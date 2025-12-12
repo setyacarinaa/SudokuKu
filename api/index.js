@@ -104,25 +104,48 @@ app.use((req, res) => {
 
 // ==================== MONGODB CONNECTION ====================
 
-// Connect to MongoDB saat cold start
+const mongoose = require('mongoose');
+
+// Connect to MongoDB saat cold start dengan proper timeout
 let isConnected = false;
 
 const connectDB = async () => {
-  if (isConnected) {
-    return;
+  if (isConnected && mongoose.connection.readyState === 1) {
+    return true;
   }
+  
   try {
-    await hubungkanMongoDB();
+    const MONGODB_URI = process.env.MONGODB_URI;
+    
+    if (!MONGODB_URI) {
+      console.error('❌ MONGODB_URI tidak ditemukan di environment variables');
+      return false;
+    }
+    
+    await mongoose.connect(MONGODB_URI, {
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+    });
+    
     isConnected = true;
     console.log('✅ MongoDB connected for serverless');
+    return true;
   } catch (error) {
-    console.error('❌ MongoDB connection error:', error);
+    console.error('❌ MongoDB connection error:', error.message);
+    isConnected = false;
+    return false;
   }
 };
 
 // Middleware untuk ensure DB connection
 app.use(async (req, res, next) => {
-  await connectDB();
+  const connected = await connectDB();
+  if (!connected) {
+    return res.status(503).json({
+      sukses: false,
+      pesan: 'Database tidak tersedia. Pastikan MONGODB_URI sudah di-set di Vercel Environment Variables.'
+    });
+  }
   next();
 });
 
