@@ -110,47 +110,60 @@ app.use((req, res) => {
 
 const mongoose = require('mongoose');
 
-// Connect to MongoDB saat cold start dengan proper timeout
-let isConnected = false;
+// Global connection promise untuk serverless
+let cachedConnection = null;
 
 const connectDB = async () => {
-  if (isConnected && mongoose.connection.readyState === 1) {
-    return true;
+  // Reuse existing connection
+  if (cachedConnection && mongoose.connection.readyState === 1) {
+    console.log('♻️ Reusing existing MongoDB connection');
+    return cachedConnection;
   }
   
   try {
     const MONGODB_URI = process.env.MONGODB_URI;
     
     if (!MONGODB_URI) {
-      console.error('❌ MONGODB_URI tidak ditemukan di environment variables');
-      return false;
+      throw new Error('MONGODB_URI tidak ditemukan di environment variables');
     }
     
-    await mongoose.connect(MONGODB_URI, {
-      serverSelectionTimeoutMS: 5000,
+    console.log('🔄 Connecting to MongoDB...');
+    
+    // Connect dengan timeout settings
+    cachedConnection = await mongoose.connect(MONGODB_URI, {
+      serverSelectionTimeoutMS: 10000,
       socketTimeoutMS: 45000,
+      maxPoolSize: 10,
+      minPoolSize: 2,
     });
     
-    isConnected = true;
-    console.log('✅ MongoDB connected for serverless');
-    return true;
+    console.log('✅ MongoDB connected successfully');
+    console.log(`   Database: ${mongoose.connection.name}`);
+    
+    return cachedConnection;
   } catch (error) {
     console.error('❌ MongoDB connection error:', error.message);
-    isConnected = false;
-    return false;
+    cachedConnection = null;
+    throw error;
   }
 };
 
-// Middleware untuk ensure DB connection
+// Connect immediately on cold start (sebelum request pertama)
+connectDB().catch(err => {
+  console.error('Failed to connect on startup:', err.message);
+});
+
+// Middleware untuk ensure DB connection setiap request
 app.use(async (req, res, next) => {
-  const connected = await connectDB();
-  if (!connected) {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
     return res.status(503).json({
       sukses: false,
-      pesan: 'Database tidak tersedia. Pastikan MONGODB_URI sudah di-set di Vercel Environment Variables.'
+      pesan: 'Database tidak tersedia: ' + error.message
     });
   }
-  next();
 });
 
 // Export app sebagai serverless function
