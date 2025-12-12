@@ -171,3 +171,7 @@ app.use(async (req, res, next) => {
 
 // Export app sebagai serverless function
 module.exports = app;
+
+// Direct connection test route (more verbose)
+const testDirectConnRouter = require('../src/routes/test-direct-connection');
+app.use('/api', testDirectConnRouter);
