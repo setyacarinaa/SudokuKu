@@ -15,6 +15,8 @@ const registerPengguna = async (req, res) => {
   try {
     const { namaLengkap, email, password } = req.body;
 
+    console.log('[Register] Menerima request:', { namaLengkap, email });
+
     // Validasi input
     if (!namaLengkap || !email || !password) {
       return res.status(400).json({
@@ -31,15 +33,20 @@ const registerPengguna = async (req, res) => {
       });
     }
 
+    console.log('[Register] Checking if email exists...');
+    
     // Cek apakah email sudah terdaftar
-    const penggunaAda = await Pengguna.findOne({ email: email.toLowerCase() });
+    const penggunaAda = await Pengguna.findOne({ email: email.toLowerCase() }).exec();
     if (penggunaAda) {
+      console.log('[Register] Email sudah terdaftar:', email);
       return res.status(400).json({
         sukses: false,
         pesan: 'Email sudah terdaftar. Gunakan email lain atau login.'
       });
     }
 
+    console.log('[Register] Creating new user...');
+    
     // Buat pengguna baru
     const penggunaBaru = new Pengguna({
       namaLengkap: namaLengkap,
@@ -48,6 +55,8 @@ const registerPengguna = async (req, res) => {
     });
 
     await penggunaBaru.save();
+    
+    console.log('[Register] User saved successfully:', penggunaBaru._id);
 
     console.log(`✅ Pengguna baru berhasil didaftarkan: ${email}`);
 
@@ -73,7 +82,8 @@ const registerPengguna = async (req, res) => {
       pesan: 'Registrasi berhasil! Selamat datang di SudokuKu!'
     });
   } catch (error) {
-    console.error('❌ Error saat registrasi:', error);
+    console.error('❌ Error saat registrasi:', error.message);
+    console.error('Stack:', error.stack);
 
     // Handle duplicate key error dari MongoDB
     if (error.code === 11000) {
@@ -83,10 +93,20 @@ const registerPengguna = async (req, res) => {
       });
     }
 
+    // Handle connection timeout
+    if (error.message && error.message.includes('buffering timed out')) {
+      return res.status(503).json({
+        sukses: false,
+        pesan: 'Database tidak tersedia. Coba lagi dalam beberapa saat.',
+        error: 'MongoDB connection timeout'
+      });
+    }
+
     res.status(500).json({
       sukses: false,
-      pesan: 'Terjadi kesalahan saat registrasi',
-      error: error.message
+      pesan: 'Terjadi kesalahan saat registrasi: ' + error.message,
+      error: error.message,
+      code: error.code
     });
   }
 };
