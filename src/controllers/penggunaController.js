@@ -202,10 +202,9 @@ const logoutPengguna = async (req, res) => {
         });
       }
 
-      res.json({
-        sukses: true,
-        pesan: 'Logout berhasil'
-      });
+      // Hapus cookie sesi dan alihkan ke beranda
+      res.clearCookie('connect.sid');
+      return res.redirect('/');
     });
   } catch (error) {
     console.error('❌ Error saat logout:', error);
