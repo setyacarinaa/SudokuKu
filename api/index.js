@@ -94,6 +94,10 @@ app.use('/api', apiRoute);
 app.use('/api', penggunaRoute);
 app.use('/api/chatbot', chatbotRouter);
 
+// Debug routes (hapus di production)
+const debugRouter = require('../src/routes/debug');
+app.use('/api', debugRouter);
+
 // 404 Handler
 app.use((req, res) => {
   res.status(404).json({
