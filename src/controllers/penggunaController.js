@@ -4,6 +4,8 @@
  */
 
 const Pengguna = require('../models/Pengguna');
+const mongoose = require('mongoose');
+const { hubungkanMongoDB } = require('../utils/koneksiMongo');
 const { kirimEmailSelamatDatang } = require('../services/emailService');
 
 /**
@@ -13,6 +15,10 @@ const { kirimEmailSelamatDatang } = require('../services/emailService');
  */
 const registerPengguna = async (req, res) => {
   try {
+    // Pastikan koneksi DB aktif sebelum operasi
+    if (mongoose.connection.readyState !== 1) {
+      await hubungkanMongoDB();
+    }
     const { namaLengkap, email, password } = req.body;
 
     console.log('[Register] Menerima request:', { namaLengkap, email });
@@ -118,6 +124,10 @@ const registerPengguna = async (req, res) => {
  */
 const loginPengguna = async (req, res) => {
   try {
+    // Pastikan koneksi DB aktif sebelum operasi
+    if (mongoose.connection.readyState !== 1) {
+      await hubungkanMongoDB();
+    }
     const { email, password } = req.body;
 
     // Validasi input

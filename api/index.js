@@ -134,9 +134,9 @@ const hubungkanBasisData = async () => {
     
     // Koneksi langsung tanpa promise caching
     await mongoose.connect(URI_MONGODB, {
-      serverSelectionTimeoutMS: 20000,
-      socketTimeoutMS: 45000,
-      connectTimeoutMS: 20000,
+      serverSelectionTimeoutMS: 30000,
+      socketTimeoutMS: 60000,
+      connectTimeoutMS: 30000,
       maxPoolSize: 5,
       minPoolSize: 1,
       family: 4, // Force IPv4
