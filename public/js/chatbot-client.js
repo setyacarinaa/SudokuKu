@@ -4,7 +4,7 @@
  */
 
 // Inisialisasi Socket.IO
-const socket = io();
+const soket = io();
 
 // State chatbot
 let chatbotTerbuka = false;
@@ -14,69 +14,69 @@ let chatbotTerbuka = false;
 document.addEventListener('DOMContentLoaded', () => {
   console.log('💬 Chatbot client dimuat');
   
-  setupChatbot();
-  setupSocketEvents();
-  // Toggle helpers
-  const getChatbotContainer = () => document.querySelector('#chatbot-container');
-  const getCloseBtn = () => document.querySelector('#chatbot-close, .chatbot-close');
-  const getHeader = () => document.querySelector('#chatbot-header');
+  siapkanChatbot();
+  siapkanEventSoket();
+  // Helper toggle
+  const ambilKontainerChatbot = () => document.querySelector('#chatbot-container');
+  const ambilTombolTutup = () => document.querySelector('#chatbot-close, .chatbot-close');
+  const ambilHeaderChatbot = () => document.querySelector('#chatbot-header');
 
-  const hideChatbot = () => {
-    const container = getChatbotContainer();
-    if (container) {
-      container.classList.add('chatbot--hidden');
-      container.style.display = 'none';
+  const sembunyikanChatbot = () => {
+    const kontainer = ambilKontainerChatbot();
+    if (kontainer) {
+      kontainer.classList.add('chatbot--hidden');
+      kontainer.style.display = 'none';
     }
   };
 
-  const showChatbot = () => {
-    const container = getChatbotContainer();
-    if (container) {
-      container.classList.remove('chatbot--hidden');
-      container.style.display = 'block';
+  const tampilkanChatbot = () => {
+    const kontainer = ambilKontainerChatbot();
+    if (kontainer) {
+      kontainer.classList.remove('chatbot--hidden');
+      kontainer.style.display = 'block';
     }
   };
 
-  // Existing toggle API, keep backward compatible
-  window.toggleChatbot = function toggleChatbot(forceState) {
-    const container = getChatbotContainer();
-    if (!container) return;
-    const isHidden = container.classList.contains('chatbot--hidden') || container.style.display === 'none';
+  // API toggle untuk kompatibilitas
+  window.alihChatbot = function alihChatbot(forceState) {
+    const kontainer = ambilKontainerChatbot();
+    if (!kontainer) return;
+    const tersembunyi = kontainer.classList.contains('chatbot--hidden') || kontainer.style.display === 'none';
     if (forceState === true) {
-      showChatbot();
+      tampilkanChatbot();
     } else if (forceState === false) {
-      hideChatbot();
+      sembunyikanChatbot();
     } else {
-      if (isHidden) showChatbot(); else hideChatbot();
+      if (tersembunyi) tampilkanChatbot(); else sembunyikanChatbot();
     }
   };
 
-  // Wire up close button (the "X")
-  const closeBtn = getCloseBtn();
-  if (closeBtn) {
-    closeBtn.addEventListener('click', (e) => {
+  // Tombol tutup (ikon X)
+  const tombolTutup = ambilTombolTutup();
+  if (tombolTutup) {
+    tombolTutup.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      hideChatbot();
+      sembunyikanChatbot();
     });
   }
 
-  // Also allow header double-click to collapse/expand
-  const header = getHeader();
+  // Header double-click untuk collapse/expand
+  const header = ambilHeaderChatbot();
   if (header) {
     header.addEventListener('dblclick', () => {
-      window.toggleChatbot();
+      window.alihChatbot();
     });
   }
 });
 
 // ==================== SETUP CHATBOT UI ====================
 
-function setupChatbot() {
+function siapkanChatbot() {
   // Tombol toggle chatbot
   const btnToggle = document.getElementById('chatbot-toggle');
   if (btnToggle) {
-    btnToggle.addEventListener('click', toggleChatbot);
+    btnToggle.addEventListener('click', alihChatbot);
   }
   
   // Form input chatbot
@@ -84,7 +84,7 @@ function setupChatbot() {
   if (formChatbot) {
     formChatbot.addEventListener('submit', (e) => {
       e.preventDefault();
-      kirimPesan();
+      kirimPesanPengguna();
     });
   }
   
@@ -92,7 +92,7 @@ function setupChatbot() {
   const btnHint = document.getElementById('btn-hint-chat');
   if (btnHint) {
     btnHint.addEventListener('click', () => {
-      kirimPesanChatbot('hint');
+      kirimPesanKeChatbot('hint');
     });
   }
   
@@ -102,29 +102,29 @@ function setupChatbot() {
 
 // ==================== TOGGLE CHATBOT ====================
 
-function toggleChatbot() {
-  const container = document.getElementById('chatbot-container');
+function alihChatbot() {
+  const kontainerChatbot = document.getElementById('chatbot-container');
   const btnToggle = document.getElementById('chatbot-toggle-btn');
   
-  if (!container) return;
+  if (!kontainerChatbot) return;
   
   chatbotTerbuka = !chatbotTerbuka;
   
   if (chatbotTerbuka) {
-    container.classList.remove('chatbot-hidden');
+    kontainerChatbot.classList.remove('chatbot-hidden');
     if (btnToggle) btnToggle.classList.add('chatbot-hidden');
     
     // Auto scroll ke bawah
     scrollKeBawah();
   } else {
-    container.classList.add('chatbot-hidden');
+    kontainerChatbot.classList.add('chatbot-hidden');
     if (btnToggle) btnToggle.classList.remove('chatbot-hidden');
   }
 }
 
 // ==================== KIRIM PESAN ====================
 
-function kirimPesan() {
+function kirimPesanPengguna() {
   const input = document.getElementById('input-chatbot');
   if (!input) return;
   
@@ -132,23 +132,23 @@ function kirimPesan() {
   if (!pesan) return;
   
   // Tampilkan pesan user
-  tambahPesanUser(pesan);
+  tambahPesanPengguna(pesan);
   
   // Kirim ke server
-  kirimPesanChatbot(pesan);
+  kirimPesanKeChatbot(pesan);
   
   // Clear input
   input.value = '';
 }
 
-function kirimPesanChatbot(pesan, papan = null) {
+function kirimPesanKeChatbot(pesan, papan = null) {
   // Ambil papan saat ini jika tidak diberikan
   if (!papan && typeof window.dapatkanPapanSekarang === 'function') {
     papan = window.dapatkanPapanSekarang();
   }
   
   // Emit event ke server
-  socket.emit('pesan_chatbot', {
+  soket.emit('pesan_chatbot', {
     pesan: pesan,
     papan: papan
   });
@@ -158,40 +158,40 @@ function kirimPesanChatbot(pesan, papan = null) {
 
 // ==================== SOCKET EVENTS ====================
 
-function setupSocketEvents() {
+function siapkanEventSoket() {
   // Connection
-  socket.on('connect', () => {
+  soket.on('connect', () => {
     console.log('✅ Socket.IO terhubung');
   });
   
   // Disconnect
-  socket.on('disconnect', () => {
+  soket.on('disconnect', () => {
     console.log('⚠️ Socket.IO terputus');
     tambahPesanBot('⚠️ Koneksi terputus. Mencoba hubungkan kembali...');
   });
   
   // Respons dari chatbot
-  socket.on('respons_chatbot', (data) => {
-    handleResponsChatbot(data);
+  soket.on('respons_chatbot', (data) => {
+    tanganiResponsChatbot(data);
   });
 }
 
 // ==================== HANDLE RESPONS ====================
 
-function handleResponsChatbot(data) {
+function tanganiResponsChatbot(data) {
   console.log('📥 Respons chatbot:', data);
   
   switch(data.tipe) {
     case 'hint':
-      handleHint(data);
+      tanganiHint(data);
       break;
       
     case 'validasi':
-      handleValidasi(data);
+      tanganiValidasi(data);
       break;
       
     case 'solusi':
-      handleSolusi(data);
+      tanganiSolusi(data);
       break;
       
     case 'error':
@@ -208,7 +208,7 @@ function handleResponsChatbot(data) {
 
 // ==================== HANDLE HINT ====================
 
-function handleHint(data) {
+function tanganiHint(data) {
   if (data.data && data.data.sukses) {
     const { baris, kolom, angka, pesan } = data.data;
     
@@ -235,7 +235,7 @@ function handleHint(data) {
 
 // ==================== HANDLE VALIDASI ====================
 
-function handleValidasi(data) {
+function tanganiValidasi(data) {
   if (data.data) {
     const hasil = data.data;
     
@@ -269,7 +269,7 @@ function handleValidasi(data) {
 
 // ==================== HANDLE SOLUSI ====================
 
-function handleSolusi(data) {
+function tanganiSolusi(data) {
   if (data.data && data.data.solusi) {
     const solusi = data.data.solusi;
     
@@ -293,21 +293,21 @@ function handleSolusi(data) {
 
 // ==================== TAMBAH PESAN KE UI ====================
 
-function tambahPesanUser(pesan) {
-  const container = document.getElementById('chatbot-messages');
-  if (!container) return;
+function tambahPesanPengguna(pesan) {
+  const kontainerPesan = document.getElementById('chatbot-messages');
+  if (!kontainerPesan) return;
   
   const div = document.createElement('div');
   div.className = 'pesan user';
   div.textContent = pesan;
   
-  container.appendChild(div);
+  kontainerPesan.appendChild(div);
   scrollKeBawah();
 }
 
 function tambahPesanBot(pesan) {
-  const container = document.getElementById('chatbot-messages');
-  if (!container) return;
+  const kontainerPesan = document.getElementById('chatbot-messages');
+  if (!kontainerPesan) return;
   
   const div = document.createElement('div');
   div.className = 'pesan bot';
@@ -315,18 +315,18 @@ function tambahPesanBot(pesan) {
   // Support multiline
   div.innerHTML = pesan.replace(/\n/g, '<br>');
   
-  container.appendChild(div);
+  kontainerPesan.appendChild(div);
   scrollKeBawah();
 }
 
 function scrollKeBawah() {
-  const container = document.getElementById('chatbot-messages');
-  if (container) {
-    container.scrollTop = container.scrollHeight;
+  const kontainerPesan = document.getElementById('chatbot-messages');
+  if (kontainerPesan) {
+    kontainerPesan.scrollTop = kontainerPesan.scrollHeight;
   }
 }
 
 // ==================== EXPORT ====================
 
-window.kirimPesanChatbot = kirimPesanChatbot;
-window.toggleChatbot = toggleChatbot;
+window.kirimPesanKeChatbot = kirimPesanKeChatbot;
+window.alihChatbot = alihChatbot;

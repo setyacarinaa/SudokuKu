@@ -8,7 +8,7 @@ let papanSudoku = [];
 let papanAsli = [];
 let tingkatTerpilih = 'sedang';
 let waktuMulai = null;
-let timerInterval = null;
+let intervalTimer = null;
 let skorPemain = 0;
 
 // ==================== INISIALISASI ====================
@@ -16,8 +16,8 @@ let skorPemain = 0;
 document.addEventListener('DOMContentLoaded', () => {
   console.log('🎮 Sudoku Frontend dimuat');
   
-  // Setup event listeners
-  setupEventListeners();
+  // Pasang event listener
+  pasangPendengarEvent();
   
   // Muat papan baru otomatis
   muatPapanBaru(tingkatTerpilih);
@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ==================== EVENT LISTENERS ====================
 
-function setupEventListeners() {
+function pasangPendengarEvent() {
   // Tombol tingkat kesulitan
   const tombolMudah = document.getElementById('btn-mudah');
   const tombolSedang = document.getElementById('btn-sedang');
@@ -86,8 +86,7 @@ async function muatPapanBaru(tingkat) {
     papanSudoku = data.data.papan;
     papanAsli = JSON.parse(JSON.stringify(data.data.papan)); // Deep copy
     
-    // Render papan
-    renderPapan();
+    tampilkanPapan();
     
     // Mulai timer
     mulaiTimer();
@@ -105,12 +104,12 @@ async function muatPapanBaru(tingkat) {
 
 // ==================== RENDER PAPAN ====================
 
-function renderPapan() {
-  const container = document.getElementById('papan-sudoku');
-  if (!container) return;
+function tampilkanPapan() {
+  const kontainer = document.getElementById('papan-sudoku');
+  if (!kontainer) return;
   
   // Kosongkan container
-  container.innerHTML = '';
+  kontainer.innerHTML = '';
   
   // Buat sel untuk setiap angka
   for (let baris = 0; baris < 9; baris++) {
@@ -132,18 +131,18 @@ function renderPapan() {
         input.value = '';
         
         // Event listener untuk input
-        input.addEventListener('input', (e) => handleInput(e, baris, kolom));
-        input.addEventListener('keydown', (e) => handleKeyboard(e, baris, kolom));
+        input.addEventListener('input', (e) => tanganiInput(e, baris, kolom));
+        input.addEventListener('keydown', (e) => tanganiKeyboard(e, baris, kolom));
       }
-      
-      container.appendChild(input);
+
+      kontainer.appendChild(input);
     }
   }
 }
 
 // ==================== HANDLE INPUT ====================
 
-function handleInput(event, baris, kolom) {
+function tanganiInput(event, baris, kolom) {
   const input = event.target;
   let nilai = input.value;
   
@@ -170,7 +169,7 @@ function handleInput(event, baris, kolom) {
 
 // ==================== KEYBOARD NAVIGATION ====================
 
-function handleKeyboard(event, baris, kolom) {
+function tanganiKeyboard(event, baris, kolom) {
   let targetBaris = baris;
   let targetKolom = kolom;
   
@@ -213,8 +212,8 @@ function handleKeyboard(event, baris, kolom) {
 async function cekJawaban() {
   try {
     // Kirim pesan ke chatbot untuk validasi
-    if (window.kirimPesanChatbot) {
-      window.kirimPesanChatbot('cek jawaban', papanSudoku);
+    if (window.kirimPesanKeChatbot) {
+      window.kirimPesanKeChatbot('cek jawaban', papanSudoku);
     } else {
       tampilkanPesan('Chatbot tidak tersedia untuk validasi', 'error');
     }
@@ -290,8 +289,8 @@ async function selesaikanPuzzle() {
   
   try {
     // Minta solusi dari chatbot
-    if (window.kirimPesanChatbot) {
-      window.kirimPesanChatbot('solusi');
+    if (window.kirimPesanKeChatbot) {
+      window.kirimPesanKeChatbot('solusi');
     }
   } catch (error) {
     console.error('❌ Error mendapatkan solusi:', error);
@@ -308,7 +307,7 @@ function resetPapan() {
   
   // Kembalikan ke papan asli
   papanSudoku = JSON.parse(JSON.stringify(papanAsli));
-  renderPapan();
+  tampilkanPapan();
   
   // Reset timer
   mulaiTimer();
@@ -320,27 +319,27 @@ function resetPapan() {
 
 function mulaiTimer() {
   // Hentikan timer lama jika ada
-  if (timerInterval) {
-    clearInterval(timerInterval);
+  if (intervalTimer) {
+    clearInterval(intervalTimer);
   }
   
   waktuMulai = Date.now();
   
-  timerInterval = setInterval(() => {
-    updateTimer();
+  intervalTimer = setInterval(() => {
+    perbaruiTimer();
   }, 1000);
   
-  updateTimer();
+  perbaruiTimer();
 }
 
 function hentikanTimer() {
-  if (timerInterval) {
-    clearInterval(timerInterval);
-    timerInterval = null;
+  if (intervalTimer) {
+    clearInterval(intervalTimer);
+    intervalTimer = null;
   }
 }
 
-function updateTimer() {
+function perbaruiTimer() {
   const waktu = hitungWaktu();
   const timerElement = document.getElementById('timer');
   if (timerElement) {
@@ -362,8 +361,8 @@ function formatWaktu(detik) {
 // ==================== UI HELPERS ====================
 
 function tampilkanPesan(pesan, tipe = 'info') {
-  const container = document.getElementById('pesan-container');
-  if (!container) {
+  const kontainerPesan = document.getElementById('pesan-container');
+  if (!kontainerPesan) {
     alert(pesan);
     return;
   }
@@ -372,8 +371,8 @@ function tampilkanPesan(pesan, tipe = 'info') {
   div.className = `alert alert-${tipe}`;
   div.textContent = pesan;
   
-  container.innerHTML = '';
-  container.appendChild(div);
+  kontainerPesan.innerHTML = '';
+  kontainerPesan.appendChild(div);
   
   // Auto hide setelah 5 detik
   setTimeout(() => {
@@ -382,9 +381,9 @@ function tampilkanPesan(pesan, tipe = 'info') {
 }
 
 function tampilkanLoading(pesan = 'Memuat...') {
-  const container = document.getElementById('pesan-container');
-  if (container) {
-    container.innerHTML = `
+  const kontainerPesan = document.getElementById('pesan-container');
+  if (kontainerPesan) {
+    kontainerPesan.innerHTML = `
       <div class="alert alert-info">
         <span class="loading"></span> ${pesan}
       </div>
@@ -393,9 +392,9 @@ function tampilkanLoading(pesan = 'Memuat...') {
 }
 
 function sembunyikanLoading() {
-  const container = document.getElementById('pesan-container');
-  if (container) {
-    container.innerHTML = '';
+  const kontainerPesan = document.getElementById('pesan-container');
+  if (kontainerPesan) {
+    kontainerPesan.innerHTML = '';
   }
 }
 
@@ -404,5 +403,5 @@ function sembunyikanLoading() {
 window.dapatkanPapanSekarang = () => papanSudoku;
 window.updatePapan = (papanBaru) => {
   papanSudoku = papanBaru;
-  renderPapan();
+  tampilkanPapan();
 };

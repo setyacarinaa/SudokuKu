@@ -123,19 +123,19 @@ const validasiJawaban = (papanPemain, solusi) => {
  * @param {Object} dataPuzzle - Data puzzle aktif {papan, solusi}
  * @returns {Object} Respons chatbot
  */
-const prosesPesanChatbot = (pesan, dataPuzzle) => {
-  const pesanLower = pesan.toLowerCase().trim();
+const prosesPesanChatbot = (pesan, dataTekaTeki) => {
+  const pesanHurufKecil = pesan.toLowerCase().trim();
 
   // Command: Hint
-  if (pesanLower.includes('hint') || pesanLower.includes('petunjuk') || pesanLower.includes('bantuan')) {
-    if (!dataPuzzle || !dataPuzzle.papan || !dataPuzzle.solusi) {
+  if (pesanHurufKecil.includes('hint') || pesanHurufKecil.includes('petunjuk') || pesanHurufKecil.includes('bantuan')) {
+    if (!dataTekaTeki || !dataTekaTeki.papan || !dataTekaTeki.solusi) {
       return {
         tipe: 'error',
         pesan: '❌ Tidak ada puzzle aktif. Silakan mulai game baru!'
       };
     }
     
-    const hint = berikanHint(dataPuzzle.papan, dataPuzzle.solusi);
+    const hint = berikanHint(dataTekaTeki.papan, dataTekaTeki.solusi);
     return {
       tipe: 'hint',
       data: hint,
@@ -144,15 +144,15 @@ const prosesPesanChatbot = (pesan, dataPuzzle) => {
   }
 
   // Command: Cek Jawaban
-  if (pesanLower.includes('cek') || pesanLower.includes('validasi') || pesanLower.includes('periksa')) {
-    if (!dataPuzzle || !dataPuzzle.papan || !dataPuzzle.solusi) {
+  if (pesanHurufKecil.includes('cek') || pesanHurufKecil.includes('validasi') || pesanHurufKecil.includes('periksa')) {
+    if (!dataTekaTeki || !dataTekaTeki.papan || !dataTekaTeki.solusi) {
       return {
         tipe: 'error',
         pesan: '❌ Tidak ada puzzle aktif untuk dicek!'
       };
     }
 
-    const hasil = validasiJawaban(dataPuzzle.papan, dataPuzzle.solusi);
+    const hasil = validasiJawaban(dataTekaTeki.papan, dataTekaTeki.solusi);
     return {
       tipe: 'validasi',
       data: hasil,
@@ -161,8 +161,8 @@ const prosesPesanChatbot = (pesan, dataPuzzle) => {
   }
 
   // Command: Solusi
-  if (pesanLower.includes('solusi') || pesanLower.includes('jawaban')) {
-    if (!dataPuzzle || !dataPuzzle.solusi) {
+  if (pesanHurufKecil.includes('solusi') || pesanHurufKecil.includes('jawaban')) {
+    if (!dataTekaTeki || !dataTekaTeki.solusi) {
       return {
         tipe: 'error',
         pesan: '❌ Tidak ada puzzle aktif!'
@@ -171,13 +171,13 @@ const prosesPesanChatbot = (pesan, dataPuzzle) => {
 
     return {
       tipe: 'solusi',
-      data: { solusi: dataPuzzle.solusi },
+      data: { solusi: dataTekaTeki.solusi },
       pesan: '📋 Berikut adalah solusi lengkap puzzle ini:'
     };
   }
 
   // Command: Cara Main
-  if (pesanLower.includes('cara') || pesanLower.includes('aturan') || pesanLower.includes('main')) {
+  if (pesanHurufKecil.includes('cara') || pesanHurufKecil.includes('aturan') || pesanHurufKecil.includes('main')) {
     return {
       tipe: 'instruksi',
       pesan: `📖 **Cara Bermain Sudoku:**
@@ -198,7 +198,7 @@ Selamat bermain! 🎮`
   }
 
   // Command: Salam
-  if (pesanLower.includes('halo') || pesanLower.includes('hai') || pesanLower.includes('hello')) {
+  if (pesanHurufKecil.includes('halo') || pesanHurufKecil.includes('hai') || pesanHurufKecil.includes('hello')) {
     return {
       tipe: 'salam',
       pesan: '👋 Halo! Saya chatbot SudokuKu. Saya bisa membantu kamu dengan:\n• Memberikan hint\n• Validasi jawaban\n• Menampilkan solusi\n• Menjelaskan cara bermain\n\nKetik "cara main" untuk instruksi lengkap!'
@@ -206,7 +206,7 @@ Selamat bermain! 🎮`
   }
 
   // Command: Terima Kasih
-  if (pesanLower.includes('terima kasih') || pesanLower.includes('makasih') || pesanLower.includes('thanks')) {
+  if (pesanHurufKecil.includes('terima kasih') || pesanHurufKecil.includes('makasih') || pesanHurufKecil.includes('thanks')) {
     return {
       tipe: 'ucapan',
       pesan: '😊 Sama-sama! Semangat bermain Sudoku!'

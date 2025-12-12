@@ -77,7 +77,7 @@
   </main>
 
   <!-- Chatbot Toggle Button -->
-  <button id="chatbot-toggle-btn" class="chatbot-toggle-btn" onclick="toggleChatbot()">
+  <button id="chatbot-toggle-btn" class="chatbot-toggle-btn" onclick="alihChatbot()">
     💬
   </button>
 
@@ -85,7 +85,7 @@
   <div id="chatbot-container" class="chatbot-container chatbot-hidden">
     <div class="chatbot-header">
       <h3 style="margin: 0;">💬 Chatbot SudokuKu</h3>
-      <button class="chatbot-toggle" id="chatbot-toggle" onclick="toggleChatbot()">✕</button>
+      <button class="chatbot-toggle" id="chatbot-toggle" onclick="alihChatbot()">✕</button>
     </div>
     
     <div id="chatbot-messages" class="chatbot-messages">
@@ -105,9 +105,9 @@
     </div>
     
     <div style="padding: 0.5rem 1rem; border-top: 1px solid #e5e7eb; display: flex; gap: 0.5rem; flex-wrap: wrap;">
-      <button class="btn btn-secondary btn-small" onclick="kirimPesanChatbot('hint')">💡 Hint</button>
-      <button class="btn btn-secondary btn-small" onclick="kirimPesanChatbot('cek jawaban')">✓ Cek</button>
-      <button class="btn btn-secondary btn-small" onclick="kirimPesanChatbot('cara main')">📖 Cara Main</button>
+      <button class="btn btn-secondary btn-small" onclick="kirimPesanKeChatbot('hint')">💡 Hint</button>
+      <button class="btn btn-secondary btn-small" onclick="kirimPesanKeChatbot('cek jawaban')">✓ Cek</button>
+      <button class="btn btn-secondary btn-small" onclick="kirimPesanKeChatbot('cara main')">📖 Cara Main</button>
     </div>
   </div>
 

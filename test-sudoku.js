@@ -4,7 +4,7 @@
  * Jalankan dengan: node test-sudoku.js
  */
 
-const { generateSudoku } = require('./src/services/sudokuGenerator');
+const { buatSudoku } = require('./src/services/sudokuGenerator');
 const { selesaikanSudoku } = require('./src/services/sudokuSolver');
 const { validasiPapanLengkap } = require('./src/utils/validasiSudoku');
 
@@ -16,21 +16,21 @@ console.log('');
 // Test 1: Generator Sudoku Mudah
 console.log('📋 Test 1: Generator Sudoku Mudah');
 console.log('-'.repeat(60));
-const puzzleMudah = generateSudoku('mudah');
+const puzzleMudah = buatSudoku('mudah');
 console.log(`✓ Puzzle mudah dibuat dengan ${puzzleMudah.selKosong} sel kosong`);
 console.log('');
 
 // Test 2: Generator Sudoku Sedang
 console.log('📋 Test 2: Generator Sudoku Sedang');
 console.log('-'.repeat(60));
-const puzzleSedang = generateSudoku('sedang');
+const puzzleSedang = buatSudoku('sedang');
 console.log(`✓ Puzzle sedang dibuat dengan ${puzzleSedang.selKosong} sel kosong`);
 console.log('');
 
 // Test 3: Generator Sudoku Sulit
 console.log('📋 Test 3: Generator Sudoku Sulit');
 console.log('-'.repeat(60));
-const puzzleSulit = generateSudoku('sulit');
+const puzzleSulit = buatSudoku('sulit');
 console.log(`✓ Puzzle sulit dibuat dengan ${puzzleSulit.selKosong} sel kosong`);
 console.log('');
 
@@ -69,7 +69,7 @@ console.log('');
 // Test 5: Validasi Generator
 console.log('📋 Test 5: Validasi Solusi dari Generator');
 console.log('-'.repeat(60));
-const puzzleValidasi = generateSudoku('sedang');
+const puzzleValidasi = buatSudoku('sedang');
 const solusiValidasi = puzzleValidasi.solusi;
 const validasiSolusi = validasiPapanLengkap(solusiValidasi);
 console.log(`✓ Solusi dari generator: ${validasiSolusi ? 'VALID' : 'TIDAK VALID'}`);
@@ -78,7 +78,7 @@ console.log('');
 // Test 6: Solver dengan Puzzle dari Generator
 console.log('📋 Test 6: Solver dengan Puzzle dari Generator');
 console.log('-'.repeat(60));
-const puzzleUntukSolver = generateSudoku('mudah');
+const puzzleUntukSolver = buatSudoku('mudah');
 console.log('Puzzle dari generator:');
 tampilkanPapan(puzzleUntukSolver.papan);
 

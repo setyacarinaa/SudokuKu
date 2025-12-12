@@ -3,7 +3,7 @@
  * Controller untuk menangani logic permainan Sudoku
  */
 
-const { generateSudoku } = require('../services/sudokuGenerator');
+const { buatSudoku } = require('../services/sudokuGenerator');
 const { selesaikanSudoku } = require('../services/sudokuSolver');
 
 /**
@@ -27,12 +27,12 @@ const dapatkanPapanBaru = async (req, res) => {
     console.log(`📥 Request papan baru dengan tingkat: ${tingkat}`);
 
     // Generate puzzle baru
-    const puzzle = generateSudoku(tingkat);
+    const tekaTeki = buatSudoku(tingkat);
 
     // Simpan puzzle dan solusi di session untuk chatbot
-    req.session.puzzleAktif = {
-      papan: puzzle.papan,
-      solusi: puzzle.solusi,
+    req.session.tekaTekiAktif = {
+      papan: tekaTeki.papan,
+      solusi: tekaTeki.solusi,
       tingkat: tingkat,
       waktuMulai: Date.now()
     };
@@ -41,9 +41,9 @@ const dapatkanPapanBaru = async (req, res) => {
     res.json({
       sukses: true,
       data: {
-        papan: puzzle.papan,
+        papan: tekaTeki.papan,
         tingkat: tingkat,
-        selKosong: puzzle.selKosong
+        selKosong: tekaTeki.selKosong
         // Catatan: solusi tidak dikirim ke client untuk keamanan
         // Solusi disimpan di session untuk validasi
       },
@@ -115,7 +115,7 @@ const selesaikanPuzzle = async (req, res) => {
 const dapatkanSolusi = async (req, res) => {
   try {
     // Cek apakah ada puzzle aktif di session
-    if (!req.session.puzzleAktif || !req.session.puzzleAktif.solusi) {
+    if (!req.session.tekaTekiAktif || !req.session.tekaTekiAktif.solusi) {
       return res.status(404).json({
         sukses: false,
         pesan: 'Tidak ada puzzle aktif. Mulai game baru terlebih dahulu.'
@@ -125,7 +125,7 @@ const dapatkanSolusi = async (req, res) => {
     res.json({
       sukses: true,
       data: {
-        solusi: req.session.puzzleAktif.solusi
+        solusi: req.session.tekaTekiAktif.solusi
       },
       pesan: 'Solusi puzzle aktif'
     });

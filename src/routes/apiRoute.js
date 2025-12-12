@@ -4,7 +4,7 @@
  */
 
 const express = require('express');
-const router = express.Router();
+const rute = express.Router();
 
 // Import controllers
 const sudokuController = require('../controllers/sudokuController');
@@ -14,31 +14,31 @@ const emailController = require('../controllers/emailController');
 // ==================== SUDOKU ROUTES ====================
 
 // Dapatkan papan Sudoku baru
-router.get('/papan', sudokuController.dapatkanPapanBaru);
+rute.get('/papan', sudokuController.dapatkanPapanBaru);
 
 // Selesaikan puzzle (untuk testing)
-router.post('/selesaikan', sudokuController.selesaikanPuzzle);
+rute.post('/selesaikan', sudokuController.selesaikanPuzzle);
 
 // Dapatkan solusi puzzle aktif
-router.get('/solusi', sudokuController.dapatkanSolusi);
+rute.get('/solusi', sudokuController.dapatkanSolusi);
 
 // ==================== SKOR & LEADERBOARD ROUTES ====================
 
 // Rekam skor permainan
-router.post('/rekam-skor', apiController.rekamSkor);
+rute.post('/rekam-skor', apiController.rekamSkor);
 
 // Dapatkan leaderboard
-router.get('/leaderboard', apiController.dapatkanLeaderboard);
+rute.get('/leaderboard', apiController.dapatkanLeaderboard);
 
 // Dapatkan statistik pengguna
-router.get('/statistik', apiController.dapatkanStatistik);
+rute.get('/statistik', apiController.dapatkanStatistik);
 
 // ==================== EMAIL TESTING ROUTES ====================
 
 // Test koneksi email
-router.get('/test-email', emailController.testEmail);
+rute.get('/test-email', emailController.testEmail);
 
 // Kirim email test
-router.post('/kirim-email-test', emailController.kirimEmailTest);
+rute.post('/kirim-email-test', emailController.kirimEmailTest);
 
-module.exports = router;
+module.exports = rute;

@@ -49,7 +49,7 @@ schemaSkor.index({ idPengguna: 1, tanggalMain: -1 });
 // Method untuk menghitung skor berdasarkan waktu dan tingkat kesulitan
 schemaSkor.statics.hitungSkor = function(waktuDetik, tingkat) {
   // Base score berdasarkan tingkat
-  const baseScore = {
+  const skorDasar = {
     'mudah': 100,
     'sedang': 200,
     'sulit': 300
@@ -59,7 +59,7 @@ schemaSkor.statics.hitungSkor = function(waktuDetik, tingkat) {
   // Semakin cepat, semakin tinggi bonus
   const bonusKecepatan = Math.max(0, 500 - waktuDetik);
 
-  const skorTotal = (baseScore[tingkat] || 100) + bonusKecepatan;
+  const skorTotal = (skorDasar[tingkat] || 100) + bonusKecepatan;
   return Math.round(skorTotal);
 };
 

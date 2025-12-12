@@ -9,13 +9,10 @@ const session = require('express-session');
 const path = require('path');
 const cors = require('cors');
 
-// Import utilities
-const { hubungkanMongoDB } = require('../src/utils/koneksiMongo');
-
 // Import routes
-const apiRoute = require('../src/routes/apiRoute');
-const penggunaRoute = require('../src/routes/penggunaRoute');
-const chatbotRouter = require('../src/routes/chatbot');
+const ruteApi = require('../src/routes/apiRoute');
+const rutePengguna = require('../src/routes/penggunaRoute');
+const ruteChatbot = require('../src/routes/chatbot');
 
 // Inisialisasi Express
 const app = express();
@@ -90,17 +87,19 @@ app.get('/login', (req, res) => {
 });
 
 // API Routes
-app.use('/api', apiRoute);
-app.use('/api', penggunaRoute);
-app.use('/api/chatbot', chatbotRouter);
+app.use('/api', ruteApi);
+app.use('/api', rutePengguna);
+app.use('/api/chatbot', ruteChatbot);
 
 // Debug routes (hapus di production)
-const debugRouter = require('../src/routes/debug');
-app.use('/api', debugRouter);
+const ruteDebug = require('../src/routes/debug');
+app.use('/api', ruteDebug);
 
-// Test connection route
-const testConnRouter = require('../src/routes/test-connection');
-app.use('/api', testConnRouter);
+// Test connection routes
+const ruteTesKoneksi = require('../src/routes/test-connection');
+const ruteTesKoneksiLangsung = require('../src/routes/test-direct-connection');
+app.use('/api', ruteTesKoneksi);
+app.use('/api', ruteTesKoneksiLangsung);
 
 // 404 Handler
 app.use((req, res) => {
@@ -115,24 +114,24 @@ app.use((req, res) => {
 const mongoose = require('mongoose');
 
 // Direct connection tanpa caching untuk cold start
-const connectDB = async () => {
+const hubungkanBasisData = async () => {
   try {
     // Check jika sudah connected
     if (mongoose.connection.readyState === 1) {
-      console.log('♻️ Reusing existing MongoDB connection');
+      console.log('♻️ Menggunakan ulang koneksi MongoDB yang sudah ada');
       return mongoose.connection;
     }
     
-    const MONGODB_URI = process.env.MONGODB_URI;
+    const URI_MONGODB = process.env.MONGODB_URI;
     
-    if (!MONGODB_URI) {
-      throw new Error('MONGODB_URI environment variable not found');
+    if (!URI_MONGODB) {
+      throw new Error('Variabel environment MONGODB_URI tidak ditemukan');
     }
     
-    console.log('🔄 [Cold Start] Connecting to MongoDB Atlas...');
+    console.log('🔄 [Cold Start] Menghubungkan ke MongoDB Atlas...');
     
     // Koneksi langsung tanpa promise caching
-    await mongoose.connect(MONGODB_URI, {
+    await mongoose.connect(URI_MONGODB, {
       serverSelectionTimeoutMS: 20000,
       socketTimeoutMS: 45000,
       connectTimeoutMS: 20000,
@@ -141,12 +140,12 @@ const connectDB = async () => {
       family: 4, // Force IPv4
     });
     
-    console.log('✅ [Cold Start] MongoDB connected!');
-    console.log(`   Database: ${mongoose.connection.name}`);
+    console.log('✅ [Cold Start] MongoDB terhubung!');
+    console.log(`   Basis data: ${mongoose.connection.name}`);
     
     return mongoose.connection;
   } catch (error) {
-    console.error('❌ [Cold Start] Connection failed:', error.message);
+    console.error('❌ [Cold Start] Gagal terhubung:', error.message);
     throw error;
   }
 };
@@ -156,12 +155,12 @@ app.use(async (req, res, next) => {
   try {
     // Ensure connection sebelum proses request
     if (mongoose.connection.readyState !== 1) {
-      console.log(`⏳ Connecting... (current state: ${mongoose.connection.readyState})`);
-      await connectDB();
+      console.log(`⏳ Menghubungkan... (status saat ini: ${mongoose.connection.readyState})`);
+      await hubungkanBasisData();
     }
     next();
   } catch (error) {
-    console.error('❌ Middleware connection error:', error.message);
+    console.error('❌ Error koneksi middleware:', error.message);
     return res.status(503).json({
       sukses: false,
       pesan: 'Database tidak tersedia - ' + error.message
@@ -171,7 +170,3 @@ app.use(async (req, res, next) => {
 
 // Export app sebagai serverless function
 module.exports = app;
-
-// Direct connection test route (more verbose)
-const testDirectConnRouter = require('../src/routes/test-direct-connection');
-app.use('/api', testDirectConnRouter);

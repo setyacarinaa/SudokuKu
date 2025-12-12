@@ -119,40 +119,40 @@ const rekamSkor = async (req, res) => {
  */
 const dapatkanLeaderboard = async (req, res) => {
   try {
-    const limit = parseInt(req.query.limit) || 10;
+    const batas = parseInt(req.query.limit) || 10;
     const tingkat = req.query.tingkat;
 
     // Build query
-    let query = {};
+    let kueri = {};
     if (tingkat && ['mudah', 'sedang', 'sulit'].includes(tingkat.toLowerCase())) {
-      query.tingkatKesulitan = tingkat.toLowerCase();
+      kueri.tingkatKesulitan = tingkat.toLowerCase();
     }
 
     // Ambil skor terbaik
-    const daftarSkor = await Skor.find(query)
+    const daftarSkor = await Skor.find(kueri)
       .sort({ skor: -1, waktuPenyelesaian: 1 }) // Sort by skor DESC, waktu ASC
-      .limit(limit)
+      .limit(batas)
       .populate('idPengguna', 'namaLengkap email')
       .lean();
 
     // Format response
-    const leaderboard = daftarSkor.map((item, index) => ({
-      peringkat: index + 1,
-      namaPengguna: item.namaPengguna,
-      skor: item.skor,
-      waktuPenyelesaian: item.waktuPenyelesaian,
-      tingkatKesulitan: item.tingkatKesulitan,
-      tanggalMain: item.tanggalMain
+    const papanPeringkat = daftarSkor.map((entri, indeks) => ({
+      peringkat: indeks + 1,
+      namaPengguna: entri.namaPengguna,
+      skor: entri.skor,
+      waktuPenyelesaian: entri.waktuPenyelesaian,
+      tingkatKesulitan: entri.tingkatKesulitan,
+      tanggalMain: entri.tanggalMain
     }));
 
     res.json({
       sukses: true,
-      data: leaderboard,
-      total: leaderboard.length,
+      data: papanPeringkat,
+      total: papanPeringkat.length,
       pesan: 'Leaderboard berhasil diambil'
     });
 
-    console.log(`✅ Leaderboard berhasil dikirim (${leaderboard.length} entri)`);
+    console.log(`✅ Leaderboard berhasil dikirim (${papanPeringkat.length} entri)`);
   } catch (error) {
     console.error('❌ Error saat mengambil leaderboard:', error);
     res.status(500).json({

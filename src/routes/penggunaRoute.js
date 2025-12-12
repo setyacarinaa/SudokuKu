@@ -4,7 +4,7 @@
  */
 
 const express = require('express');
-const router = express.Router();
+const rute = express.Router();
 
 // Import controller
 const penggunaController = require('../controllers/penggunaController');
@@ -12,20 +12,20 @@ const penggunaController = require('../controllers/penggunaController');
 // ==================== AUTENTIKASI ROUTES ====================
 
 // Registrasi pengguna baru
-router.post('/register', penggunaController.registerPengguna);
+rute.post('/register', penggunaController.registerPengguna);
 
 // Login pengguna
-router.post('/login', penggunaController.loginPengguna);
+rute.post('/login', penggunaController.loginPengguna);
 
 // Logout pengguna
-router.get('/logout', penggunaController.logoutPengguna);
+rute.get('/logout', penggunaController.logoutPengguna);
 
 // Cek status login
-router.get('/cek-login', penggunaController.cekStatusLogin);
+rute.get('/cek-login', penggunaController.cekStatusLogin);
 
 // ==================== PROFIL ROUTES ====================
 
 // Dapatkan profil pengguna
-router.get('/profil', penggunaController.dapatkanProfil);
+rute.get('/profil', penggunaController.dapatkanProfil);
 
-module.exports = router;
+module.exports = rute;

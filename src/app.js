@@ -18,15 +18,15 @@ const cors = require('cors');
 const { hubungkanMongoDB } = require('./utils/koneksiMongo');
 
 // Import routes
-const apiRoute = require('./routes/apiRoute');
-const penggunaRoute = require('./routes/penggunaRoute');
+const ruteApi = require('./routes/apiRoute');
+const rutePengguna = require('./routes/penggunaRoute');
 
 // Router Chatbot via HTTP
-const chatbotRouter = require('./routes/chatbot');
+const ruteChatbot = require('./routes/chatbot');
 
 // Inisialisasi Express
 const app = express();
-const server = http.createServer(app);
+const serverHttp = http.createServer(app);
 // Socket.IO dihapus; gunakan HTTP endpoints
 
 // Port dari environment atau default
@@ -42,7 +42,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Session middleware
-const sessionMiddleware = session({
+const middlewareSesi = session({
   secret: process.env.SESSION_SECRET || 'sudokuku_secret_key',
   resave: false,
   saveUninitialized: false,
@@ -51,7 +51,7 @@ const sessionMiddleware = session({
   }
 });
 
-app.use(sessionMiddleware);
+app.use(middlewareSesi);
 
 // Static files
 app.use(express.static(path.join(__dirname, '../public')));
@@ -104,9 +104,9 @@ app.get('/login', (req, res) => {
 });
 
 // API Routes
-app.use('/api', apiRoute);
-app.use('/api', penggunaRoute);
-app.use('/api/chatbot', chatbotRouter);
+app.use('/api', ruteApi);
+app.use('/api', rutePengguna);
+app.use('/api/chatbot', ruteChatbot);
 
 // 404 Handler
 app.use((req, res) => {
@@ -128,7 +128,7 @@ const startServer = async () => {
     await hubungkanMongoDB();
 
     // Start server
-    server.listen(PORT, () => {
+    serverHttp.listen(PORT, () => {
       console.log('');
       console.log('='.repeat(50));
       console.log('🎮 SudokuKu Server');
@@ -150,10 +150,10 @@ startServer();
 
 // Handle graceful shutdown
 process.on('SIGTERM', () => {
-  console.log('SIGTERM signal received: closing HTTP server');
-  server.close(() => {
-    console.log('HTTP server closed');
+  console.log('Sinyal SIGTERM diterima: menutup server HTTP');
+  serverHttp.close(() => {
+    console.log('Server HTTP ditutup');
   });
 });
 
-module.exports = { app, server };
+module.exports = { app, server: serverHttp };

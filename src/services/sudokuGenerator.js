@@ -5,8 +5,8 @@
  * Alur Generator:
  * 1. Buat papan Sudoku lengkap yang valid (solusi)
  * 2. Hapus beberapa angka berdasarkan tingkat kesulitan
- * 3. Pastikan puzzle tetap memiliki solusi unik
- * 4. Return puzzle dan solusinya
+ * 3. Pastikan teka-teki tetap memiliki solusi unik
+ * 4. Return teka-teki dan solusinya
  */
 
 const { pecahkanSudoku, salinPapan, cekSolusiUnik } = require('./sudokuSolver');
@@ -182,7 +182,7 @@ const hapusAngkaUntukPuzzle = (papanLengkap, jumlahHapus) => {
  * @param {String} tingkat - 'mudah', 'sedang', atau 'sulit'
  * @returns {Object} {papan: puzzle, solusi: solusi lengkap}
  */
-const generateSudoku = (tingkat = 'sedang') => {
+const buatSudoku = (tingkat = 'sedang') => {
   console.log(`🎲 Membuat puzzle Sudoku tingkat ${tingkat}...`);
 
   // 1. Buat solusi lengkap
@@ -220,22 +220,22 @@ const generateSudoku = (tingkat = 'sedang') => {
  * @param {Number} jumlah - Jumlah puzzle yang akan di-generate
  * @returns {Array} Array of puzzle objects
  */
-const generateBanyakSudoku = (tingkat = 'sedang', jumlah = 5) => {
-  const puzzles = [];
+const buatBanyakSudoku = (tingkat = 'sedang', jumlah = 5) => {
+  const kumpulanTekaTeki = [];
   
   console.log(`Membuat ${jumlah} puzzle tingkat ${tingkat}...`);
   
   for (let i = 0; i < jumlah; i++) {
-    puzzles.push(generateSudoku(tingkat));
+    kumpulanTekaTeki.push(buatSudoku(tingkat));
     console.log(`Puzzle ${i + 1}/${jumlah} selesai`);
   }
   
-  return puzzles;
+  return kumpulanTekaTeki;
 };
 
 module.exports = {
-  generateSudoku,
-  generateBanyakSudoku,
+  buatSudoku,
+  buatBanyakSudoku,
   buatPapanKosong,
   buatSolusiLengkap
 };

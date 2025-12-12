@@ -1,10 +1,10 @@
 const express = require('express');
-const router = express.Router();
+const rute = express.Router();
 const mongoose = require('mongoose');
 
 // Debug endpoint untuk cek environment dan koneksi
-router.get('/debug', async (req, res) => {
-  const debug = {
+rute.get('/debug', async (req, res) => {
+  const diagnostik = {
     timestamp: new Date().toISOString(),
     env_check: {
       MONGODB_URI_exists: !!process.env.MONGODB_URI,
@@ -21,11 +21,11 @@ router.get('/debug', async (req, res) => {
     }
   };
   
-  res.json(debug);
+  res.json(diagnostik);
 });
 
 // Test koneksi langsung
-router.get('/test-connect', async (req, res) => {
+rute.get('/test-connect', async (req, res) => {
   try {
     const uri = process.env.MONGODB_URI;
     
@@ -55,4 +55,4 @@ router.get('/test-connect', async (req, res) => {
   }
 });
 
-module.exports = router;
+module.exports = rute;
