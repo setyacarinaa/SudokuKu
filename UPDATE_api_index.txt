@@ -1,0 +1,10 @@
+// Update file api/index.js - ganti section debugRouter dengan kode di bawah:
+// Cari baris:
+// const debugRouter = require('../src/routes/debug');
+// app.use('/api', debugRouter);
+
+// Ganti dengan:
+const debugRouter = require('../src/routes/debug');
+const testConnRouter = require('../src/routes/test-connection');
+app.use('/api', debugRouter);
+app.use('/api', testConnRouter);

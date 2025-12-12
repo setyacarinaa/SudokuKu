@@ -98,6 +98,10 @@ app.use('/api/chatbot', chatbotRouter);
 const debugRouter = require('../src/routes/debug');
 app.use('/api', debugRouter);
 
+// Test connection route
+const testConnRouter = require('../src/routes/test-connection');
+app.use('/api', testConnRouter);
+
 // 404 Handler
 app.use((req, res) => {
   res.status(404).json({
