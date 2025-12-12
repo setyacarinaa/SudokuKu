@@ -110,75 +110,57 @@ app.use((req, res) => {
 
 const mongoose = require('mongoose');
 
-// Global connection promise untuk serverless
-let cachedConnection = null;
-
+// Direct connection tanpa caching untuk cold start
 const connectDB = async () => {
-  // Reuse existing connection
-  if (cachedConnection && mongoose.connection.readyState === 1) {
-    console.log('♻️ Reusing existing MongoDB connection');
-    return cachedConnection;
-  }
-  
   try {
+    // Check jika sudah connected
+    if (mongoose.connection.readyState === 1) {
+      console.log('♻️ Reusing existing MongoDB connection');
+      return mongoose.connection;
+    }
+    
     const MONGODB_URI = process.env.MONGODB_URI;
     
     if (!MONGODB_URI) {
-      throw new Error('MONGODB_URI tidak ditemukan di environment variables');
+      throw new Error('MONGODB_URI environment variable not found');
     }
     
-    console.log('🔄 Connecting to MongoDB...');
-    console.log('📍 Connection string preview:', MONGODB_URI.substring(0, 50) + '...');
+    console.log('🔄 [Cold Start] Connecting to MongoDB Atlas...');
     
-    // Connect dengan timeout settings yang lebih panjang
-    cachedConnection = await mongoose.connect(MONGODB_URI, {
-      serverSelectionTimeoutMS: 15000,
+    // Koneksi langsung tanpa promise caching
+    await mongoose.connect(MONGODB_URI, {
+      serverSelectionTimeoutMS: 20000,
       socketTimeoutMS: 45000,
-      connectTimeoutMS: 15000,
-      maxPoolSize: 10,
-      minPoolSize: 2,
-      retryWrites: true,
-      w: 'majority',
+      connectTimeoutMS: 20000,
+      maxPoolSize: 5,
+      minPoolSize: 1,
+      family: 4, // Force IPv4
     });
     
-    console.log('✅ MongoDB connected successfully');
+    console.log('✅ [Cold Start] MongoDB connected!');
     console.log(`   Database: ${mongoose.connection.name}`);
-    console.log(`   Host: ${mongoose.connection.host}`);
     
-    return cachedConnection;
+    return mongoose.connection;
   } catch (error) {
-    console.error('❌ MongoDB connection error:', error.message);
-    console.error('Error code:', error.code);
-    console.error('Error name:', error.name);
-    cachedConnection = null;
+    console.error('❌ [Cold Start] Connection failed:', error.message);
     throw error;
   }
 };
 
-// Connect immediately on cold start (sebelum request pertama)
-let connectionPromise = connectDB().catch(err => {
-  console.error('Failed to connect on startup:', err.message);
-});
-
-// Middleware untuk ensure DB connection setiap request
+// Middleware - koneksi sebelum setiap request
 app.use(async (req, res, next) => {
   try {
-    // Tunggu connection promise sebelumnya
-    await connectionPromise;
-    
-    // Jika belum connect, coba connect lagi
+    // Ensure connection sebelum proses request
     if (mongoose.connection.readyState !== 1) {
-      console.log('Retrying MongoDB connection...');
-      connectionPromise = connectDB();
-      await connectionPromise;
+      console.log(`⏳ Connecting... (current state: ${mongoose.connection.readyState})`);
+      await connectDB();
     }
-    
     next();
   } catch (error) {
-    console.error('Middleware connection error:', error.message);
+    console.error('❌ Middleware connection error:', error.message);
     return res.status(503).json({
       sukses: false,
-      pesan: 'Database tidak tersedia: ' + error.message
+      pesan: 'Database tidak tersedia - ' + error.message
     });
   }
 });
