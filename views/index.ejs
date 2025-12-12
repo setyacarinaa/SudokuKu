@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SudokuKu — <%= title %></title>
+  <meta name="theme-color" content="#667eea">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="alternate icon" type="image/png" href="/favicon.png">
+  <link rel="apple-touch-icon" href="/favicon.png">
+  <link rel="stylesheet" href="/css/gaya.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <nav class="navbar">
+      <div class="logo">🎮 SudokuKu</div>
+      <ul class="nav-menu">
+        <li><a href="/">Beranda</a></li>
+        <li><a href="/sudoku">Main</a></li>
+        <li><a href="/leaderboard">Leaderboard</a></li>
+        <% if (sudahLogin) { %>
+          <li><a href="/api/logout" onclick="return confirm('Yakin ingin logout?')">Logout (<%= namaLengkap %>)</a></li>
+        <% } else { %>
+          <li><a href="/login">Login</a></li>
+        <% } %>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container">
+    <div class="card text-center" style="margin-top: 3rem;">
+      <div class="card-header">
+        <h1 class="card-title" style="font-size: 3rem; margin-bottom: 1rem;">
+          🎮 Selamat Datang di SudokuKu!
+        </h1>
+        <p class="card-subtitle" style="font-size: 1.2rem;">
+          Platform Permainan Sudoku Terbaik dengan Chatbot Realtime
+        </p>
+      </div>
+
+      <div style="margin: 2rem 0;">
+        <p style="font-size: 1.1rem; color: #6b7280; margin-bottom: 2rem;">
+          Asah otakmu dengan puzzle Sudoku yang menantang!<br>
+          Dapatkan bantuan dari chatbot pintar dan bersaing di leaderboard global.
+        </p>
+
+        <% if (sudahLogin) { %>
+          <a href="/sudoku" class="btn btn-primary" style="font-size: 1.2rem; padding: 1rem 2rem;">
+            🎯 Mulai Bermain Sekarang!
+          </a>
+        <% } else { %>
+          <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
+            <a href="/login" class="btn btn-primary" style="font-size: 1.2rem; padding: 1rem 2rem;">
+              🔐 Login / Register
+            </a>
+            <a href="/leaderboard" class="btn btn-secondary" style="font-size: 1.2rem; padding: 1rem 2rem;">
+              🏆 Lihat Leaderboard
+            </a>
+          </div>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Fitur -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-top: 3rem;">
+      <div class="card">
+        <div style="font-size: 3rem; text-align: center; margin-bottom: 1rem;">🎯</div>
+        <h3 style="text-align: center; margin-bottom: 0.5rem;">3 Tingkat Kesulitan</h3>
+        <p style="text-align: center; color: #6b7280;">
+          Pilih tingkat mudah, sedang, atau sulit sesuai kemampuanmu
+        </p>
+      </div>
+
+      <div class="card">
+        <div style="font-size: 3rem; text-align: center; margin-bottom: 1rem;">💬</div>
+        <h3 style="text-align: center; margin-bottom: 0.5rem;">Chatbot Pintar</h3>
+        <p style="text-align: center; color: #6b7280;">
+          Dapatkan hint, validasi jawaban, dan solusi dari chatbot realtime
+        </p>
+      </div>
+
+      <div class="card">
+        <div style="font-size: 3rem; text-align: center; margin-bottom: 1rem;">🏆</div>
+        <h3 style="text-align: center; margin-bottom: 0.5rem;">Leaderboard Global</h3>
+        <p style="text-align: center; color: #6b7280;">
+          Bersaing dengan pemain lain dan raih posisi teratas
+        </p>
+      </div>
+
+      <div class="card">
+        <div style="font-size: 3rem; text-align: center; margin-bottom: 1rem;">⏱️</div>
+        <h3 style="text-align: center; margin-bottom: 0.5rem;">Timer Otomatis</h3>
+        <p style="text-align: center; color: #6b7280;">
+          Lacak waktu penyelesaianmu dan pecahkan rekor pribadi
+        </p>
+      </div>
+
+      <div class="card">
+        <div style="font-size: 3rem; text-align: center; margin-bottom: 1rem;">📧</div>
+        <h3 style="text-align: center; margin-bottom: 0.5rem;">Notifikasi Email</h3>
+        <p style="text-align: center; color: #6b7280;">
+          Terima email selamat datang dan notifikasi pencapaian skor
+        </p>
+      </div>
+
+      <div class="card">
+        <div style="font-size: 3rem; text-align: center; margin-bottom: 1rem;">🎲</div>
+        <h3 style="text-align: center; margin-bottom: 0.5rem;">Generator Otomatis</h3>
+        <p style="text-align: center; color: #6b7280;">
+          Puzzle baru setiap kali bermain dengan algoritma backtracking
+        </p>
+      </div>
+    </div>
+
+    <!-- Cara Bermain -->
+    <div class="card" style="margin-top: 3rem;">
+      <h2 style="text-align: center; margin-bottom: 2rem;">📖 Cara Bermain Sudoku</h2>
+      <div style="max-width: 600px; margin: 0 auto;">
+        <ol style="font-size: 1.1rem; line-height: 2;">
+          <li>Isi setiap sel kosong dengan angka 1-9</li>
+          <li>Setiap baris harus berisi angka 1-9 tanpa duplikat</li>
+          <li>Setiap kolom harus berisi angka 1-9 tanpa duplikat</li>
+          <li>Setiap kotak 3x3 harus berisi angka 1-9 tanpa duplikat</li>
+          <li>Gunakan chatbot untuk bantuan jika kesulitan</li>
+          <li>Selesaikan secepat mungkin untuk skor tertinggi!</li>
+        </ol>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer style="text-align: center; padding: 2rem; color: white; margin-top: 3rem;">
+    <p>&copy; 2025 SudokuKu - Platform Permainan Sudoku Terbaik</p>
+    <p style="margin-top: 0.5rem; font-size: 0.9rem;">
+      Dibuat oleh <strong>Setya</strong>, <strong>Radhia</strong>, dan <strong>Syahid</strong> — untuk memenuhi tugas akhir matkul Pemrograman Jaringan 
+    </p>
+  </footer>
+</body>
+</html>

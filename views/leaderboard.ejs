@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - SudokuKu</title>
+  <link rel="stylesheet" href="/css/gaya.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <nav class="navbar">
+      <div class="logo">🎮 SudokuKu</div>
+      <ul class="nav-menu">
+        <li><a href="/">Beranda</a></li>
+        <li><a href="/sudoku">Main</a></li>
+        <li><a href="/leaderboard" style="color: #667eea; font-weight: bold;">Leaderboard</a></li>
+        <% if (sudahLogin) { %>
+          <li><a href="/api/logout" onclick="return confirm('Yakin ingin logout?')">Logout (<%= namaLengkap %>)</a></li>
+        <% } else { %>
+          <li><a href="/login">Login</a></li>
+        <% } %>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container">
+    <div class="card">
+      <div class="card-header text-center">
+        <h1 class="card-title">🏆 Leaderboard Global</h1>
+        <p class="card-subtitle">Pemain terbaik berdasarkan skor tertinggi</p>
+      </div>
+
+      <!-- Filter Tingkat -->
+      <div class="tingkat-kesulitan" style="margin-bottom: 2rem;">
+        <button class="btn btn-primary btn-small" onclick="muatLeaderboard('semua')">Semua</button>
+        <button class="btn btn-secondary btn-small" onclick="muatLeaderboard('mudah')">Mudah</button>
+        <button class="btn btn-secondary btn-small" onclick="muatLeaderboard('sedang')">Sedang</button>
+        <button class="btn btn-secondary btn-small" onclick="muatLeaderboard('sulit')">Sulit</button>
+      </div>
+
+      <!-- Loading -->
+      <div id="loading" class="text-center" style="display: none;">
+        <div class="loading"></div>
+        <p style="margin-top: 1rem;">Memuat leaderboard...</p>
+      </div>
+
+      <!-- Table -->
+      <div id="leaderboard-container">
+        <table class="leaderboard-table">
+          <thead>
+            <tr>
+              <th>Peringkat</th>
+              <th>Nama Pemain</th>
+              <th>Skor</th>
+              <th>Waktu</th>
+              <th>Tingkat</th>
+              <th>Tanggal</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboard-body">
+            <!-- Data akan diisi oleh JavaScript -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Empty State -->
+      <div id="empty-state" class="text-center" style="display: none; padding: 3rem;">
+        <div style="font-size: 4rem; margin-bottom: 1rem;">🏆</div>
+        <h3>Belum ada data leaderboard</h3>
+        <p style="color: #6b7280; margin-top: 1rem;">Jadilah yang pertama bermain dan raih posisi teratas!</p>
+        <% if (sudahLogin) { %>
+          <a href="/sudoku" class="btn btn-primary" style="margin-top: 1rem;">🎯 Mulai Bermain</a>
+        <% } else { %>
+          <a href="/login" class="btn btn-primary" style="margin-top: 1rem;">🔐 Login untuk Main</a>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="card">
+      <h3 style="margin-bottom: 1rem;">ℹ️ Tentang Sistem Skor</h3>
+      <ul style="line-height: 2; color: #6b7280;">
+        <li><strong>Mudah:</strong> Base skor 100 poin + bonus kecepatan</li>
+        <li><strong>Sedang:</strong> Base skor 200 poin + bonus kecepatan</li>
+        <li><strong>Sulit:</strong> Base skor 300 poin + bonus kecepatan</li>
+        <li><strong>Bonus Kecepatan:</strong> Maksimal 500 poin (500 - waktu dalam detik)</li>
+        <li>Skor dihitung otomatis saat puzzle selesai</li>
+        <li>Hanya skor terbaik yang ditampilkan di leaderboard</li>
+      </ul>
+    </div>
+  </main>
+
+  <!-- Scripts -->
+  <script>
+    let tingkatAktif = 'semua';
+
+    // Muat leaderboard saat halaman load
+    document.addEventListener('DOMContentLoaded', () => {
+      muatLeaderboard('semua');
+    });
+
+    // Fungsi untuk muat leaderboard
+    async function muatLeaderboard(tingkat = 'semua') {
+      tingkatAktif = tingkat;
+
+      // Update tampilan tombol
+      document.querySelectorAll('.tingkat-kesulitan .btn').forEach(btn => {
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-secondary');
+      });
+      event.target.classList.remove('btn-secondary');
+      event.target.classList.add('btn-primary');
+
+      // Tampilkan loading
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('leaderboard-container').style.display = 'none';
+      document.getElementById('empty-state').style.display = 'none';
+
+      try {
+        // Request API
+        const url = tingkat === 'semua' 
+          ? '/api/leaderboard?limit=50' 
+          : `/api/leaderboard?limit=50&tingkat=${tingkat}`;
+
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.sukses && data.data.length > 0) {
+          tampilkanLeaderboard(data.data);
+        } else {
+          tampilkanEmpty();
+        }
+      } catch (error) {
+        console.error('Error memuat leaderboard:', error);
+        alert('Gagal memuat leaderboard');
+      } finally {
+        document.getElementById('loading').style.display = 'none';
+      }
+    }
+
+    // Fungsi untuk menampilkan leaderboard
+    function tampilkanLeaderboard(data) {
+      const tbody = document.getElementById('leaderboard-body');
+      tbody.innerHTML = '';
+
+      data.forEach((item, index) => {
+        const tr = document.createElement('tr');
+        
+        // Badge peringkat
+        let badgeClass = '';
+        if (item.peringkat === 1) badgeClass = 'peringkat-1';
+        else if (item.peringkat === 2) badgeClass = 'peringkat-2';
+        else if (item.peringkat === 3) badgeClass = 'peringkat-3';
+
+        const badge = badgeClass 
+          ? `<span class="peringkat-badge ${badgeClass}">#${item.peringkat}</span>`
+          : `#${item.peringkat}`;
+
+        // Format waktu
+        const menit = Math.floor(item.waktuPenyelesaian / 60);
+        const detik = item.waktuPenyelesaian % 60;
+        const waktuFormat = `${menit}:${detik.toString().padStart(2, '0')}`;
+
+        // Format tanggal
+        const tanggal = new Date(item.tanggalMain).toLocaleDateString('id-ID', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric'
+        });
+
+        tr.innerHTML = `
+          <td>${badge}</td>
+          <td><strong>${item.namaPengguna}</strong></td>
+          <td><strong style="color: #667eea;">${item.skor}</strong></td>
+          <td>${waktuFormat}</td>
+          <td><span style="text-transform: capitalize;">${item.tingkatKesulitan}</span></td>
+          <td>${tanggal}</td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('leaderboard-container').style.display = 'block';
+    }
+
+    // Fungsi untuk menampilkan empty state
+    function tampilkanEmpty() {
+      document.getElementById('empty-state').style.display = 'block';
+    }
+  </script>
+</body>
+</html>

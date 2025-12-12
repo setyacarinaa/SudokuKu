@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - SudokuKu</title>
+  <link rel="stylesheet" href="/css/gaya.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <nav class="navbar">
+      <div class="logo">🎮 SudokuKu</div>
+      <ul class="nav-menu">
+        <li><a href="/">Beranda</a></li>
+        <li><a href="/sudoku">Main</a></li>
+        <li><a href="/leaderboard">Leaderboard</a></li>
+        <li><a href="/login" style="color: #667eea; font-weight: bold;">Login</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container">
+    <div class="card" style="max-width: 500px; margin: 3rem auto;">
+      <div class="card-header text-center">
+        <h1 class="card-title">🔐 Login / Register</h1>
+        <p class="card-subtitle">Masuk untuk mulai bermain Sudoku</p>
+      </div>
+
+      <!-- Alert Container -->
+      <div id="alert-container"></div>
+
+      <!-- Tab Navigation -->
+      <div style="display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 2px solid #e5e7eb;">
+        <button id="tab-login" class="btn-tab active" onclick="switchTab('login')" 
+                style="flex: 1; padding: 1rem; border: none; background: none; cursor: pointer; font-weight: bold; border-bottom: 3px solid #667eea;">
+          Login
+        </button>
+        <button id="tab-register" class="btn-tab" onclick="switchTab('register')" 
+                style="flex: 1; padding: 1rem; border: none; background: none; cursor: pointer; font-weight: bold; border-bottom: 3px solid transparent;">
+          Register
+        </button>
+      </div>
+
+      <!-- Form Login -->
+      <form id="form-login" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label for="login-email">Email</label>
+          <input type="email" id="login-email" name="email" required placeholder="nama@email.com">
+        </div>
+
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" name="password" required placeholder="Minimal 6 karakter">
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%;" id="btn-login">
+          Login
+        </button>
+      </form>
+
+      <!-- Form Register -->
+      <form id="form-register" onsubmit="handleRegister(event)" style="display: none;">
+        <div class="form-group">
+          <label for="register-nama">Nama Lengkap</label>
+          <input type="text" id="register-nama" name="namaLengkap" required placeholder="Nama lengkap Anda">
+        </div>
+
+        <div class="form-group">
+          <label for="register-email">Email</label>
+          <input type="email" id="register-email" name="email" required placeholder="nama@email.com">
+        </div>
+
+        <div class="form-group">
+          <label for="register-password">Password</label>
+          <input type="password" id="register-password" name="password" required placeholder="Minimal 6 karakter">
+        </div>
+
+        <div class="form-group">
+          <label for="register-password2">Konfirmasi Password</label>
+          <input type="password" id="register-password2" name="password2" required placeholder="Ketik ulang password">
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%;" id="btn-register">
+          Daftar Akun Baru
+        </button>
+      </form>
+
+      <!-- Info -->
+      <div style="margin-top: 2rem; padding: 1rem; background: #f3f4f6; border-radius: 8px; text-align: center;">
+        <p style="color: #6b7280; font-size: 0.9rem;">
+          Dengan mendaftar, kamu akan mendapatkan:<br>
+          ✓ Akses ke semua fitur game<br>
+          ✓ Skor tersimpan otomatis<br>
+          ✓ Email notifikasi pencapaian<br>
+          ✓ Posisi di leaderboard global
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Scripts -->
+  <script>
+    // Switch tab
+    function switchTab(tab) {
+      const loginForm = document.getElementById('form-login');
+      const registerForm = document.getElementById('form-register');
+      const loginTab = document.getElementById('tab-login');
+      const registerTab = document.getElementById('tab-register');
+
+      if (tab === 'login') {
+        loginForm.style.display = 'block';
+        registerForm.style.display = 'none';
+        loginTab.classList.add('active');
+        registerTab.classList.remove('active');
+        loginTab.style.borderBottom = '3px solid #667eea';
+        registerTab.style.borderBottom = '3px solid transparent';
+      } else {
+        loginForm.style.display = 'none';
+        registerForm.style.display = 'block';
+        loginTab.classList.remove('active');
+        registerTab.classList.add('active');
+        loginTab.style.borderBottom = '3px solid transparent';
+        registerTab.style.borderBottom = '3px solid #667eea';
+      }
+
+      // Clear alerts
+      document.getElementById('alert-container').innerHTML = '';
+    }
+
+    // Handle login
+    async function handleLogin(event) {
+      event.preventDefault();
+
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+      const btnLogin = document.getElementById('btn-login');
+
+      // Disable button
+      btnLogin.disabled = true;
+      btnLogin.innerHTML = '<span class="loading"></span> Memproses...';
+
+      try {
+        const response = await fetch('/api/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (data.sukses) {
+          tampilkanAlert('Login berhasil! Mengalihkan...', 'success');
+          setTimeout(() => {
+            window.location.href = '/sudoku';
+          }, 1000);
+        } else {
+          tampilkanAlert(data.pesan || 'Login gagal', 'error');
+          btnLogin.disabled = false;
+          btnLogin.innerHTML = 'Login';
+        }
+      } catch (error) {
+        console.error('Error login:', error);
+        tampilkanAlert('Terjadi kesalahan saat login', 'error');
+        btnLogin.disabled = false;
+        btnLogin.innerHTML = 'Login';
+      }
+    }
+
+    // Handle register
+    async function handleRegister(event) {
+      event.preventDefault();
+
+      const namaLengkap = document.getElementById('register-nama').value;
+      const email = document.getElementById('register-email').value;
+      const password = document.getElementById('register-password').value;
+      const password2 = document.getElementById('register-password2').value;
+      const btnRegister = document.getElementById('btn-register');
+
+      // Validasi password match
+      if (password !== password2) {
+        tampilkanAlert('Password tidak cocok!', 'error');
+        return;
+      }
+
+      // Validasi panjang password
+      if (password.length < 6) {
+        tampilkanAlert('Password minimal 6 karakter!', 'error');
+        return;
+      }
+
+      // Disable button
+      btnRegister.disabled = true;
+      btnRegister.innerHTML = '<span class="loading"></span> Mendaftar...';
+
+      try {
+        const response = await fetch('/api/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ namaLengkap, email, password })
+        });
+
+        const data = await response.json();
+
+        if (data.sukses) {
+          tampilkanAlert('Registrasi berhasil! Email selamat datang telah dikirim. Mengalihkan...', 'success');
+          setTimeout(() => {
+            window.location.href = '/sudoku';
+          }, 2000);
+        } else {
+          tampilkanAlert(data.pesan || 'Registrasi gagal', 'error');
+          btnRegister.disabled = false;
+          btnRegister.innerHTML = 'Daftar Akun Baru';
+        }
+      } catch (error) {
+        console.error('Error register:', error);
+        tampilkanAlert('Terjadi kesalahan saat registrasi', 'error');
+        btnRegister.disabled = false;
+        btnRegister.innerHTML = 'Daftar Akun Baru';
+      }
+    }
+
+    // Tampilkan alert
+    function tampilkanAlert(pesan, tipe) {
+      const container = document.getElementById('alert-container');
+      container.innerHTML = `
+        <div class="alert alert-${tipe}" style="margin-bottom: 1rem;">
+          ${pesan}
+        </div>
+      `;
+
+      // Auto hide setelah 5 detik
+      setTimeout(() => {
+        container.innerHTML = '';
+      }, 5000);
+    }
+  </script>
+</body>
+</html>

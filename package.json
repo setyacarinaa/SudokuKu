@@ -1,0 +1,35 @@
+{
+  "name": "sudoku-ku",
+  "version": "1.0.0",
+  "description": "Aplikasi Sudoku dengan Node.js, Express, MongoDB, Socket.IO, dan Nodemailer",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js"
+  },
+  "keywords": [
+    "sudoku",
+    "game",
+    "nodejs",
+    "express",
+    "mongodb",
+    "socketio"
+  ],
+  "author": "Tim SudokuKu",
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "ejs": "^3.1.9",
+    "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "mongodb": "4.1",
+    "mongoose": "^8.0.3",
+    "nodemailer": "^6.9.7",
+    "socket.io": "^4.6.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}

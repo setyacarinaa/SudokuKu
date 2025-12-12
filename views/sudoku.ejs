@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - SudokuKu</title>
+  <link rel="stylesheet" href="/css/gaya.css">
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <nav class="navbar">
+      <div class="logo">🎮 SudokuKu</div>
+      <ul class="nav-menu">
+        <li><a href="/">Beranda</a></li>
+        <li><a href="/sudoku" style="color: #667eea; font-weight: bold;">Main</a></li>
+        <li><a href="/leaderboard">Leaderboard</a></li>
+        <li><a href="/api/logout" onclick="return confirm('Yakin ingin logout?')">Logout (<%= namaLengkap %>)</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container">
+    <!-- Pesan Container -->
+    <div id="pesan-container"></div>
+
+    <!-- Game Card -->
+    <div class="card">
+      <div class="card-header text-center">
+        <h1 class="card-title">🎯 Permainan Sudoku</h1>
+        <p class="card-subtitle">Selesaikan puzzle dan raih skor tertinggi!</p>
+      </div>
+
+      <!-- Tingkat Kesulitan -->
+      <div class="tingkat-kesulitan">
+        <button id="btn-mudah" class="btn btn-secondary btn-small">Mudah</button>
+        <button id="btn-sedang" class="btn btn-primary btn-small">Sedang</button>
+        <button id="btn-sulit" class="btn btn-secondary btn-small">Sulit</button>
+      </div>
+
+      <!-- Timer -->
+      <div class="timer" id="timer">00:00</div>
+
+      <!-- Papan Sudoku -->
+      <div id="papan-sudoku" class="papan-sudoku"></div>
+
+      <!-- Game Controls -->
+      <div class="game-controls">
+        <button id="btn-papan-baru" class="btn btn-primary">
+          🎲 Puzzle Baru
+        </button>
+        <button id="btn-cek-jawaban" class="btn btn-secondary">
+          ✓ Cek Jawaban
+        </button>
+        <button id="btn-reset" class="btn btn-secondary">
+          🔄 Reset
+        </button>
+        <button id="btn-selesaikan" class="btn btn-danger">
+          📋 Lihat Solusi
+        </button>
+      </div>
+
+      <!-- Instruksi -->
+      <div style="margin-top: 2rem; padding: 1rem; background: #f3f4f6; border-radius: 8px;">
+        <h3 style="margin-bottom: 0.5rem;">💡 Tips Bermain:</h3>
+        <ul style="color: #6b7280; line-height: 1.8;">
+          <li>Gunakan <strong>Arrow Keys</strong> untuk navigasi antar sel</li>
+          <li>Tekan <strong>Delete/Backspace</strong> untuk menghapus angka</li>
+          <li>Klik tombol <strong>💬 Chatbot</strong> untuk bantuan realtime</li>
+          <li>Ketik <strong>"hint"</strong> di chatbot untuk mendapat petunjuk</li>
+          <li>Selesaikan secepat mungkin untuk skor lebih tinggi!</li>
+        </ul>
+      </div>
+    </div>
+  </main>
+
+  <!-- Chatbot Toggle Button -->
+  <button id="chatbot-toggle-btn" class="chatbot-toggle-btn" onclick="toggleChatbot()">
+    💬
+  </button>
+
+  <!-- Chatbot Container -->
+  <div id="chatbot-container" class="chatbot-container chatbot-hidden">
+    <div class="chatbot-header">
+      <h3 style="margin: 0;">💬 Chatbot SudokuKu</h3>
+      <button class="chatbot-toggle" id="chatbot-toggle" onclick="toggleChatbot()">✕</button>
+    </div>
+    
+    <div id="chatbot-messages" class="chatbot-messages">
+      <!-- Pesan akan ditambahkan di sini oleh JavaScript -->
+    </div>
+    
+    <div class="chatbot-input">
+      <form id="form-chatbot" style="display: flex; gap: 0.5rem; width: 100%;">
+        <input 
+          type="text" 
+          id="input-chatbot" 
+          placeholder="Ketik pesan atau 'hint'..." 
+          autocomplete="off"
+        >
+        <button type="submit" class="btn btn-primary btn-small">Kirim</button>
+      </form>
+    </div>
+    
+    <div style="padding: 0.5rem 1rem; border-top: 1px solid #e5e7eb; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+      <button class="btn btn-secondary btn-small" onclick="kirimPesanChatbot('hint')">💡 Hint</button>
+      <button class="btn btn-secondary btn-small" onclick="kirimPesanChatbot('cek jawaban')">✓ Cek</button>
+      <button class="btn btn-secondary btn-small" onclick="kirimPesanChatbot('cara main')">📖 Cara Main</button>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/js/sudoku-frontend.js"></script>
+  <script src="/js/chatbot-client.js"></script>
+</body>
+</html>
