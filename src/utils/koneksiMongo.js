@@ -12,12 +12,24 @@ const mongoose = require('mongoose');
 const hubungkanMongoDB = async () => {
   try {
     // Ambil connection string dari environment variable
-    const uriMongo = process.env.MONGODB_URI || 'mongodb://localhost:27017/sudokuku';
+    const uriMongo = process.env.MONGODB_URI;
     
-    // Opsi koneksi MongoDB
+    if (!uriMongo) {
+      throw new Error('MONGODB_URI tidak ditemukan di environment variables');
+    }
+    
+    // Skip jika sudah terhubung
+    if (mongoose.connection.readyState === 1) {
+      console.log('✅ MongoDB sudah terhubung (reuse connection)');
+      return mongoose.connection;
+    }
+    
+    // Opsi koneksi MongoDB untuk serverless
     const opsiKoneksi = {
-      // useNewUrlParser dan useUnifiedTopology sudah default di Mongoose 6+
-      // Tidak perlu ditambahkan lagi
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+      maxPoolSize: 10,
+      minPoolSize: 1,
     };
 
     // Hubungkan ke MongoDB
@@ -39,8 +51,7 @@ const hubungkanMongoDB = async () => {
     return mongoose.connection;
   } catch (error) {
     console.error('❌ Gagal terhubung ke MongoDB:', error.message);
-    // Keluar dari proses jika koneksi gagal
-    process.exit(1);
+    throw error; // Jangan exit di serverless
   }
 };
 
