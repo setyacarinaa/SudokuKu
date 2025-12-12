@@ -98,8 +98,10 @@ app.use('/api', ruteDebug);
 // Test connection routes
 const ruteTesKoneksi = require('../src/routes/test-connection');
 const ruteTesKoneksiLangsung = require('../src/routes/test-direct-connection');
+const ruteStatusDB = require('../src/routes/status-db');
 app.use('/api', ruteTesKoneksi);
 app.use('/api', ruteTesKoneksiLangsung);
+app.use('/api', ruteStatusDB);
 
 // 404 Handler
 app.use((req, res) => {
