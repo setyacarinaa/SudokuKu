@@ -128,37 +128,54 @@ const connectDB = async () => {
     }
     
     console.log('🔄 Connecting to MongoDB...');
+    console.log('📍 Connection string preview:', MONGODB_URI.substring(0, 50) + '...');
     
-    // Connect dengan timeout settings
+    // Connect dengan timeout settings yang lebih panjang
     cachedConnection = await mongoose.connect(MONGODB_URI, {
-      serverSelectionTimeoutMS: 10000,
+      serverSelectionTimeoutMS: 15000,
       socketTimeoutMS: 45000,
+      connectTimeoutMS: 15000,
       maxPoolSize: 10,
       minPoolSize: 2,
+      retryWrites: true,
+      w: 'majority',
     });
     
     console.log('✅ MongoDB connected successfully');
     console.log(`   Database: ${mongoose.connection.name}`);
+    console.log(`   Host: ${mongoose.connection.host}`);
     
     return cachedConnection;
   } catch (error) {
     console.error('❌ MongoDB connection error:', error.message);
+    console.error('Error code:', error.code);
+    console.error('Error name:', error.name);
     cachedConnection = null;
     throw error;
   }
 };
 
 // Connect immediately on cold start (sebelum request pertama)
-connectDB().catch(err => {
+let connectionPromise = connectDB().catch(err => {
   console.error('Failed to connect on startup:', err.message);
 });
 
 // Middleware untuk ensure DB connection setiap request
 app.use(async (req, res, next) => {
   try {
-    await connectDB();
+    // Tunggu connection promise sebelumnya
+    await connectionPromise;
+    
+    // Jika belum connect, coba connect lagi
+    if (mongoose.connection.readyState !== 1) {
+      console.log('Retrying MongoDB connection...');
+      connectionPromise = connectDB();
+      await connectionPromise;
+    }
+    
     next();
   } catch (error) {
+    console.error('Middleware connection error:', error.message);
     return res.status(503).json({
       sukses: false,
       pesan: 'Database tidak tersedia: ' + error.message
