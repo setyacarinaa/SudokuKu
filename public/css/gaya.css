@@ -964,6 +964,26 @@ body {
   animation: pulse 1.5s ease-in-out infinite;
 }
 
+/* ==================== RESPONSIVE OVERLAY ==================== */
+@media (max-width: 600px) {
+  .overlay-content {
+    width: 95%;
+    padding: 2rem 1.5rem;
+  }
+
+  .overlay-emoji {
+    font-size: 3.5rem;
+  }
+
+  .overlay-title {
+    font-size: 1.8rem;
+  }
+
+  .overlay-stats {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+
   .nav-menu {
     flex-direction: column;
     gap: 1rem;
