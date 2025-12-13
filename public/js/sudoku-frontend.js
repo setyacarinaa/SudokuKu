@@ -410,17 +410,13 @@ async function gameOver(menang) {
   const waktuBermain = hitungWaktu();
 
   if (menang) {
-    // Pemain menang!
-    tampilkanPesan('🎉 Selamat! Puzzle diselesaikan dengan sempurna!', 'success');
-    
     // Hitung skor
     const durasiDetik = Math.floor((new Date() - waktuMulai) / 1000);
     const skorFinal = hitungSkor(durasiDetik, tingkatTerpilih);
     
-    // Redirect ke halaman hasil
-    setTimeout(() => {
-      window.location.href = `/hasil?waktu=${durasiDetik}&tingkat=${tingkatTerpilih}&menang=true&skor=${skorFinal}`;
-    }, 2000);
+    // Tampilkan overlay success
+    tampilkanOverlaySelesai(durasiDetik, skorFinal);
+    
   } else {
     // Pemain kalah - kesalahan melebihi batas
     tampilkanPesan('❌ Game Over! Batas kesalahan terlampaui. Game direset.', 'error');
@@ -431,8 +427,68 @@ async function gameOver(menang) {
       updateErrorCounter();
       muatPapanBaru(tingkatTerpilih);
       tampilkanPesan('🔄 Game telah direset. Coba lagi!', 'info');
-    }, 2000);
+    }, 2500);
   }
+}
+
+// ==================== OVERLAY SELESAI ====================
+
+function tampilkanOverlaySelesai(durasiDetik, skorFinal) {
+  // Cek apakah overlay sudah ada
+  let overlay = document.getElementById('overlay-selesai');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'overlay-selesai';
+    overlay.className = 'overlay-selesai';
+    
+    overlay.innerHTML = `
+      <div class="overlay-content">
+        <div class="overlay-emoji">🎉</div>
+        <h1 class="overlay-title">SELAMAT!</h1>
+        <p class="overlay-subtitle">Puzzle Diselesaikan dengan Sempurna!</p>
+        
+        <div class="overlay-stats">
+          <div class="overlay-stat">
+            <span class="overlay-stat-icon">⏱️</span>
+            <span class="overlay-stat-label">Waktu</span>
+            <span class="overlay-stat-value">${formatWaktu(durasiDetik)}</span>
+          </div>
+          <div class="overlay-stat">
+            <span class="overlay-stat-icon">🏆</span>
+            <span class="overlay-stat-label">Skor</span>
+            <span class="overlay-stat-value">${skorFinal}</span>
+          </div>
+          <div class="overlay-stat">
+            <span class="overlay-stat-icon">📊</span>
+            <span class="overlay-stat-label">Level</span>
+            <span class="overlay-stat-value">${tingkatTerpilih.charAt(0).toUpperCase() + tingkatTerpilih.slice(1)}</span>
+          </div>
+        </div>
+        
+        <p class="overlay-loading">Diarahkan ke halaman hasil...</p>
+      </div>
+    `;
+    
+    document.body.appendChild(overlay);
+  }
+  
+  // Show overlay dengan animasi
+  overlay.style.display = 'flex';
+  overlay.offsetHeight; // Trigger reflow
+  overlay.classList.add('show');
+  
+  // Redirect ke halaman hasil setelah 3 detik
+  setTimeout(() => {
+    window.location.href = `/hasil?waktu=${durasiDetik}&tingkat=${tingkatTerpilih}&menang=true&skor=${skorFinal}`;
+  }, 3000);
+}
+
+// ==================== FORMAT WAKTU ====================
+
+function formatWaktu(detik) {
+  const menit = Math.floor(detik / 60);
+  const sisa = detik % 60;
+  return `${menit.toString().padStart(2, '0')}:${sisa.toString().padStart(2, '0')}`;
 }
 
 // ==================== HITUNG SKOR ====================
