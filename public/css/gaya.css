@@ -803,6 +803,39 @@ body {
   text-align: center;
 }
 
+.tips-section {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: #f3f4f6;
+  border-radius: 8px;
+  border-left: 4px solid var(--primary-color);
+}
+
+.tips-title {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.tips-list {
+  margin: 0;
+  padding-left: 1.5rem;
+  color: #6b7280;
+  line-height: 1.8;
+  list-style: disc;
+}
+
+.tips-list li {
+  margin-bottom: 0.6rem;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.tips-list li:last-child {
+  margin-bottom: 0;
+}
+
 .mt-1 { margin-top: 0.5rem; }
 .mt-2 { margin-top: 1rem; }
 .mt-3 { margin-top: 1.5rem; }
