@@ -446,6 +446,7 @@ body {
   border-bottom: 1px solid #e0e3e8;
   flex-shrink: 0;
   height: auto;
+  min-height: fit-content;
   max-height: 130px;
   overflow-y: auto;
 }
@@ -473,15 +474,15 @@ body {
 }
 
 .chatbot-messages {
-  flex: 1;
+  flex: 1 1 auto;
   min-height: 0;
   padding: 1rem;
   overflow-y: auto;
+  overflow-x: hidden;
   background: #f9fafb;
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
-  overflow-x: hidden;
 }
 
 .pesan {
@@ -519,10 +520,10 @@ body {
   flex-shrink: 0;
   background: white;
   height: auto;
+  min-height: fit-content;
   width: 100%;
   box-sizing: border-box;
   border-radius: 0 0 14px 14px;
-  margin-top: auto;
 }
 
 .chatbot-input form {
