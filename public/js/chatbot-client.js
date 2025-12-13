@@ -18,13 +18,13 @@ document.addEventListener('DOMContentLoaded', () => {
   siapkanEventSoket();
   // Helper toggle
   const ambilKontainerChatbot = () => document.querySelector('#chatbot-container');
-  const ambilTombolTutup = () => document.querySelector('#chatbot-close, .chatbot-close');
+  const ambilTombolTutup = () => document.querySelector('#chatbot-toggle, .chatbot-toggle');
   const ambilHeaderChatbot = () => document.querySelector('#chatbot-header');
 
   const sembunyikanChatbot = () => {
     const kontainer = ambilKontainerChatbot();
     if (kontainer) {
-      kontainer.classList.add('chatbot--hidden');
+      kontainer.classList.add('chatbot-hidden');
       kontainer.style.display = 'none';
     }
   };
@@ -32,22 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const tampilkanChatbot = () => {
     const kontainer = ambilKontainerChatbot();
     if (kontainer) {
-      kontainer.classList.remove('chatbot--hidden');
+      kontainer.classList.remove('chatbot-hidden');
       kontainer.style.display = 'block';
-    }
-  };
-
-  // API toggle untuk kompatibilitas
-  window.alihChatbot = function alihChatbot(forceState) {
-    const kontainer = ambilKontainerChatbot();
-    if (!kontainer) return;
-    const tersembunyi = kontainer.classList.contains('chatbot--hidden') || kontainer.style.display === 'none';
-    if (forceState === true) {
-      tampilkanChatbot();
-    } else if (forceState === false) {
-      sembunyikanChatbot();
-    } else {
-      if (tersembunyi) tampilkanChatbot(); else sembunyikanChatbot();
     }
   };
 
@@ -68,13 +54,16 @@ document.addEventListener('DOMContentLoaded', () => {
       window.alihChatbot();
     });
   }
+
+  // Gunakan toggle global utama
+  window.alihChatbot = alihChatbot;
 });
 
 // ==================== SETUP CHATBOT UI ====================
 
 function siapkanChatbot() {
   // Tombol toggle chatbot
-  const btnToggle = document.getElementById('chatbot-toggle');
+  const btnToggle = document.getElementById('chatbot-toggle-btn');
   if (btnToggle) {
     btnToggle.addEventListener('click', alihChatbot);
   }
@@ -102,22 +91,23 @@ function siapkanChatbot() {
 
 // ==================== TOGGLE CHATBOT ====================
 
-function alihChatbot() {
+function alihChatbot(forceState) {
   const kontainerChatbot = document.getElementById('chatbot-container');
   const btnToggle = document.getElementById('chatbot-toggle-btn');
-  
   if (!kontainerChatbot) return;
-  
-  chatbotTerbuka = !chatbotTerbuka;
-  
+
+  // Tentukan target state
+  const targetOpen = forceState === true ? true : forceState === false ? false : !chatbotTerbuka;
+  chatbotTerbuka = targetOpen;
+
   if (chatbotTerbuka) {
     kontainerChatbot.classList.remove('chatbot-hidden');
+    kontainerChatbot.style.display = 'block';
     if (btnToggle) btnToggle.classList.add('chatbot-hidden');
-    
-    // Auto scroll ke bawah
     scrollKeBawah();
   } else {
     kontainerChatbot.classList.add('chatbot-hidden');
+    kontainerChatbot.style.display = 'none';
     if (btnToggle) btnToggle.classList.remove('chatbot-hidden');
   }
 }
