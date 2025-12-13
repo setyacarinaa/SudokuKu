@@ -3,13 +3,25 @@
  * Frontend untuk Socket.IO chatbot
  */
 
-// Inisialisasi Socket.IO (aman jika tidak tersedia)
+// Inisialisasi Socket.IO dengan fallback path
 let soket = null;
-if (typeof io !== 'undefined') {
-  // Pilih path sesuai lingkungan (Vercel sering memakai /api/socket.io)
-  const pakaiApiPath = window.location.hostname.endsWith('vercel.app');
-  const socketPath = pakaiApiPath ? '/api/socket.io' : '/socket.io';
-  soket = io({ path: socketPath });
+let sudahCobaAlternate = false;
+const socketPaths = ['/api/socket.io', '/socket.io'];
+
+function buatSoket(path) {
+  return io({
+    path,
+    transports: ['websocket', 'polling'],
+    reconnectionAttempts: 3,
+    reconnectionDelay: 500
+  });
+}
+
+function pilihPathAwal() {
+  const host = window.location.hostname;
+  const isLocal = host === 'localhost' || host === '127.0.0.1';
+  // Lokal pakai /socket.io, produksi coba /api/socket.io dulu
+  return isLocal ? 1 : 0;
 }
 
 // State chatbot
@@ -160,32 +172,46 @@ function kirimPesanKeChatbot(pesan, papan = null) {
 // ==================== SOCKET EVENTS ====================
 
 function siapkanEventSoket() {
-  if (!soket) {
+  const idxAwal = pilihPathAwal();
+  const idxAlt = idxAwal === 0 ? 1 : 0;
+
+  function ikatEvent(socketInstance, pathLabel) {
+    socketInstance.on('connect', () => {
+      console.log('✅ Socket.IO terhubung via', pathLabel);
+      tambahPesanStatus('✅ Chatbot terhubung');
+    });
+
+    socketInstance.on('connect_error', (err) => {
+      console.warn('⚠️ Gagal konek Socket.IO via', pathLabel, err?.message || err);
+      if (!sudahCobaAlternate) {
+        sudahCobaAlternate = true;
+        console.log('🔄 Mencoba path alternatif');
+        soket.removeAllListeners();
+        soket.close();
+        soket = buatSoket(socketPaths[idxAlt]);
+        ikatEvent(soket, socketPaths[idxAlt]);
+      } else {
+        tambahPesanStatus('⚠️ Gagal konek ke chatbot. Coba lagi atau muat ulang.');
+      }
+    });
+
+    socketInstance.on('disconnect', (reason) => {
+      console.log('⚠️ Socket.IO terputus', reason);
+      tambahPesanStatus('⚠️ Koneksi chatbot terputus. Mencoba hubungkan kembali...');
+    });
+
+    socketInstance.on('respons_chatbot', (data) => {
+      tanganiResponsChatbot(data);
+    });
+  }
+
+  if (typeof io === 'undefined') {
     console.warn('Socket.IO tidak tersedia; chatbot offline');
     return;
   }
 
-  // Connection
-  soket.on('connect', () => {
-    console.log('✅ Socket.IO terhubung');
-    tambahPesanStatus('✅ Chatbot terhubung');
-  });
-  
-  soket.on('connect_error', (err) => {
-    console.warn('⚠️ Gagal konek Socket.IO:', err?.message || err);
-    tambahPesanStatus('⚠️ Gagal konek ke chatbot. Coba lagi atau muat ulang.');
-  });
-
-  // Disconnect
-  soket.on('disconnect', () => {
-    console.log('⚠️ Socket.IO terputus');
-    tambahPesanStatus('⚠️ Koneksi chatbot terputus. Mencoba hubungkan kembali...');
-  });
-  
-  // Respons dari chatbot
-  soket.on('respons_chatbot', (data) => {
-    tanganiResponsChatbot(data);
-  });
+  soket = buatSoket(socketPaths[idxAwal]);
+  ikatEvent(soket, socketPaths[idxAwal]);
 }
 
 // ==================== HANDLE RESPONS ====================
