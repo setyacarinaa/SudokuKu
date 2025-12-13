@@ -13,34 +13,24 @@
     <nav class="navbar">
       <div class="logo">🎮 SudokuKu</div>
       <ul class="nav-menu">
-        <li><a href="/"><img src="/favicon.svg" alt="Beranda" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 5px;"> Beranda</a></li>
-        <li><a href="/sudoku" style="color: #667eea; font-weight: bold;"><img src="/favicon.svg" alt="Main" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 5px;"> Main</a></li>
-        <li><a href="/leaderboard"><img src="/favicon.svg" alt="Leaderboard" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 5px;"> Leaderboard</a></li>
-        <li><a href="/api/logout" onclick="return confirm('Yakin ingin logout?')"><img src="/favicon.svg" alt="Logout" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 5px;"> Logout (<%= namaLengkap %>)</a></li>
+        <li><a href="/">Beranda</a></li>
+        <li><a href="/sudoku" style="color: #667eea; font-weight: bold;">Main</a></li>
+        <li><a href="/leaderboard">Leaderboard</a></li>
+        <li><a href="/api/logout" onclick="return confirm('Yakin ingin logout?')">Logout (<%= namaLengkap %>)</a></li>
       </ul>
     </nav>
   </header>
 
   <!-- Main Content -->
   <main class="container">
-    <!-- Page Title Bar dengan Tab Style -->
-    <div class="page-header">
-      🎯 Permainan Sudoku
-    </div>
-
     <!-- Pesan Container -->
     <div id="pesan-container"></div>
 
     <!-- Game Card -->
-    <div class="card text-center" style="margin-top: 2rem;">
-      <div class="card-header">
-        <div style="font-size: 3rem; margin-bottom: 1rem;">🎯</div>
-        <h1 class="card-title" style="font-size: 2.5rem; margin-bottom: 0.5rem;">
-          Permainan Sudoku
-        </h1>
-        <p class="card-subtitle" style="font-size: 1.1rem;">
-          Selesaikan puzzle dan raih skor tertinggi!
-        </p>
+    <div class="card">
+      <div class="card-header text-center">
+        <h1 class="card-title">🎯 Permainan Sudoku</h1>
+        <p class="card-subtitle">Selesaikan puzzle dan raih skor tertinggi!</p>
       </div>
 
       <!-- Tingkat Kesulitan -->

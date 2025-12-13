@@ -12,13 +12,13 @@
     <nav class="navbar">
       <div class="logo">🎮 SudokuKu</div>
       <ul class="nav-menu">
-        <li><a href="/"><img src="/favicon.svg" alt="Beranda" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 5px;"> Beranda</a></li>
-        <li><a href="/sudoku"><img src="/favicon.svg" alt="Main" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 5px;"> Main</a></li>
-        <li><a href="/leaderboard" style="color: #667eea; font-weight: bold;"><img src="/favicon.svg" alt="Leaderboard" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 5px;"> Leaderboard</a></li>
+        <li><a href="/">Beranda</a></li>
+        <li><a href="/sudoku">Main</a></li>
+        <li><a href="/leaderboard" style="color: #667eea; font-weight: bold;">Leaderboard</a></li>
         <% if (sudahLogin) { %>
-          <li><a href="/api/logout" onclick="return confirm('Yakin ingin logout?')"><img src="/favicon.svg" alt="Logout" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 5px;"> Logout (<%= namaLengkap %>)</a></li>
+          <li><a href="/api/logout" onclick="return confirm('Yakin ingin logout?')">Logout (<%= namaLengkap %>)</a></li>
         <% } else { %>
-          <li><a href="/login"><img src="/favicon.svg" alt="Login" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 5px;"> Login</a></li>
+          <li><a href="/login">Login</a></li>
         <% } %>
       </ul>
     </nav>
@@ -26,20 +26,10 @@
 
   <!-- Main Content -->
   <main class="container">
-    <!-- Page Title Bar dengan Tab Style -->
-    <div class="page-header">
-      🏆 Leaderboard
-    </div>
-
-    <div class="card text-center" style="margin-top: 2rem;">
-      <div class="card-header">
-        <div style="font-size: 3rem; margin-bottom: 1rem;">🏆</div>
-        <h1 class="card-title" style="font-size: 2.5rem; margin-bottom: 0.5rem;">
-          Leaderboard Global
-        </h1>
-        <p class="card-subtitle" style="font-size: 1.1rem;">
-          Pemain terbaik berdasarkan skor tertinggi
-        </p>
+    <div class="card">
+      <div class="card-header text-center">
+        <h1 class="card-title">🏆 Leaderboard Global</h1>
+        <p class="card-subtitle">Pemain terbaik berdasarkan skor tertinggi</p>
       </div>
 
       <!-- Filter Tingkat -->
@@ -86,9 +76,10 @@
           <a href="/login" class="btn btn-primary" style="margin-top: 1rem;">🔐 Login untuk Main</a>
         <% } %>
       </div>
+    </div>
 
-      <!-- Info Card -->
-      <div class="card" style="margin-top: 2rem;">
+    <!-- Info Card -->
+    <div class="card">
       <h3 style="margin-bottom: 1rem;">ℹ️ Tentang Sistem Skor</h3>
       <ul style="line-height: 2; color: #6b7280;">
         <li><strong>Mudah:</strong> Base skor 100 poin + bonus kecepatan</li>

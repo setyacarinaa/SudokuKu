@@ -32,12 +32,14 @@
       <div id="alert-container"></div>
 
       <!-- Tab Navigation -->
-      <div class="tab-container">
-        <button id="tab-login" class="tab-button active" onclick="switchTab('login')">
-          🔐 Login
+      <div style="display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 2px solid #e5e7eb;">
+        <button id="tab-login" class="btn-tab active" onclick="switchTab('login')" 
+                style="flex: 1; padding: 1rem; border: none; background: none; cursor: pointer; font-weight: bold; border-bottom: 3px solid #667eea;">
+          Login
         </button>
-        <button id="tab-register" class="tab-button" onclick="switchTab('register')">
-          📝 Daftar
+        <button id="tab-register" class="btn-tab" onclick="switchTab('register')" 
+                style="flex: 1; padding: 1rem; border: none; background: none; cursor: pointer; font-weight: bold; border-bottom: 3px solid transparent;">
+          Register
         </button>
       </div>
 
@@ -112,11 +114,15 @@
         registerForm.style.display = 'none';
         loginTab.classList.add('active');
         registerTab.classList.remove('active');
+        loginTab.style.borderBottom = '3px solid #667eea';
+        registerTab.style.borderBottom = '3px solid transparent';
       } else {
         loginForm.style.display = 'none';
         registerForm.style.display = 'block';
         loginTab.classList.remove('active');
         registerTab.classList.add('active');
+        loginTab.style.borderBottom = '3px solid transparent';
+        registerTab.style.borderBottom = '3px solid #667eea';
       }
 
       // Clear alerts
