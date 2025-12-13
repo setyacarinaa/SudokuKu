@@ -523,10 +523,6 @@ body {
   width: 100%;
   box-sizing: border-box;
   border-radius: 0 0 14px 14px;
-  position: sticky;
-  bottom: 0;
-  left: 0;
-  right: 0;
 }
 
 .chatbot-input form {
