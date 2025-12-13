@@ -11,8 +11,14 @@ rute.post('/', (req, res) => {
   const dariSession = req.session && req.session.tekaTekiAktif ? req.session.tekaTekiAktif : null;
   const dataUntukChatbot = dariBody || dariSession;
 
-  const respons = prosesPesanChatbot(pesan || '', dataUntukChatbot);
-  return res.json(respons);
+  const hasil = prosesPesanChatbot(pesan || '', dataUntukChatbot);
+  if (hasil && typeof hasil.then === 'function') {
+    hasil.then(r => res.json(r)).catch(err => {
+      res.json({ tipe: 'error', pesan: `❌ Error AI: ${err.message}` });
+    });
+  } else {
+    return res.json(hasil);
+  }
 });
 
 module.exports = rute;

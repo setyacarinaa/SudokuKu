@@ -213,16 +213,103 @@ Selamat bermain! 🎮`
     };
   }
 
+  // Command: Strategi Sudoku
+  if (pesanHurufKecil.includes('strategi') || pesanHurufKecil.includes('teknik') || pesanHurufKecil.includes('cara menyelesaikan')) {
+    return {
+      tipe: 'strategi',
+      pesan: `🧠 **Strategi Bermain Sudoku:**
+
+**1. Single Candidate (Kandidat Tunggal)**
+   Cari sel yang hanya memiliki satu angka yang mungkin diisi.
+   Angka tersebut pasti benar untuk sel itu.
+
+**2. Hidden Single (Single Tersembunyi)**
+   Cari angka yang hanya bisa masuk di satu sel dalam baris, kolom, atau blok.
+   Angka tersebut harus diisi di sel itu.
+
+**3. Scanning Rows & Columns**
+   Periksa setiap baris dan kolom untuk menemukan di mana angka tertentu bisa diletakkan.
+   Banyak Sudoku bisa diselesaikan dengan teknik ini saja.
+
+**4. Block/Jigsaw Checking**
+   Periksa setiap blok 3×3 untuk menemukan angka yang hilang.
+   Kombinasikan dengan informasi dari baris dan kolom.
+
+**5. Proses Eliminasi**
+   Untuk setiap sel kosong, tuliskan angka-angka yang mungkin (kandidat).
+   Saat Anda menemukan angka baru, hapus dari kandidat sel lain di baris/kolom/blok yang sama.
+
+**Tips:** Mulai dari sel dengan fewest candidates untuk progress lebih cepat!`
+    };
+  }
+
+  // Command: Validasi Langkah (apakah langkah ini benar)
+  if (pesanHurufKecil.includes('validasi') && !pesanHurufKecil.includes('cek jawaban') || pesanHurufKecil.includes('apakah langkah') || pesanHurufKecil.includes('benar')) {
+    if (!dataTekaTeki || !dataTekaTeki.papan || !dataTekaTeki.solusi) {
+      return {
+        tipe: 'error',
+        pesan: '❌ Tidak ada puzzle aktif untuk divalidasi. Mulai game baru terlebih dahulu!'
+      };
+    }
+
+    // Hitung statistik jawaban
+    let statistik = {
+      benar: 0,
+      salah: 0,
+      kosong: 0
+    };
+
+    let kesalahanDetail = [];
+    for (let baris = 0; baris < 9; baris++) {
+      for (let kolom = 0; kolom < 9; kolom++) {
+        const nilaiPemain = dataTekaTeki.papan[baris][kolom];
+        const nilaiBenar = dataTekaTeki.solusi[baris][kolom];
+
+        if (nilaiPemain === 0 || nilaiPemain === null) {
+          statistik.kosong++;
+        } else if (nilaiPemain === nilaiBenar) {
+          statistik.benar++;
+        } else {
+          statistik.salah++;
+          if (kesalahanDetail.length < 5) {
+            kesalahanDetail.push(`**Baris ${baris+1}, Kolom ${kolom+1}:** Anda isi **${nilaiPemain}**, seharusnya **${nilaiBenar}**`);
+          }
+        }
+      }
+    }
+
+    let pesanValidasi = `📊 **Status Jawaban Anda:**
+✅ Benar: ${statistik.benar}/81
+❌ Salah: ${statistik.salah}
+⬜ Kosong: ${statistik.kosong}
+
+`;
+
+    if (statistik.salah > 0) {
+      pesanValidasi += `**Kesalahan yang ditemukan:**\n`;
+      kesalahanDetail.forEach(detail => {
+        pesanValidasi += `• ${detail}\n`;
+      });
+      if (statistik.salah > 5) {
+        pesanValidasi += `• ... dan ${statistik.salah - 5} kesalahan lainnya\n`;
+      }
+      pesanValidasi += `\n💡 Gunakan "hint" untuk bantuan sel spesifik!`;
+    } else if (statistik.kosong === 0) {
+      pesanValidasi += `🎉 **Selamat!** Semua jawaban Anda benar! Puzzle selesai!`;
+    } else {
+      pesanValidasi += `✨ Semua jawaban yang Anda isi benar! Lanjutkan untuk menyelesaikan ${statistik.kosong} sel kosong.`;
+    }
+
+    return {
+      tipe: 'validasi',
+      pesan: pesanValidasi
+    };
+  }
+
   // Default response jika perintah tidak dikenali
   return {
     tipe: 'unknown',
-    pesan: `🤔 Maaf, saya tidak mengerti perintah "${pesan}". 
-
-Coba ketik:
-• "hint" - untuk bantuan
-• "cek jawaban" - untuk validasi
-• "solusi" - untuk lihat jawaban
-• "cara main" - untuk instruksi`
+    pesan: `🤔 Maaf, saya tidak mengerti perintah "${pesan}". \n\nCoba ketik:\n• "hint" - untuk bantuan\n• "cek jawaban" - untuk validasi\n• "solusi" - untuk lihat jawaban\n• "cara main" - untuk instruksi`
   };
 };
 
