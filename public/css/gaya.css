@@ -743,8 +743,21 @@ body {
   }
 
   .chatbot-container {
-    width: 90%;
-    right: 5%;
+    width: 95%;
+    height: 90vh;
+    max-height: 600px;
+    bottom: 10px;
+    right: 2.5%;
+    left: 2.5%;
+  }
+
+  .chatbot-messages {
+    min-height: 150px;
+  }
+
+  .quick-list .btn {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.75rem;
   }
 
   .nav-menu {
