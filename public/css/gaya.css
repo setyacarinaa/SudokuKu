@@ -519,11 +519,14 @@ body {
   border-top: 1px solid #e0e3e8;
   flex-shrink: 0;
   background: white;
-  height: 0;
-  min-height: fit-content;
+  height: auto;
   width: 100%;
   box-sizing: border-box;
   border-radius: 0 0 14px 14px;
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
 }
 
 .chatbot-input form {
