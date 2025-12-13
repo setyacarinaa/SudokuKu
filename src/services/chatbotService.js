@@ -180,14 +180,14 @@ const prosesPesanChatbot = (pesan, dataTekaTeki) => {
   if (pesanHurufKecil.includes('cara') || pesanHurufKecil.includes('aturan') || pesanHurufKecil.includes('main')) {
     return {
       tipe: 'instruksi',
-      pesan: `📖 **Cara Bermain Sudoku:**
+      pesan: `📖 Cara Bermain Sudoku:
 
 1️⃣ Isi setiap sel kosong dengan angka 1-9
 2️⃣ Setiap baris harus berisi angka 1-9 tanpa duplikat
 3️⃣ Setiap kolom harus berisi angka 1-9 tanpa duplikat
 4️⃣ Setiap kotak 3x3 harus berisi angka 1-9 tanpa duplikat
 
-**Perintah Chatbot:**
+Perintah Chatbot:
 • "hint" - Dapatkan petunjuk satu sel
 • "cek jawaban" - Validasi jawaban saat ini
 • "solusi" - Lihat solusi lengkap
@@ -217,24 +217,24 @@ Selamat bermain! 🎮`
   if (pesanHurufKecil.includes('strategi') || pesanHurufKecil.includes('teknik') || pesanHurufKecil.includes('sulit')) {
     return {
       tipe: 'strategi',
-      pesan: `🧠 **Strategi Bermain Sudoku:**
+      pesan: `🧠 Strategi Bermain Sudoku:
 
-**1. Single Candidate (Kandidat Tunggal)**
+1. Single Candidate (Kandidat Tunggal)
    Cari sel yang hanya memiliki satu angka yang mungkin diisi.
 
-**2. Hidden Single (Single Tersembunyi)**
+2. Hidden Single (Single Tersembunyi)
    Cari angka yang hanya bisa masuk di satu sel dalam baris/kolom/blok.
 
-**3. Scanning Rows & Columns**
+3. Scanning Rows & Columns
    Periksa setiap baris dan kolom untuk menemukan posisi angka.
 
-**4. Block/Jigsaw Checking**
+4. Block/Jigsaw Checking
    Periksa setiap blok 3×3 untuk angka yang hilang.
 
-**5. Proses Eliminasi**
+5. Proses Eliminasi
    Tuliskan angka mungkin untuk setiap sel, lalu eliminasi saat menemukan angka baru.
 
-**Tips:** Mulai dari sel dengan fewest candidates untuk progress lebih cepat!`
+Tips: Mulai dari sel dengan fewest candidates untuk progress lebih cepat!`
     };
   }
 
@@ -268,7 +268,7 @@ Selamat bermain! 🎮`
       }
     }
 
-    let pesan = `📊 **Status Jawaban Anda:**
+    let pesan = `📊 Status Jawaban Anda:
 ✅ Benar: ${benar}/81
 ❌ Salah: ${salah}
 ⬜ Kosong: ${kosong}
@@ -276,12 +276,12 @@ Selamat bermain! 🎮`
 `;
 
     if (salah > 0) {
-      pesan += `**Kesalahan:**\n`;
+      pesan += `Kesalahan:\n`;
       kesalahanDetail.forEach(d => pesan += `• ${d}\n`);
       if (salah > 3) pesan += `• ... dan ${salah-3} kesalahan lainnya\n`;
       pesan += `\n💡 Gunakan "hint" untuk bantuan!`;
     } else if (kosong === 0) {
-      pesan += `🎉 **Selamat!** Semua jawaban benar! Puzzle selesai!`;
+      pesan += `🎉 Selamat! Semua jawaban benar! Puzzle selesai!`;
     } else {
       pesan += `✨ Semua jawaban benar! Lanjutkan ${kosong} sel kosong.`;
     }
