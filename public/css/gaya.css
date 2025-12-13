@@ -964,6 +964,21 @@ body {
   animation: pulse 1.5s ease-in-out infinite;
 }
 
+.overlay-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.overlay-btn {
+  display: block;
+  text-align: center;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  font-weight: 700;
+}
+
 /* ==================== RESPONSIVE OVERLAY ==================== */
 @media (max-width: 600px) {
   .overlay-content {
