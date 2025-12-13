@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hasil Permainan — SudokuKu</title>
+  <meta name="theme-color" content="#667eea">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="alternate icon" type="image/png" href="/favicon.png">
+  <link rel="apple-touch-icon" href="/favicon.png">
+  <link rel="stylesheet" href="/css/gaya.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <nav class="navbar">
+      <div class="logo">🎮 SudokuKu</div>
+      <ul class="nav-menu">
+        <li><a href="/">Beranda</a></li>
+        <li><a href="/sudoku">Main</a></li>
+        <li><a href="/leaderboard">Leaderboard</a></li>
+        <li><a href="/api/logout" onclick="return confirm('Yakin ingin logout?')">Logout (<%= namaLengkap %>)</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container">
+    <!-- Hasil Card -->
+    <div class="card hasil-card">
+      <div class="hasil-header">
+        <div class="hasil-emoji">🎉</div>
+        <h1 class="hasil-title">Selamat!</h1>
+        <p class="hasil-subtitle">Anda telah menyelesaikan Sudoku dengan sempurna!</p>
+      </div>
+
+      <!-- Stats Container -->
+      <div class="hasil-stats">
+        <div class="stat-item">
+          <div class="stat-label">⏱️ Waktu Bermain</div>
+          <div class="stat-value"><%= waktuFormatted %></div>
+        </div>
+
+        <div class="stat-item">
+          <div class="stat-label">⭐ Tingkat Kesulitan</div>
+          <div class="stat-value hasil-level">
+            <% if (tingkat === 'mudah') { %>
+              🟢 Mudah
+            <% } else if (tingkat === 'sedang') { %>
+              🟡 Sedang
+            <% } else { %>
+              🔴 Sulit
+            <% } %>
+          </div>
+        </div>
+
+        <div class="stat-item">
+          <div class="stat-label">🏆 Skor</div>
+          <div class="stat-value skor-besar"><%= skor %></div>
+        </div>
+      </div>
+
+      <!-- Motivasi -->
+      <div class="motivasi-box">
+        <p><%= motivasi %></p>
+      </div>
+
+      <!-- Tombol Aksi -->
+      <div class="hasil-actions">
+        <a href="/sudoku" class="btn btn-primary btn-large">
+          🎮 Main Lagi
+        </a>
+        <a href="/leaderboard" class="btn btn-secondary btn-large">
+          🏅 Lihat Leaderboard
+        </a>
+        <a href="/" class="btn btn-tertiary btn-large">
+          🏠 Kembali ke Beranda
+        </a>
+      </div>
+
+      <!-- Tips untuk Lanjut -->
+      <div class="tips-section">
+        <h3>💡 Tips Lanjutan</h3>
+        <ul>
+          <li>Coba tingkat kesulitan yang lebih tinggi untuk tantangan baru</li>
+          <li>Latih kecepatan Anda dengan mencatat waktu pada setiap puzzle</li>
+          <li>Gunakan strategi sudoku untuk menyelesaikan puzzle lebih cepat</li>
+          <li>Akses halaman Strategi untuk mempelajari teknik-teknik advanced</li>
+        </ul>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <p>&copy; 2024 SudokuKu. Dibuat dengan ❤️ untuk para penggemar Sudoku.</p>
+      <div class="footer-links">
+        <a href="/">Beranda</a> | 
+        <a href="/sudoku">Main</a> | 
+        <a href="/leaderboard">Leaderboard</a> | 
+        <a href="/about">Tentang</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Style tambahan untuk hasil page -->
+  <style>
+    .hasil-card {
+      max-width: 500px;
+      margin: 2rem auto;
+      text-align: center;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+      border: 2px solid var(--primary-color);
+    }
+
+    .hasil-header {
+      padding: 2rem 1rem 1rem;
+    }
+
+    .hasil-emoji {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      animation: bounce 1s ease infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .hasil-title {
+      font-size: 2.5rem;
+      color: var(--success-color);
+      margin-bottom: 0.5rem;
+    }
+
+    .hasil-subtitle {
+      color: var(--text-light);
+      font-size: 1.1rem;
+    }
+
+    .hasil-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1rem;
+      padding: 2rem 1rem;
+      background: var(--bg-white);
+      border-radius: 8px;
+      margin: 2rem 0;
+    }
+
+    .stat-item {
+      padding: 1rem;
+      background: var(--bg-light);
+      border-radius: 8px;
+      border-left: 4px solid var(--primary-color);
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: var(--text-light);
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    .stat-value {
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: var(--text-dark);
+    }
+
+    .hasil-level {
+      font-size: 1.2rem;
+    }
+
+    .skor-besar {
+      font-size: 2rem;
+      color: var(--primary-color);
+    }
+
+    .motivasi-box {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      border-left: 4px solid #f59e0b;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin: 1.5rem 0;
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #78350f;
+    }
+
+    .hasil-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+
+    .btn-large {
+      padding: 1rem 2rem;
+      font-size: 1.1rem;
+    }
+
+    .btn-tertiary {
+      background: var(--text-light);
+      color: white;
+    }
+
+    .btn-tertiary:hover {
+      background: var(--text-dark);
+    }
+
+    @media (max-width: 600px) {
+      .hasil-stats {
+        grid-template-columns: 1fr;
+      }
+
+      .hasil-title {
+        font-size: 2rem;
+      }
+
+      .hasil-emoji {
+        font-size: 3rem;
+      }
+
+      .hasil-actions {
+        flex-direction: column;
+      }
+    }
+  </style>
+</body>
+</html>

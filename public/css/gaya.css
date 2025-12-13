@@ -756,6 +756,65 @@ body {
   to { transform: rotate(360deg); }
 }
 
+/* ==================== ANIMASI VALIDASI ====================  */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  75% { transform: translateX(8px); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+@keyframes fadeInRed {
+  from {
+    background: #fecaca;
+    opacity: 0.7;
+  }
+  to {
+    background: #fee2e2;
+    opacity: 1;
+  }
+}
+
+/* ==================== ERROR COUNTER STYLING ==================== */
+.error-counter-section {
+  text-align: center;
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+
+.error-counter-section label {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-right: 0.5rem;
+}
+
+.error-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--error-color), #dc2626);
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 1rem;
+  min-width: 50px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+#error-count {
+  display: inline-block;
+  min-width: 30px;
+  text-align: center;
+}
+
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 768px) {
   .papan-sudoku {

@@ -11,6 +11,9 @@ let waktuMulai = null;
 let intervalTimer = null;
 let skorPemain = 0;
 let selTerpilih = null; // Menyimpan sel yang sedang dipilih untuk keypad input
+let errorCount = 0; // Tracking kesalahan (max 3)
+let solusiSekarang = null; // Menyimpan solusi untuk validasi
+const MAX_ERRORS = 3; // Batas maksimal kesalahan
 
 // ==================== INISIALISASI ====================
 
@@ -39,11 +42,13 @@ function pasangPendengarEvent() {
   // Tombol game
   const btnPapanBaru = document.getElementById('btn-papan-baru');
   const btnCekJawaban = document.getElementById('btn-cek-jawaban');
+  const btnSubmitJawaban = document.getElementById('btn-submit-jawaban');
   const btnSelesaikan = document.getElementById('btn-selesaikan');
   const btnReset = document.getElementById('btn-reset');
   
   if (btnPapanBaru) btnPapanBaru.addEventListener('click', () => muatPapanBaru(tingkatTerpilih));
   if (btnCekJawaban) btnCekJawaban.addEventListener('click', cekJawaban);
+  if (btnSubmitJawaban) btnSubmitJawaban.addEventListener('click', submitJawabanFinal);
   if (btnSelesaikan) btnSelesaikan.addEventListener('click', selesaikanPuzzle);
   if (btnReset) btnReset.addEventListener('click', resetPapan);
 }
@@ -83,9 +88,14 @@ async function muatPapanBaru(tingkat) {
       throw new Error(data.pesan || 'Gagal memuat papan');
     }
     
-    // Simpan papan
+    // Simpan papan dan solusi
     papanSudoku = data.data.papan;
     papanAsli = JSON.parse(JSON.stringify(data.data.papan)); // Deep copy
+    solusiSekarang = data.data.solusi; // Capture solusi dari API
+    
+    // Reset error counter
+    errorCount = 0;
+    updateErrorCounter();
     
     tampilkanPapan();
     
@@ -273,18 +283,184 @@ function tanganiKeyboard(event, baris, kolom) {
 
 // ==================== CEK JAWABAN ====================
 
-async function cekJawaban() {
-  try {
-    // Kirim pesan ke chatbot untuk validasi
-    if (window.kirimPesanKeChatbot) {
-      window.kirimPesanKeChatbot('cek jawaban', papanSudoku);
-    } else {
-      tampilkanPesan('Chatbot tidak tersedia untuk validasi', 'error');
-    }
-  } catch (error) {
-    console.error('❌ Error cek jawaban:', error);
-    tampilkanPesan('Gagal memvalidasi jawaban', 'error');
+function cekJawaban() {
+  if (!solusiSekarang) {
+    tampilkanPesan('Solusi tidak tersedia', 'error');
+    return;
   }
+
+  // Cari sel yang salah
+  const selSalah = [];
+  for (let baris = 0; baris < 9; baris++) {
+    for (let kolom = 0; kolom < 9; kolom++) {
+      const nilaiPemain = papanSudoku[baris][kolom];
+      const nilaiBenar = solusiSekarang[baris][kolom];
+      
+      // Cek jika ada nilai dan salah
+      if (nilaiPemain !== 0 && nilaiPemain !== nilaiBenar) {
+        selSalah.push({ baris, kolom });
+      }
+    }
+  }
+
+  // Highlight sel yang salah
+  highlightSelSalah(selSalah);
+
+  if (selSalah.length > 0) {
+    // Ada kesalahan - increment counter
+    errorCount++;
+    updateErrorCounter();
+    tampilkanPesan(`⚠️ Ada ${selSalah.length} jawaban yang salah! (${errorCount}/${MAX_ERRORS})`, 'warning');
+    
+    // Cek apakah sudah exceed limit
+    if (errorCount >= MAX_ERRORS) {
+      gameOver(false); // false = kalah
+    }
+  } else {
+    tampilkanPesan('✓ Semua jawaban yang Anda isi benar! Lanjutkan atau submit untuk menyelesaikan.', 'success');
+  }
+}
+
+// ==================== HIGHLIGHT SEL SALAH ====================
+
+function highlightSelSalah(selSalah) {
+  // Hapus highlight sebelumnya
+  document.querySelectorAll('.sel-sudoku.salah').forEach(sel => {
+    sel.classList.remove('salah');
+  });
+
+  // Highlight sel salah dengan animasi
+  selSalah.forEach(({ baris, kolom }) => {
+    const sel = document.querySelector(`[data-baris="${baris}"][data-kolom="${kolom}"]`);
+    if (sel) {
+      sel.classList.add('salah');
+      // Animasi shake
+      sel.style.animation = 'none';
+      setTimeout(() => {
+        sel.style.animation = 'shake 0.5s';
+      }, 10);
+    }
+  });
+}
+
+// ==================== SUBMIT JAWABAN FINAL ====================
+
+function submitJawabanFinal() {
+  if (!solusiSekarang) {
+    tampilkanPesan('Solusi tidak tersedia', 'error');
+    return;
+  }
+
+  // Cek apakah semua sel terisi
+  if (!cekPuzzleSelesai()) {
+    tampilkanPesan('⚠️ Masih ada sel kosong! Lengkapi semua sel terlebih dahulu.', 'warning');
+    return;
+  }
+
+  // Validasi semua jawaban
+  let adaYangSalah = false;
+  const selSalah = [];
+
+  for (let baris = 0; baris < 9; baris++) {
+    for (let kolom = 0; kolom < 9; kolom++) {
+      const nilaiPemain = papanSudoku[baris][kolom];
+      const nilaiBenar = solusiSekarang[baris][kolom];
+      
+      if (nilaiPemain !== nilaiBenar) {
+        adaYangSalah = true;
+        selSalah.push({ baris, kolom });
+      }
+    }
+  }
+
+  if (adaYangSalah) {
+    // Ada kesalahan
+    errorCount++;
+    updateErrorCounter();
+    highlightSelSalah(selSalah);
+    tampilkanPesan(`❌ Ada ${selSalah.length} jawaban yang salah! (${errorCount}/${MAX_ERRORS})`, 'error');
+    
+    if (errorCount >= MAX_ERRORS) {
+      gameOver(false); // Kalah
+    }
+  } else {
+    // Semua benar! Selesai
+    gameOver(true); // Menang
+  }
+}
+
+// ==================== UPDATE ERROR COUNTER ====================
+
+function updateErrorCounter() {
+  const errorBadge = document.getElementById('error-count');
+  if (errorBadge) {
+    errorBadge.textContent = errorCount;
+    // Animasi
+    errorBadge.style.animation = 'pulse 0.5s';
+    setTimeout(() => {
+      errorBadge.style.animation = 'none';
+    }, 500);
+  }
+}
+
+// ==================== GAME OVER ====================
+
+async function gameOver(menang) {
+  hentikanTimer();
+  const waktuBermain = hitungWaktu();
+
+  if (menang) {
+    // Pemain menang!
+    tampilkanPesan('🎉 Selamat! Puzzle diselesaikan dengan sempurna!', 'success');
+    
+    // Hitung skor
+    const durasiDetik = Math.floor((new Date() - waktuMulai) / 1000);
+    const skorFinal = hitungSkor(durasiDetik, tingkatTerpilih);
+    
+    // Redirect ke halaman hasil
+    setTimeout(() => {
+      window.location.href = `/hasil?waktu=${durasiDetik}&tingkat=${tingkatTerpilih}&menang=true&skor=${skorFinal}`;
+    }, 2000);
+  } else {
+    // Pemain kalah - kesalahan melebihi batas
+    tampilkanPesan('❌ Game Over! Batas kesalahan terlampaui. Game direset.', 'error');
+    
+    // Reset game
+    setTimeout(() => {
+      errorCount = 0;
+      updateErrorCounter();
+      muatPapanBaru(tingkatTerpilih);
+      tampilkanPesan('🔄 Game telah direset. Coba lagi!', 'info');
+    }, 2000);
+  }
+}
+
+// ==================== HITUNG SKOR ====================
+
+function hitungSkor(durasiDetik, tingkat) {
+  // Base skor berdasarkan tingkat
+  let baseSkor = 0;
+  if (tingkat === 'mudah') baseSkor = 100;
+  else if (tingkat === 'sedang') baseSkor = 300;
+  else baseSkor = 500;
+
+  // Bonus waktu (semakin cepat, semakin banyak bonus)
+  let bonusWaktu = 0;
+  if (tingkat === 'mudah') {
+    if (durasiDetik < 300) bonusWaktu = 200; // < 5 menit
+    else if (durasiDetik < 600) bonusWaktu = 100; // < 10 menit
+    else bonusWaktu = 50; // > 10 menit
+  } else if (tingkat === 'sedang') {
+    if (durasiDetik < 600) bonusWaktu = 300; // < 10 menit
+    else if (durasiDetik < 900) bonusWaktu = 200; // < 15 menit
+    else bonusWaktu = 100; // > 15 menit
+  } else {
+    if (durasiDetik < 900) bonusWaktu = 500; // < 15 menit
+    else if (durasiDetik < 1800) bonusWaktu = 300; // < 30 menit
+    else bonusWaktu = 150; // > 30 menit
+  }
+
+  return baseSkor + bonusWaktu;
 }
 
 // ==================== CEK PUZZLE SELESAI ====================

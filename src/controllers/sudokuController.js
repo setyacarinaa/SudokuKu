@@ -42,10 +42,9 @@ const dapatkanPapanBaru = async (req, res) => {
       sukses: true,
       data: {
         papan: tekaTeki.papan,
+        solusi: tekaTeki.solusi, // Untuk validasi di client
         tingkat: tingkat,
         selKosong: tekaTeki.selKosong
-        // Catatan: solusi tidak dikirim ke client untuk keamanan
-        // Solusi disimpan di session untuk validasi
       },
       pesan: `Puzzle ${tingkat} berhasil dibuat!`
     });

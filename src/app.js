@@ -92,6 +92,51 @@ app.get('/leaderboard', (req, res) => {
   });
 });
 
+// Halaman hasil permainan
+app.get('/hasil', (req, res) => {
+  if (!req.session.userId) {
+    return res.redirect('/login');
+  }
+
+  // Extract query params
+  const waktuDetik = parseInt(req.query.waktu) || 0;
+  const tingkat = req.query.tingkat || 'sedang';
+  const menang = req.query.menang === 'true';
+  const skor = parseInt(req.query.skor) || 0;
+
+  // Format waktu MM:SS
+  const menit = Math.floor(waktuDetik / 60);
+  const detik = waktuDetik % 60;
+  const waktuFormatted = `${menit.toString().padStart(2, '0')}:${detik.toString().padStart(2, '0')}`;
+
+  // Motivasi berdasarkan waktu dan tingkat
+  let motivasi = '';
+  if (tingkat === 'mudah') {
+    if (waktuDetik < 300) motivasi = '⚡ Luar biasa cepat! Waktunya menakjubkan!';
+    else if (waktuDetik < 600) motivasi = '👍 Kinerja bagus! Terus tingkatkan!';
+    else motivasi = '💪 Selamat menyelesaikan! Latih terus untuk lebih cepat!';
+  } else if (tingkat === 'sedang') {
+    if (waktuDetik < 600) motivasi = '🔥 Sangat cepat untuk tingkat sedang!';
+    else if (waktuDetik < 900) motivasi = '✨ Waktu yang solid! Tingkatkan terus!';
+    else motivasi = '🎯 Berhasil menyelesaikan! Tingkatkan kecepatan Anda!';
+  } else {
+    if (waktuDetik < 900) motivasi = '🏆 Master Sudoku! Waktu luar biasa!';
+    else if (waktuDetik < 1800) motivasi = '⭐ Hebat! Tingkat sulit tidak mudah!';
+    else motivasi = '💎 Mengesankan! Anda berhasil menyelesaikan puzzle sulit!';
+  }
+
+  res.render('hasil', {
+    title: 'SudokuKu - Hasil Permainan',
+    sudahLogin: true,
+    namaLengkap: req.session.namaLengkap,
+    waktuFormatted,
+    tingkat,
+    menang,
+    skor,
+    motivasi
+  });
+});
+
 // Halaman login
 app.get('/login', (req, res) => {
   if (req.session.userId) {
