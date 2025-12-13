@@ -237,6 +237,51 @@ body {
   margin: 0.75rem 0;
 }
 
+/* ==================== KEYPAD ANGKA ==================== */
+.keypad-angka {
+  max-width: 300px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: var(--bg-light);
+  border-radius: 12px;
+  border: 2px solid var(--border-color);
+}
+
+.btn-keypad {
+  background: var(--bg-white);
+  color: var(--text-dark);
+  border: 2px solid var(--primary-color);
+  padding: 1rem;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-height: 50px;
+}
+
+.btn-keypad:hover {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: var(--bg-white);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.btn-keypad:active {
+  transform: translateY(0);
+}
+
+.btn-keypad.btn-hapus {
+  background: #fee2e2;
+  border-color: var(--error-color);
+  color: var(--error-color);
+}
+
+.btn-keypad.btn-hapus:hover {
+  background: var(--error-color);
+  color: var(--bg-white);
+}
+
 /* ==================== CHATBOT ==================== */
 .chatbot-container {
   position: fixed;

@@ -10,6 +10,7 @@ let tingkatTerpilih = 'sedang';
 let waktuMulai = null;
 let intervalTimer = null;
 let skorPemain = 0;
+let selTerpilih = null; // Menyimpan sel yang sedang dipilih untuk keypad input
 
 // ==================== INISIALISASI ====================
 
@@ -133,11 +134,74 @@ function tampilkanPapan() {
         // Event listener untuk input
         input.addEventListener('input', (e) => tanganiInput(e, baris, kolom));
         input.addEventListener('keydown', (e) => tanganiKeyboard(e, baris, kolom));
+        input.addEventListener('focus', (e) => selTerpilih = input); // Track sel terpilih untuk keypad
       }
 
       kontainer.appendChild(input);
     }
   }
+}
+
+// ==================== INPUT VIA KEYPAD ====================
+
+/**
+ * Input angka melalui tombol keypad
+ * @param {Number} angka - Angka yang akan diinput (1-9)
+ */
+function inputAngkaViaKeypad(angka) {
+  if (!selTerpilih) {
+    tampilkanPesan('Pilih sel terlebih dahulu!', 'info');
+    return;
+  }
+
+  if (selTerpilih.readOnly) {
+    tampilkanPesan('Sel ini tidak bisa diubah!', 'error');
+    return;
+  }
+
+  const baris = parseInt(selTerpilih.dataset.baris);
+  const kolom = parseInt(selTerpilih.dataset.kolom);
+
+  // Update nilai
+  selTerpilih.value = angka;
+  papanSudoku[baris][kolom] = angka;
+  selTerpilih.classList.add('diisi');
+  selTerpilih.classList.remove('salah');
+
+  // Cek apakah puzzle selesai
+  if (cekPuzzleSelesai()) {
+    setTimeout(() => {
+      selesaiPermainan();
+    }, 500);
+  }
+
+  // Fokus ke sel berikutnya otomatis
+  const sebelahKanan = document.querySelector(`[data-baris="${baris}"][data-kolom="${kolom + 1}"]`);
+  if (sebelahKanan && !sebelahKanan.readOnly) {
+    sebelahKanan.focus();
+  }
+}
+
+/**
+ * Hapus angka dari sel yang sedang dipilih via keypad
+ */
+function hapusAngkaViaKeypad() {
+  if (!selTerpilih) {
+    tampilkanPesan('Pilih sel terlebih dahulu!', 'info');
+    return;
+  }
+
+  if (selTerpilih.readOnly) {
+    tampilkanPesan('Sel ini tidak bisa diubah!', 'error');
+    return;
+  }
+
+  const baris = parseInt(selTerpilih.dataset.baris);
+  const kolom = parseInt(selTerpilih.dataset.kolom);
+
+  selTerpilih.value = '';
+  papanSudoku[baris][kolom] = 0;
+  selTerpilih.classList.remove('diisi', 'salah');
 }
 
 // ==================== HANDLE INPUT ====================
