@@ -136,17 +136,19 @@ body {
 .page-header {
   background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
   color: white;
-  padding: 1.5rem 2rem;
-  border-radius: 10px;
-  margin-bottom: 2rem;
+  padding: 2rem;
+  border-radius: 12px;
+  margin-bottom: 2.5rem;
   box-shadow: var(--shadow-lg);
+  text-align: center;
 }
 
 .page-title {
-  font-size: 2rem;
+  font-size: 2.2rem;
   font-weight: 700;
   margin: 0;
   text-align: center;
+  letter-spacing: 0.5px;
 }
 
 /* ==================== CARDS ==================== */
