@@ -136,16 +136,25 @@
           ? '/api/leaderboard?limit=50' 
           : `/api/leaderboard?limit=50&tingkat=${tingkat}`;
 
+        console.log('🔄 Loading leaderboard dari:', url);
+        
         const response = await fetch(url);
         const data = await response.json();
 
-        if (data.sukses && data.data.length > 0) {
+        console.log('📊 Response data:', data);
+
+        if (data.sukses && data.data && data.data.length > 0) {
+          console.log('✅ Data ditemukan, menampilkan leaderboard');
           tampilkanLeaderboard(data.data);
+          document.getElementById('leaderboard-container').style.display = 'block';
+          document.getElementById('empty-state').style.display = 'none';
         } else {
+          console.log('❌ Data kosong, menampilkan empty state');
           tampilkanEmpty();
         }
       } catch (error) {
-        console.error('Error memuat leaderboard:', error);
+        console.error('❌ Error memuat leaderboard:', error);
+        document.getElementById('leaderboard-container').style.display = 'none';
         tampilkanEmpty();
       } finally {
         document.getElementById('loading').style.display = 'none';
@@ -194,11 +203,14 @@
         tbody.appendChild(tr);
       });
 
+      // Show container, hide empty state
       document.getElementById('leaderboard-container').style.display = 'block';
+      document.getElementById('empty-state').style.display = 'none';
     }
 
     // Fungsi untuk menampilkan empty state
     function tampilkanEmpty() {
+      document.getElementById('leaderboard-container').style.display = 'none';
       document.getElementById('empty-state').style.display = 'block';
     }
   </script>
