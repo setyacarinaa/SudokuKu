@@ -494,7 +494,6 @@ function tampilkanOverlaySelesai(durasiDetik, skorFinal) {
           <a href="/" class="btn btn-secondary btn-lg overlay-btn">🏠 Kembali ke Beranda</a>
           <a href="/leaderboard" class="btn btn-tertiary btn-lg overlay-btn">🏅 Lihat Leaderboard</a>
         </div>
-        <p class="overlay-loading">Atau tunggu, akan diarahkan ke halaman hasil...</p>
       </div>
     `;
     
@@ -506,17 +505,7 @@ function tampilkanOverlaySelesai(durasiDetik, skorFinal) {
   overlay.offsetHeight; // Trigger reflow
   overlay.classList.add('show');
   
-  // Redirect ke halaman hasil setelah 4 detik jika user tidak memilih
-  const redirectTimeout = setTimeout(() => {
-    window.location.href = `/hasil?waktu=${durasiDetik}&tingkat=${tingkatTerpilih}&menang=true&skor=${skorFinal}`;
-  }, 4000);
-
-  // Jika user klik salah satu tombol, batalkan auto-redirect
-  overlay.querySelectorAll('.overlay-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      clearTimeout(redirectTimeout);
-    });
-  });
+  // Auto-redirect dihapus; pemain memilih aksi sendiri
 }
 
 // ==================== FORMAT WAKTU ====================
