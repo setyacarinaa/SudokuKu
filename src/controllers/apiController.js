@@ -122,11 +122,13 @@ const dapatkanLeaderboard = async (req, res) => {
     const batas = parseInt(req.query.limit) || 10;
     const tingkat = req.query.tingkat;
 
-    // Build query
-    let kueri = {};
+    // Build query - hanya ambil skor yang selesai
+    let kueri = { apakahSelesai: true };
     if (tingkat && ['mudah', 'sedang', 'sulit'].includes(tingkat.toLowerCase())) {
       kueri.tingkatKesulitan = tingkat.toLowerCase();
     }
+
+    console.log(`🔍 Querying leaderboard dengan kueri:`, kueri);
 
     // Ambil skor terbaik
     const daftarSkor = await Skor.find(kueri)
@@ -134,6 +136,8 @@ const dapatkanLeaderboard = async (req, res) => {
       .limit(batas)
       .populate('idPengguna', 'namaLengkap email')
       .lean();
+
+    console.log(`📊 Ditemukan ${daftarSkor.length} skor dari database`);
 
     // Format response
     const papanPeringkat = daftarSkor.map((entri, indeks) => ({

@@ -414,6 +414,30 @@ async function gameOver(menang) {
     const durasiDetik = Math.floor((new Date() - waktuMulai) / 1000);
     const skorFinal = hitungSkor(durasiDetik, tingkatTerpilih);
     
+    // Rekam skor ke database (jika user login)
+    try {
+      const responseRekam = await fetch('/api/rekam-skor', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          waktuPenyelesaian: durasiDetik,
+          tingkatKesulitan: tingkatTerpilih
+        })
+      });
+      
+      const dataRekam = await responseRekam.json();
+      console.log('📊 Response rekam skor:', dataRekam);
+      
+      if (!dataRekam.sukses) {
+        console.warn('⚠️ Gagal rekam skor, tapi game tetap selesai');
+      }
+    } catch (errorRekam) {
+      console.error('❌ Error rekam skor:', errorRekam);
+      // Lanjutkan meskipun rekam skor gagal
+    }
+    
     // Tampilkan overlay success
     tampilkanOverlaySelesai(durasiDetik, skorFinal);
     
