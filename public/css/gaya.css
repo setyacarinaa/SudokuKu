@@ -293,7 +293,7 @@ body {
 
 /* ==================== KEYPAD ANGKA ==================== */
 .keypad-angka {
-  max-width: 300px;
+  max-width: 100%;
   margin: 2rem auto;
   padding: 1.5rem;
   background: var(--bg-light);
@@ -301,17 +301,26 @@ body {
   border: 2px solid var(--border-color);
 }
 
+.keypad-container {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  gap: 0.5rem;
+}
+
 .btn-keypad {
   background: var(--bg-white);
   color: var(--text-dark);
   border: 2px solid var(--primary-color);
-  padding: 1rem;
+  padding: 0.75rem 0.5rem;
   border-radius: 8px;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
-  min-height: 50px;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-keypad:hover {
@@ -334,6 +343,31 @@ body {
 .btn-keypad.btn-hapus:hover {
   background: var(--error-color);
   color: var(--bg-white);
+}
+
+/* ==================== RESPONSIVE KEYPAD ==================== */
+@media (max-width: 768px) {
+  .keypad-container {
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  .btn-keypad {
+    font-size: 1rem;
+    padding: 0.6rem 0.4rem;
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  .keypad-container {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .btn-keypad {
+    font-size: 0.9rem;
+    padding: 0.5rem 0.3rem;
+    min-height: 40px;
+  }
 }
 
 /* ==================== CHATBOT ==================== */

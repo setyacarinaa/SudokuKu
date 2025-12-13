@@ -48,8 +48,10 @@
 
       <!-- Keypad Angka -->
       <div class="keypad-angka">
-        <p style="text-align: center; margin-bottom: 1rem; font-weight: bold; color: #667eea;">🔢 Keypad Angka</p>
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;">
+        <button class="btn-keypad btn-hapus" onclick="hapusAngkaViaKeypad()" style="width: 100%; margin-bottom: 0.75rem;">
+          🗑️ Hapus
+        </button>
+        <div class="keypad-container">
           <button class="btn-keypad" onclick="inputAngkaViaKeypad(1)">1</button>
           <button class="btn-keypad" onclick="inputAngkaViaKeypad(2)">2</button>
           <button class="btn-keypad" onclick="inputAngkaViaKeypad(3)">3</button>
@@ -60,9 +62,6 @@
           <button class="btn-keypad" onclick="inputAngkaViaKeypad(8)">8</button>
           <button class="btn-keypad" onclick="inputAngkaViaKeypad(9)">9</button>
         </div>
-        <button class="btn-keypad btn-hapus" onclick="hapusAngkaViaKeypad()" style="width: 100%; margin-top: 0.5rem;">
-          🗑️ Hapus
-        </button>
       </div>
 
       <!-- Game Controls -->
