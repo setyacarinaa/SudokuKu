@@ -110,6 +110,18 @@
       <button class="chatbot-toggle" id="chatbot-toggle" onclick="alihChatbot()">✕</button>
     </div>
     
+    <div class="chatbot-quick">
+      <h4>Pertanyaan cepat</h4>
+      <div class="quick-list">
+        <button class="btn btn-secondary btn-small" onclick="kirimPesanKeChatbot('hint')">💡 Minta hint</button>
+        <button class="btn btn-secondary btn-small" onclick="kirimPesanKeChatbot('cek jawaban')">✓ Cek jawaban</button>
+        <button class="btn btn-secondary btn-small" onclick="kirimPesanKeChatbot('solusi')">📋 Tampilkan solusi</button>
+        <button class="btn btn-secondary btn-small" onclick="kirimPesanKeChatbot('cara main')">📖 Cara main</button>
+        <button class="btn btn-secondary btn-small" onclick="kirimPesanKeChatbot('strategi sudoku sulit')">🧠 Strategi tingkat sulit</button>
+        <button class="btn btn-secondary btn-small" onclick="kirimPesanKeChatbot('apakah langkah ini benar?')">❓ Validasi langkah</button>
+      </div>
+    </div>
+    
     <div id="chatbot-messages" class="chatbot-messages">
       <!-- Pesan akan ditambahkan di sini oleh JavaScript -->
     </div>

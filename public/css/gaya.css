@@ -446,6 +446,30 @@ body {
   background: #f9fafb;
 }
 
+.chatbot-quick {
+  padding: 0.8rem 1rem 0.2rem;
+  background: #fff;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.chatbot-quick h4 {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  color: var(--text-dark);
+}
+
+.quick-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.quick-list .btn {
+  padding: 0.35rem 0.6rem;
+  font-size: 0.85rem;
+  border-radius: 8px;
+}
+
 .pesan {
   margin-bottom: 0.75rem;
   padding: 0.75rem 0.95rem;
