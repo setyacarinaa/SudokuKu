@@ -518,6 +518,15 @@ body {
   flex-shrink: 0;
   background: white;
   height: auto;
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 0 0 14px 14px;
+}
+
+.chatbot-input form {
+  width: 100%;
+  display: flex;
+  gap: 0.6rem;
 }
 
 .chatbot-input input {
