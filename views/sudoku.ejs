@@ -145,6 +145,51 @@
     </div>
   </div>
 
+  <script>
+    // Fallback binding: memastikan tombol toggle bekerja walau ada error JS lain
+    (function() {
+      function fallbackToggle(forceState) {
+        const kontainer = document.getElementById('chatbot-container');
+        const btnToggle = document.getElementById('chatbot-toggle-btn');
+        if (!kontainer) return;
+
+        const isHidden = kontainer.classList.contains('chatbot-hidden') || kontainer.style.display === 'none';
+        const targetOpen = forceState === true ? true : forceState === false ? false : isHidden;
+
+        if (targetOpen) {
+          kontainer.classList.remove('chatbot-hidden');
+          kontainer.style.display = 'block';
+          if (btnToggle) btnToggle.classList.add('chatbot-hidden');
+        } else {
+          kontainer.classList.add('chatbot-hidden');
+          kontainer.style.display = 'none';
+          if (btnToggle) btnToggle.classList.remove('chatbot-hidden');
+        }
+      }
+
+      // Jika alihChatbot belum terdefinisi (karena error muat script), pakai fallback
+      if (typeof window.alihChatbot !== 'function') {
+        window.alihChatbot = fallbackToggle;
+      }
+
+      // Pastikan tombol terhubung
+      window.addEventListener('DOMContentLoaded', () => {
+        const btnFloating = document.getElementById('chatbot-toggle-btn');
+        const btnClose = document.getElementById('chatbot-toggle');
+
+        if (btnFloating && !btnFloating.dataset.bound) {
+          btnFloating.dataset.bound = '1';
+          btnFloating.addEventListener('click', () => window.alihChatbot());
+        }
+
+        if (btnClose && !btnClose.dataset.bound) {
+          btnClose.dataset.bound = '1';
+          btnClose.addEventListener('click', () => window.alihChatbot(false));
+        }
+      });
+    })();
+  </script>
+
   <!-- Scripts -->
   <script src="/js/sudoku-frontend.js"></script>
   <script src="/js/chatbot-client.js"></script>
