@@ -74,11 +74,6 @@
         <div style="font-size: 4rem; margin-bottom: 1rem;">🏆</div>
         <h3>Belum ada data leaderboard</h3>
         <p style="color: #6b7280; margin-top: 1rem;">Jadilah yang pertama bermain dan raih posisi teratas!</p>
-        <% if (sudahLogin) { %>
-          <a href="/sudoku" class="btn btn-primary" style="margin-top: 1rem;">🎯 Mulai Bermain</a>
-        <% } else { %>
-          <a href="/login" class="btn btn-primary" style="margin-top: 1rem;">🔐 Login untuk Main</a>
-        <% } %>
       </div>
     </div>
 
@@ -114,8 +109,19 @@
         btn.classList.remove('btn-primary');
         btn.classList.add('btn-secondary');
       });
-      event.target.classList.remove('btn-secondary');
-      event.target.classList.add('btn-primary');
+      
+      // Jika ada event.target, update tombolnya
+      if (event && event.target) {
+        event.target.classList.remove('btn-secondary');
+        event.target.classList.add('btn-primary');
+      } else {
+        // Set tombol "Semua" sebagai aktif saat page load
+        const btnSemua = document.querySelector('.tingkat-kesulitan .btn');
+        if (btnSemua) {
+          btnSemua.classList.remove('btn-secondary');
+          btnSemua.classList.add('btn-primary');
+        }
+      }
 
       // Tampilkan loading
       document.getElementById('loading').style.display = 'block';
@@ -138,7 +144,7 @@
         }
       } catch (error) {
         console.error('Error memuat leaderboard:', error);
-        alert('Gagal memuat leaderboard');
+        tampilkanEmpty();
       } finally {
         document.getElementById('loading').style.display = 'none';
       }
