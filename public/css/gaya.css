@@ -402,7 +402,7 @@ body {
   display: flex;
   flex-direction: column;
   z-index: 1200;
-  overflow: visible;
+  overflow: hidden;
   border: 1px solid rgba(0,0,0,0.04);
 }
 
@@ -522,6 +522,7 @@ body {
   width: 100%;
   box-sizing: border-box;
   border-radius: 0 0 14px 14px;
+  margin-top: auto;
 }
 
 .chatbot-input form {
