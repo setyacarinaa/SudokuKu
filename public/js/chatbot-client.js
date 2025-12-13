@@ -150,17 +150,15 @@ function kirimPesanPengguna() {
 }
 
 function kirimPesanKeChatbot(pesan, papan = null) {
-  // Ambil papan saat ini jika tidak diberikan
-  if (!papan && typeof window.dapatkanPapanSekarang === 'function') {
-    papan = window.dapatkanPapanSekarang();
-  }
+  // Jangan kirim papan dari frontend - gunakan session backend yang lebih reliable
+  // Backend akan ambil dari req.session.tekaTekiAktif
   
   if (!soket) {
-    // Fallback ke HTTP API
+    // Fallback ke HTTP API - backend akan ambil dari session
     fetch('/api/chatbot', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pesan, dataPuzzle: papan ? { papan } : undefined })
+      body: JSON.stringify({ pesan })
     })
     .then(r => r.json())
     .then(data => tanganiResponsChatbot(data))
