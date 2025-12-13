@@ -4,7 +4,13 @@
  */
 
 // Inisialisasi Socket.IO (aman jika tidak tersedia)
-const soket = (typeof io !== 'undefined') ? io() : null;
+let soket = null;
+if (typeof io !== 'undefined') {
+  // Pilih path sesuai lingkungan (Vercel sering memakai /api/socket.io)
+  const pakaiApiPath = window.location.hostname.endsWith('vercel.app');
+  const socketPath = pakaiApiPath ? '/api/socket.io' : '/socket.io';
+  soket = io({ path: socketPath });
+}
 
 // State chatbot
 let chatbotTerbuka = false;
@@ -138,7 +144,7 @@ function kirimPesanKeChatbot(pesan, papan = null) {
   }
   
   if (!soket) {
-    tambahPesanBot('⚠️ Chatbot offline. Pastikan koneksi server aktif.');
+    tambahPesanStatus('⚠️ Chatbot offline. Pastikan koneksi server aktif.');
     return;
   }
   
@@ -162,12 +168,18 @@ function siapkanEventSoket() {
   // Connection
   soket.on('connect', () => {
     console.log('✅ Socket.IO terhubung');
+    tambahPesanStatus('✅ Chatbot terhubung');
   });
   
+  soket.on('connect_error', (err) => {
+    console.warn('⚠️ Gagal konek Socket.IO:', err?.message || err);
+    tambahPesanStatus('⚠️ Gagal konek ke chatbot. Coba lagi atau muat ulang.');
+  });
+
   // Disconnect
   soket.on('disconnect', () => {
     console.log('⚠️ Socket.IO terputus');
-    tambahPesanBot('⚠️ Koneksi terputus. Mencoba hubungkan kembali...');
+    tambahPesanStatus('⚠️ Koneksi chatbot terputus. Mencoba hubungkan kembali...');
   });
   
   // Respons dari chatbot
@@ -204,6 +216,14 @@ function tanganiResponsChatbot(data) {
   
   // Auto scroll
   scrollKeBawah();
+}
+
+// Status helper agar tidak spam
+let pesanStatusTerakhir = '';
+function tambahPesanStatus(pesan) {
+  if (pesanStatusTerakhir === pesan) return;
+  pesanStatusTerakhir = pesan;
+  tambahPesanBot(pesan);
 }
 
 // ==================== HANDLE HINT ====================
