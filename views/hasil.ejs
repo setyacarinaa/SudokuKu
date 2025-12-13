@@ -67,26 +67,15 @@
 
       <!-- Tombol Aksi -->
       <div class="hasil-actions">
-        <a href="/sudoku" class="btn btn-primary btn-large">
+        <a href="/sudoku" class="btn btn-primary btn-large" style="text-decoration: none; color: white;">
           🎮 Main Lagi
         </a>
-        <a href="/leaderboard" class="btn btn-secondary btn-large">
+        <a href="/leaderboard" class="btn btn-secondary btn-large" style="text-decoration: none; color: #1f2937;">
           🏅 Lihat Leaderboard
         </a>
-        <a href="/" class="btn btn-tertiary btn-large">
+        <a href="/" class="btn btn-tertiary btn-large" style="text-decoration: none; color: white;">
           🏠 Kembali ke Beranda
         </a>
-      </div>
-
-      <!-- Tips untuk Lanjut -->
-      <div class="tips-section">
-        <h3>💡 Tips Lanjutan</h3>
-        <ul>
-          <li>Coba tingkat kesulitan yang lebih tinggi untuk tantangan baru</li>
-          <li>Latih kecepatan Anda dengan mencatat waktu pada setiap puzzle</li>
-          <li>Gunakan strategi sudoku untuk menyelesaikan puzzle lebih cepat</li>
-          <li>Akses halaman Strategi untuk mempelajari teknik-teknik advanced</li>
-        </ul>
       </div>
     </div>
   </main>
@@ -200,15 +189,43 @@
     .btn-large {
       padding: 1rem 2rem;
       font-size: 1.1rem;
+      text-align: center;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      display: block;
+      font-weight: 600;
     }
 
-    .btn-tertiary {
-      background: var(--text-light);
+    .btn-primary.btn-large {
+      background: linear-gradient(135deg, #667eea, #764ba2);
       color: white;
     }
 
-    .btn-tertiary:hover {
-      background: var(--text-dark);
+    .btn-primary.btn-large:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary.btn-large {
+      background: #f3f4f6;
+      color: #1f2937;
+      border: 2px solid #e5e7eb;
+    }
+
+    .btn-secondary.btn-large:hover {
+      border-color: #667eea;
+      color: #667eea;
+      transform: translateY(-2px);
+    }
+
+    .btn-tertiary.btn-large {
+      background: #6b7280;
+      color: white;
+    }
+
+    .btn-tertiary.btn-large:hover {
+      background: #4b5563;
+      transform: translateY(-2px);
     }
 
     @media (max-width: 600px) {
