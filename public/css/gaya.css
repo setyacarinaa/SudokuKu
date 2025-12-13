@@ -519,7 +519,7 @@ body {
   border-top: 1px solid #e0e3e8;
   flex-shrink: 0;
   background: white;
-  height: auto;
+  height: 0;
   min-height: fit-content;
   width: 100%;
   box-sizing: border-box;
