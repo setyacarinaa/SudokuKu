@@ -3,8 +3,8 @@
  * Frontend untuk Socket.IO chatbot
  */
 
-// Inisialisasi Socket.IO
-const soket = io();
+// Inisialisasi Socket.IO (aman jika tidak tersedia)
+const soket = (typeof io !== 'undefined') ? io() : null;
 
 // State chatbot
 let chatbotTerbuka = false;
@@ -137,6 +137,11 @@ function kirimPesanKeChatbot(pesan, papan = null) {
     papan = window.dapatkanPapanSekarang();
   }
   
+  if (!soket) {
+    tambahPesanBot('⚠️ Chatbot offline. Pastikan koneksi server aktif.');
+    return;
+  }
+  
   // Emit event ke server
   soket.emit('pesan_chatbot', {
     pesan: pesan,
@@ -149,6 +154,11 @@ function kirimPesanKeChatbot(pesan, papan = null) {
 // ==================== SOCKET EVENTS ====================
 
 function siapkanEventSoket() {
+  if (!soket) {
+    console.warn('Socket.IO tidak tersedia; chatbot offline');
+    return;
+  }
+
   // Connection
   soket.on('connect', () => {
     console.log('✅ Socket.IO terhubung');
