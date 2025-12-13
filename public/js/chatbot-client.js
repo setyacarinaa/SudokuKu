@@ -156,7 +156,18 @@ function kirimPesanKeChatbot(pesan, papan = null) {
   }
   
   if (!soket) {
-    tambahPesanStatus('⚠️ Chatbot offline. Pastikan koneksi server aktif.');
+    // Fallback ke HTTP API
+    fetch('/api/chatbot', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pesan, dataPuzzle: papan ? { papan } : undefined })
+    })
+    .then(r => r.json())
+    .then(data => tanganiResponsChatbot(data))
+    .catch(err => {
+      console.warn('HTTP chatbot error:', err);
+      tambahPesanStatus('⚠️ Chatbot offline. Pastikan koneksi server aktif.');
+    });
     return;
   }
   
