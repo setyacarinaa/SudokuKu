@@ -16,13 +16,13 @@
     <nav class="navbar">
       <div class="logo">🎮 SudokuKu</div>
       <ul class="nav-menu">
-        <li><a href="/">Beranda</a></li>
-        <li><a href="/sudoku">Main</a></li>
-        <li><a href="/leaderboard">Leaderboard</a></li>
+        <li><a href="/"><img src="/favicon.svg" alt="Beranda" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 5px;"> Beranda</a></li>
+        <li><a href="/sudoku"><img src="/favicon.svg" alt="Main" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 5px;"> Main</a></li>
+        <li><a href="/leaderboard"><img src="/favicon.svg" alt="Leaderboard" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 5px;"> Leaderboard</a></li>
         <% if (sudahLogin) { %>
-          <li><a href="/api/logout" onclick="return confirm('Yakin ingin logout?')">Logout (<%= namaLengkap %>)</a></li>
+          <li><a href="/api/logout" onclick="return confirm('Yakin ingin logout?')"><img src="/favicon.svg" alt="Logout" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 5px;"> Logout (<%= namaLengkap %>)</a></li>
         <% } else { %>
-          <li><a href="/login">Login</a></li>
+          <li><a href="/login"><img src="/favicon.svg" alt="Login" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 5px;"> Login</a></li>
         <% } %>
       </ul>
     </nav>
