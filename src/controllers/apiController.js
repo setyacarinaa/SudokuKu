@@ -129,7 +129,6 @@ const dapatkanLeaderboard = async (req, res) => {
     const batas = Math.min(10, Math.max(1, batasReq));
     const tingkat = req.query.tingkat;
 
-
     // Build query - hanya ambil skor yang selesai
     let kueri = { apakahSelesai: true };
     if (tingkat && ['mudah', 'sedang', 'sulit'].includes(tingkat.toLowerCase())) {
