@@ -129,17 +129,6 @@ const dapatkanLeaderboard = async (req, res) => {
     const batas = Math.min(10, Math.max(1, batasReq));
     const tingkat = req.query.tingkat;
 
-    // Check MongoDB connection
-    const mongoose = require('mongoose');
-    if (mongoose.connection.readyState !== 1) {
-      console.log('⚠️ [Leaderboard] MongoDB belum terhubung, mengembalikan data kosong');
-      return res.json({
-        sukses: true,
-        data: [],
-        total: 0,
-        pesan: 'Leaderboard kosong - database sedang connecting'
-      });
-    }
 
     // Build query - hanya ambil skor yang selesai
     let kueri = { apakahSelesai: true };
@@ -166,24 +155,7 @@ const dapatkanLeaderboard = async (req, res) => {
       console.log(`⚠️ [Leaderboard] Data kosong! Total docs: ${totalCount}, Selesai: ${selesaiCount}`);
     }
 
-    // Jika database terhubung tetapi tidak ada data, coba fallback ke file lokal
-    if ((daftarSkor.length === 0) || !daftarSkor) {
-      try {
-        const fs = require('fs');
-        const path = require('path');
-        const fallbackPath = path.join(__dirname, '../../public/data/leaderboard.json');
-        if (fs.existsSync(fallbackPath)) {
-          const raw = fs.readFileSync(fallbackPath, 'utf8');
-          const fallback = JSON.parse(raw);
-          if (fallback && Array.isArray(fallback) && fallback.length > 0) {
-            console.log('🔁 [Leaderboard] Returning fallback JSON data');
-            return res.json({ sukses: true, data: fallback.slice(0, batas), total: fallback.length, pesan: 'Fallback leaderboard data' });
-          }
-        }
-      } catch (readErr) {
-        console.error('❌ [Leaderboard] Error reading fallback file:', readErr.message);
-      }
-    }
+    // Do not use guest fallback data; leaderboard must come from registered users in DB only
 
     // Format response
     const papanPeringkat = daftarSkor.map((entri, indeks) => ({
