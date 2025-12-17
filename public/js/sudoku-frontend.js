@@ -11,6 +11,7 @@ let waktuMulai = null;
 let intervalTimer = null;
 let skorPemain = 0;
 let selTerpilih = null; // Menyimpan sel yang sedang dipilih untuk keypad input
+let nomorKeypadTerpilih = null; // Menyimpan nomor keypad yang sedang dipilih (highlight)
 let errorCount = 0; // Tracking kesalahan (max 3)
 let solusiSekarang = null; // Menyimpan solusi untuk validasi
 const MAX_ERRORS = 3; // Batas maksimal kesalahan
@@ -221,7 +222,6 @@ function hapusAngkaViaKeypad() {
 }
 
 // ==================== HANDLE INPUT ====================
-}
 
 // Function to select a cell (without opening keyboard)
 function pilihSel(e, input, baris, kolom) {
