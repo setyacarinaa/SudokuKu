@@ -364,6 +364,26 @@ body {
   color: var(--bg-white);
 }
 
+/* Active keypad button */
+.btn-keypad.btn-active {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: var(--bg-white);
+  box-shadow: var(--shadow);
+  transform: translateY(-2px);
+}
+
+/* Selected cell when tapped */
+.sel-sudoku.sel-terpilih {
+  outline: 3px solid rgba(102,126,234,0.18);
+  box-shadow: 0 4px 18px rgba(102,126,234,0.12) inset;
+}
+
+/* Highlight cells that match selected keypad number */
+.sel-sudoku.nomor-terpilih {
+  background: rgba(102,126,234,0.06);
+  border: 1px solid rgba(102,126,234,0.12);
+}
+
 /* ==================== RESPONSIVE KEYPAD ==================== */
 @media (max-width: 768px) {
   .keypad-container {

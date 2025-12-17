@@ -140,11 +140,14 @@ function tampilkanPapan() {
         input.readOnly = true;
       } else {
         input.value = '';
-        
-        // Event listener untuk input
-        input.addEventListener('input', (e) => tanganiInput(e, baris, kolom));
-        input.addEventListener('keydown', (e) => tanganiKeyboard(e, baris, kolom));
-        input.addEventListener('focus', (e) => selTerpilih = input); // Track sel terpilih untuk keypad
+        // Make cell readonly so mobile keyboard won't open; selection handled via click/touch
+        input.readOnly = true;
+
+        // Event listener untuk input via keypad and selection
+        input.addEventListener('click', (e) => pilihSel(e, input, baris, kolom));
+        input.addEventListener('touchstart', (e) => { e.preventDefault(); pilihSel(e, input, baris, kolom); });
+        // Prevent keyboard from showing if focus occurs
+        input.addEventListener('focus', (e) => { e.preventDefault(); input.blur(); });
       }
 
       kontainer.appendChild(input);
@@ -190,6 +193,9 @@ function inputAngkaViaKeypad(angka) {
   if (sebelahKanan && !sebelahKanan.readOnly) {
     sebelahKanan.focus();
   }
+
+  // Highlight keypad button and matching cells
+  pilihNomorKeypad(angka, true);
 }
 
 /**
@@ -215,6 +221,49 @@ function hapusAngkaViaKeypad() {
 }
 
 // ==================== HANDLE INPUT ====================
+}
+
+// Function to select a cell (without opening keyboard)
+function pilihSel(e, input, baris, kolom) {
+  // Remove previous selection style
+  document.querySelectorAll('.sel-sudoku.sel-terpilih').forEach(s => s.classList.remove('sel-terpilih'));
+
+  selTerpilih = input;
+  input.classList.add('sel-terpilih');
+
+  // If a keypad number is selected for highlight-only, do not auto-fill; otherwise user can press keypad to fill
+}
+
+// Handle keypad number highlight & optional fill
+function pilihNomorKeypad(angka, keepActive = false) {
+  // If angka is null -> clear
+  if (angka === null) {
+    nomorKeypadTerpilih = null;
+    document.querySelectorAll('.btn-keypad.btn-active').forEach(b => b.classList.remove('btn-active'));
+    document.querySelectorAll('.sel-sudoku.nomor-terpilih').forEach(s => s.classList.remove('nomor-terpilih'));
+    return;
+  }
+
+  // Toggle if same
+  if (nomorKeypadTerpilih === angka && !keepActive) {
+    pilihNomorKeypad(null);
+    return;
+  }
+
+  nomorKeypadTerpilih = angka;
+
+  // Toggle active class for keypad buttons
+  document.querySelectorAll('.btn-keypad').forEach(btn => {
+    if (parseInt(btn.textContent) === angka) btn.classList.add('btn-active');
+    else btn.classList.remove('btn-active');
+  });
+
+  // Highlight cells that have the same number
+  document.querySelectorAll('.sel-sudoku.nomor-terpilih').forEach(s => s.classList.remove('nomor-terpilih'));
+  document.querySelectorAll('.sel-sudoku').forEach(s => {
+    if (s.value && parseInt(s.value) === angka) s.classList.add('nomor-terpilih');
+  });
+}
 
 function tanganiInput(event, baris, kolom) {
   const input = event.target;
