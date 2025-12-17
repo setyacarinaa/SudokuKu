@@ -15,6 +15,7 @@ let nomorKeypadTerpilih = null; // Menyimpan nomor keypad yang sedang dipilih (h
 let errorCount = 0; // Tracking kesalahan (max 3)
 let solusiSekarang = null; // Menyimpan solusi untuk validasi
 const MAX_ERRORS = 3; // Batas maksimal kesalahan
+let transientHighlightTimeout = null;
 
 // ==================== INISIALISASI ====================
 
@@ -55,16 +56,31 @@ function pasangPendengarEvent() {
 
   // Pasang listener untuk tombol keypad (jika ada)
   document.querySelectorAll('.btn-keypad').forEach(btn => {
-    btn.addEventListener('click', (e) => {
+    const handlePress = (e) => {
       e.preventDefault();
-      const angka = parseInt(btn.textContent);
-      if (Number.isInteger(angka)) handleKeypadPress(angka);
-    });
-    btn.addEventListener('touchstart', (e) => {
-      e.preventDefault();
-      const angka = parseInt(btn.textContent);
-      if (Number.isInteger(angka)) handleKeypadPress(angka);
-    });
+      const txt = btn.textContent.trim();
+      const angka = parseInt(txt);
+      if (Number.isInteger(angka)) {
+        handleKeypadPress(angka);
+        return;
+      }
+
+      // Hapus / delete button detection
+      const action = (btn.dataset && btn.dataset.action) ? btn.dataset.action.toLowerCase() : '';
+      if (action === 'delete' || action === 'hapus' || /del|hapus|⌫|backspace/i.test(txt)) {
+        hapusAngkaViaKeypad();
+        return;
+      }
+
+      // Fallback: if button labeled C or clear
+      if (/^c$|clear/i.test(txt)) {
+        hapusAngkaViaKeypad();
+        return;
+      }
+    };
+
+    btn.addEventListener('click', handlePress);
+    btn.addEventListener('touchstart', handlePress);
   });
 }
 
@@ -210,8 +226,8 @@ function inputAngkaViaKeypad(angka) {
     sebelahKanan.focus();
   }
 
-  // Highlight keypad button and matching cells
-  pilihNomorKeypad(angka, true);
+  // Clear any persistent keypad highlight after filling (keypad shouldn't stay active)
+  pilihNomorKeypad(null);
 }
 
 /**
@@ -246,15 +262,41 @@ function handleKeypadPress(angka) {
     tampilkanPesan('Pilih sel terlebih dahulu!', 'info');
     return;
   }
-
   if (selTerpilih.classList.contains('tetap')) {
-    // Hanya highlight, tidak mengisi
-    pilihNomorKeypad(angka, true);
+    // Jika sel diisi sistem, tampilkan transient highlight ungu muda pada semua angka yang sama
+    highlightTransientNumber(angka);
     return;
   }
 
-  // Jika sel terpilih bisa diisi, gunakan inputAngkaViaKeypad
+  // Jika sel terpilih bisa diisi, gunakan inputAngkaViaKeypad (dan jangan biarkan keypad tetap aktif)
   inputAngkaViaKeypad(angka);
+}
+
+/**
+ * Highlight matching numbers transiently (used when selecting a system-filled cell)
+ * Adds a temporary class to matching cells and removes it after animation.
+ */
+function highlightTransientNumber(angka) {
+  // Clear previous transient timeout and classes
+  if (transientHighlightTimeout) {
+    clearTimeout(transientHighlightTimeout);
+    transientHighlightTimeout = null;
+  }
+
+  document.querySelectorAll('.sel-sudoku.nomor-terpilih-transient').forEach(s => s.classList.remove('nomor-terpilih-transient'));
+
+  // Add transient class to matching cells
+  document.querySelectorAll('.sel-sudoku').forEach(s => {
+    if (s.value && parseInt(s.value) === angka) {
+      s.classList.add('nomor-terpilih-transient');
+    }
+  });
+
+  // Remove transient highlight after 900ms
+  transientHighlightTimeout = setTimeout(() => {
+    document.querySelectorAll('.sel-sudoku.nomor-terpilih-transient').forEach(s => s.classList.remove('nomor-terpilih-transient'));
+    transientHighlightTimeout = null;
+  }, 900);
 }
 
 // ==================== HANDLE INPUT ====================
@@ -266,22 +308,15 @@ function pilihSel(e, input, baris, kolom) {
 
   selTerpilih = input;
   input.classList.add('sel-terpilih');
-  // Jika sel sudah berisi angka (baik dari sistem atau diisi pemain), sorot semua angka yang sama
+  // Jika sel sudah berisi angka (baik dari sistem atau diisi pemain), tampilkan transient highlight ungu muda
   const nilai = input.value ? parseInt(input.value) : null;
   if (nilai) {
-    pilihNomorKeypad(nilai, true);
+    highlightTransientNumber(nilai);
     return;
   }
 
-  // Jika ada nomor keypad yang sedang dipilih, langsung isi sel tersebut dengan nomor itu
-  if (nomorKeypadTerpilih && !input.classList.contains('tetap')) {
-    const angka = nomorKeypadTerpilih;
-    selTerpilih.value = angka;
-    papanSudoku[baris][kolom] = angka;
-    selTerpilih.classList.add('diisi');
-    selTerpilih.classList.remove('salah');
-    pilihNomorKeypad(angka, true);
-  }
+  // Jika sel kosong, pastikan tidak ada persistent highlight aktif
+  pilihNomorKeypad(null);
 }
 
 // Handle keypad number highlight & optional fill
