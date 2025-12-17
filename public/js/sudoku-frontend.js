@@ -52,6 +52,20 @@ function pasangPendengarEvent() {
   if (btnSubmitJawaban) btnSubmitJawaban.addEventListener('click', submitJawabanFinal);
   if (btnSelesaikan) btnSelesaikan.addEventListener('click', selesaikanPuzzle);
   if (btnReset) btnReset.addEventListener('click', resetPapan);
+
+  // Pasang listener untuk tombol keypad (jika ada)
+  document.querySelectorAll('.btn-keypad').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const angka = parseInt(btn.textContent);
+      if (Number.isInteger(angka)) handleKeypadPress(angka);
+    });
+    btn.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      const angka = parseInt(btn.textContent);
+      if (Number.isInteger(angka)) handleKeypadPress(angka);
+    });
+  });
 }
 
 // ==================== TINGKAT KESULITAN ====================
@@ -167,9 +181,10 @@ function inputAngkaViaKeypad(angka) {
     tampilkanPesan('Pilih sel terlebih dahulu!', 'info');
     return;
   }
-  // Cek jika sel adalah sel tetap dari sistem (tidak boleh diubah)
+  // Jika sel adalah sel tetap dari sistem, maka tombol keypad tidak akan mengisi.
+  // Sebagai gantinya kita highlight semua angka yang sama.
   if (selTerpilih.classList.contains('tetap')) {
-    tampilkanPesan('Sel ini tidak bisa diubah!', 'error');
+    pilihNomorKeypad(angka, true);
     return;
   }
 
@@ -218,6 +233,28 @@ function hapusAngkaViaKeypad() {
   selTerpilih.value = '';
   papanSudoku[baris][kolom] = 0;
   selTerpilih.classList.remove('diisi', 'salah');
+}
+
+/**
+ * Unified handler for keypad presses.
+ * - Jika tidak ada sel terpilih -> hanya beri tahu pemain
+ * - Jika sel terpilih adalah 'tetap' (diisi sistem) -> highlight semua cell yang memiliki angka tersebut
+ * - Jika sel terpilih kosong/editor -> isi sel dengan angka
+ */
+function handleKeypadPress(angka) {
+  if (!selTerpilih) {
+    tampilkanPesan('Pilih sel terlebih dahulu!', 'info');
+    return;
+  }
+
+  if (selTerpilih.classList.contains('tetap')) {
+    // Hanya highlight, tidak mengisi
+    pilihNomorKeypad(angka, true);
+    return;
+  }
+
+  // Jika sel terpilih bisa diisi, gunakan inputAngkaViaKeypad
+  inputAngkaViaKeypad(angka);
 }
 
 // ==================== HANDLE INPUT ====================
@@ -554,7 +591,7 @@ function tampilkanOverlaySelesai(durasiDetik, skorFinal) {
         <div class="overlay-actions">
           <a href="/sudoku" class="btn btn-primary btn-lg overlay-btn">🎮 Main Lagi</a>
           <a href="/" class="btn btn-secondary btn-lg overlay-btn">🏠 Kembali ke Beranda</a>
-          <a href="/leaderboard" class="btn btn-tertiary btn-lg overlay-btn">🏅 Lihat Leaderboard</a>
+          <button id="btn-overlay-leaderboard" class="btn btn-tertiary btn-lg overlay-btn">🏅 Lihat Leaderboard</button>
         </div>
       </div>
     `;
@@ -566,6 +603,28 @@ function tampilkanOverlaySelesai(durasiDetik, skorFinal) {
   overlay.style.display = 'flex';
   overlay.offsetHeight; // Trigger reflow
   overlay.classList.add('show');
+
+  // Pasang listener untuk tombol Leaderboard yang akan cek status login terlebih dahulu
+  const btnLeaderboard = document.getElementById('btn-overlay-leaderboard');
+  if (btnLeaderboard) {
+    btnLeaderboard.addEventListener('click', async () => {
+      try {
+        const res = await fetch('/api/whoami');
+        if (res.ok) {
+          const j = await res.json();
+          // Jika backend memberi tahu user terautentikasi, langsung ke leaderboard
+          if (j && (j.sukses || j.user)) {
+            window.location.href = '/leaderboard';
+            return;
+          }
+        }
+      } catch (e) {
+        // ignore
+      }
+      // Jika tidak terautentikasi atau gagal cek, arahkan ke login dengan redirect kembali ke leaderboard setelah login
+      window.location.href = '/login?next=/leaderboard';
+    });
+  }
   
   // Auto-redirect dihapus; pemain memilih aksi sendiri
 }
