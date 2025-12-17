@@ -95,6 +95,10 @@ app.use('/api/chatbot', ruteChatbot);
 const ruteDebug = require('../src/routes/debug');
 app.use('/api', ruteDebug);
 
+// Debug leaderboard
+const ruteDebugLeaderboard = require('../src/routes/debug-leaderboard');
+app.use('/api', ruteDebugLeaderboard);
+
 // Test connection routes
 const ruteTesKoneksi = require('../src/routes/test-connection');
 const ruteTesKoneksiLangsung = require('../src/routes/test-direct-connection');

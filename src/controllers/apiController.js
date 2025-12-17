@@ -158,6 +158,13 @@ const dapatkanLeaderboard = async (req, res) => {
       .lean();
 
     console.log(`📊 Ditemukan ${daftarSkor.length} skor dari database`);
+    
+    // Debug: log jika kosong
+    if (daftarSkor.length === 0) {
+      const totalCount = await Skor.countDocuments({});
+      const selesaiCount = await Skor.countDocuments({ apakahSelesai: true });
+      console.log(`⚠️ [Leaderboard] Data kosong! Total docs: ${totalCount}, Selesai: ${selesaiCount}`);
+    }
 
     // Format response
     const papanPeringkat = daftarSkor.map((entri, indeks) => ({
