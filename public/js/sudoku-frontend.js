@@ -15,7 +15,7 @@ let nomorKeypadTerpilih = null; // Menyimpan nomor keypad yang sedang dipilih (h
 let errorCount = 0; // Tracking kesalahan (max 3)
 let solusiSekarang = null; // Menyimpan solusi untuk validasi
 const MAX_ERRORS = 3; // Batas maksimal kesalahan
-let transientHighlightTimeout = null;
+// transient highlight removed; persistent toggle highlighting used instead
 
 // ==================== INISIALISASI ====================
 
@@ -258,17 +258,19 @@ function hapusAngkaViaKeypad() {
  * - Jika sel terpilih kosong/editor -> isi sel dengan angka
  */
 function handleKeypadPress(angka) {
+  // If no cell selected: toggle highlight for the number
   if (!selTerpilih) {
-    tampilkanPesan('Pilih sel terlebih dahulu!', 'info');
-    return;
-  }
-  if (selTerpilih.classList.contains('tetap')) {
-    // Jika sel diisi sistem, tampilkan transient highlight ungu muda pada semua angka yang sama
-    highlightTransientNumber(angka);
+    pilihNomorKeypad(angka);
     return;
   }
 
-  // Jika sel terpilih bisa diisi, gunakan inputAngkaViaKeypad (dan jangan biarkan keypad tetap aktif)
+  // If selected cell is a system-fixed cell: toggle highlight for that number
+  if (selTerpilih.classList.contains('tetap')) {
+    pilihNomorKeypad(angka);
+    return;
+  }
+
+  // If selected cell is editable: fill it (do not leave keypad persistently active)
   inputAngkaViaKeypad(angka);
 }
 
@@ -276,28 +278,7 @@ function handleKeypadPress(angka) {
  * Highlight matching numbers transiently (used when selecting a system-filled cell)
  * Adds a temporary class to matching cells and removes it after animation.
  */
-function highlightTransientNumber(angka) {
-  // Clear previous transient timeout and classes
-  if (transientHighlightTimeout) {
-    clearTimeout(transientHighlightTimeout);
-    transientHighlightTimeout = null;
-  }
-
-  document.querySelectorAll('.sel-sudoku.nomor-terpilih-transient').forEach(s => s.classList.remove('nomor-terpilih-transient'));
-
-  // Add transient class to matching cells
-  document.querySelectorAll('.sel-sudoku').forEach(s => {
-    if (s.value && parseInt(s.value) === angka) {
-      s.classList.add('nomor-terpilih-transient');
-    }
-  });
-
-  // Remove transient highlight after 900ms
-  transientHighlightTimeout = setTimeout(() => {
-    document.querySelectorAll('.sel-sudoku.nomor-terpilih-transient').forEach(s => s.classList.remove('nomor-terpilih-transient'));
-    transientHighlightTimeout = null;
-  }, 900);
-}
+// transient highlighting removed in favor of persistent toggle via pilihNomorKeypad
 
 // ==================== HANDLE INPUT ====================
 
@@ -311,7 +292,8 @@ function pilihSel(e, input, baris, kolom) {
   // Jika sel sudah berisi angka (baik dari sistem atau diisi pemain), tampilkan transient highlight ungu muda
   const nilai = input.value ? parseInt(input.value) : null;
   if (nilai) {
-    highlightTransientNumber(nilai);
+    // Toggle persistent highlight for the selected number
+    pilihNomorKeypad(nilai);
     return;
   }
 

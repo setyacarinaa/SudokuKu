@@ -384,11 +384,10 @@ body {
   border: 1px solid rgba(102,126,234,0.12);
 }
 
-/* Transient highlight for system-filled number when user inspects it via keypad */
-.sel-sudoku.nomor-terpilih-transient {
+/* Persistent highlight style for selected number (light purple variant) */
+.sel-sudoku.nomor-terpilih {
   background-color: #f3e8ff; /* light purple */
   color: #5a2a8a;
-  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 /* ==================== RESPONSIVE KEYPAD ==================== */
