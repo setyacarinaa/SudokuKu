@@ -167,8 +167,8 @@ function inputAngkaViaKeypad(angka) {
     tampilkanPesan('Pilih sel terlebih dahulu!', 'info');
     return;
   }
-
-  if (selTerpilih.readOnly) {
+  // Cek jika sel adalah sel tetap dari sistem (tidak boleh diubah)
+  if (selTerpilih.classList.contains('tetap')) {
     tampilkanPesan('Sel ini tidak bisa diubah!', 'error');
     return;
   }
@@ -207,8 +207,7 @@ function hapusAngkaViaKeypad() {
     tampilkanPesan('Pilih sel terlebih dahulu!', 'info');
     return;
   }
-
-  if (selTerpilih.readOnly) {
+  if (selTerpilih.classList.contains('tetap')) {
     tampilkanPesan('Sel ini tidak bisa diubah!', 'error');
     return;
   }
@@ -230,8 +229,22 @@ function pilihSel(e, input, baris, kolom) {
 
   selTerpilih = input;
   input.classList.add('sel-terpilih');
+  // Jika sel sudah berisi angka (baik dari sistem atau diisi pemain), sorot semua angka yang sama
+  const nilai = input.value ? parseInt(input.value) : null;
+  if (nilai) {
+    pilihNomorKeypad(nilai, true);
+    return;
+  }
 
-  // If a keypad number is selected for highlight-only, do not auto-fill; otherwise user can press keypad to fill
+  // Jika ada nomor keypad yang sedang dipilih, langsung isi sel tersebut dengan nomor itu
+  if (nomorKeypadTerpilih && !input.classList.contains('tetap')) {
+    const angka = nomorKeypadTerpilih;
+    selTerpilih.value = angka;
+    papanSudoku[baris][kolom] = angka;
+    selTerpilih.classList.add('diisi');
+    selTerpilih.classList.remove('salah');
+    pilihNomorKeypad(angka, true);
+  }
 }
 
 // Handle keypad number highlight & optional fill
