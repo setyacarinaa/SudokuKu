@@ -119,7 +119,9 @@ const rekamSkor = async (req, res) => {
  */
 const dapatkanLeaderboard = async (req, res) => {
   try {
-    const batas = parseInt(req.query.limit) || 10;
+    // Batasi maksimal 10 entri agar tetap global dan ringan
+    const batasReq = parseInt(req.query.limit) || 10;
+    const batas = Math.min(10, Math.max(1, batasReq));
     const tingkat = req.query.tingkat;
 
     // Build query - hanya ambil skor yang selesai

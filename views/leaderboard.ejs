@@ -139,8 +139,8 @@
       try {
         // Request API
         const url = tingkat === 'semua' 
-          ? '/api/leaderboard?limit=50' 
-          : `/api/leaderboard?limit=50&tingkat=${tingkat}`;
+          ? '/api/leaderboard?limit=10' 
+          : `/api/leaderboard?limit=10&tingkat=${tingkat}`;
 
         console.log('🔄 Loading leaderboard dari:', url);
         
