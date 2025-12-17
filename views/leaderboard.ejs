@@ -50,6 +50,11 @@
         <p style="margin-top: 1rem;">Memuat leaderboard...</p>
       </div>
 
+      <!-- Error State -->
+      <div id="error-state" class="text-center" style="display: none; padding: 1rem; color: #b91c1c; font-weight: 600;">
+        Gagal memuat leaderboard. Coba refresh atau pastikan server aktif.
+      </div>
+
       <!-- Table -->
       <div id="leaderboard-container">
         <table class="leaderboard-table">
@@ -129,6 +134,7 @@
       document.getElementById('loading').style.display = 'block';
       document.getElementById('leaderboard-container').style.display = 'none';
       document.getElementById('empty-state').style.display = 'none';
+      document.getElementById('error-state').style.display = 'none';
 
       try {
         // Request API
@@ -138,7 +144,7 @@
 
         console.log('🔄 Loading leaderboard dari:', url);
         
-        const response = await fetch(url);
+        const response = await fetch(url, { credentials: 'include' });
         const data = await response.json();
 
         console.log('📊 Response data:', data);
@@ -155,7 +161,8 @@
       } catch (error) {
         console.error('❌ Error memuat leaderboard:', error);
         document.getElementById('leaderboard-container').style.display = 'none';
-        tampilkanEmpty();
+        document.getElementById('empty-state').style.display = 'none';
+        document.getElementById('error-state').style.display = 'block';
       } finally {
         document.getElementById('loading').style.display = 'none';
       }
@@ -206,12 +213,14 @@
       // Show container, hide empty state
       document.getElementById('leaderboard-container').style.display = 'block';
       document.getElementById('empty-state').style.display = 'none';
+      document.getElementById('error-state').style.display = 'none';
     }
 
     // Fungsi untuk menampilkan empty state
     function tampilkanEmpty() {
       document.getElementById('leaderboard-container').style.display = 'none';
       document.getElementById('empty-state').style.display = 'block';
+      document.getElementById('error-state').style.display = 'none';
     }
   </script>
 </body>
