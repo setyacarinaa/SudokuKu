@@ -116,9 +116,14 @@ const rekamSkor = async (req, res) => {
 /**
  * Dapatkan leaderboard
  * GET /api/leaderboard?limit=10&tingkat=sedang
+ * PUBLIK - Tidak perlu login
  */
 const dapatkanLeaderboard = async (req, res) => {
   try {
+    console.log('🎯 [Leaderboard] Request diterima dari:', req.headers['user-agent']);
+    console.log('🎯 [Leaderboard] Session:', req.session ? 'ada' : 'tidak ada');
+    console.log('🎯 [Leaderboard] Query params:', req.query);
+    
     // Batasi maksimal 10 entri agar tetap global dan ringan
     const batasReq = parseInt(req.query.limit) || 10;
     const batas = Math.min(10, Math.max(1, batasReq));
@@ -131,6 +136,7 @@ const dapatkanLeaderboard = async (req, res) => {
     }
 
     console.log(`🔍 Querying leaderboard dengan kueri:`, kueri);
+    console.log(`🔍 Batas data: ${batas}`);
 
     // Ambil skor terbaik
     const daftarSkor = await Skor.find(kueri)
@@ -151,6 +157,10 @@ const dapatkanLeaderboard = async (req, res) => {
       tanggalMain: entri.tanggalMain
     }));
 
+    // Set CORS headers explicitly untuk serverless
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    
     res.json({
       sukses: true,
       data: papanPeringkat,
@@ -158,9 +168,10 @@ const dapatkanLeaderboard = async (req, res) => {
       pesan: 'Leaderboard berhasil diambil'
     });
 
-    console.log(`✅ Leaderboard berhasil dikirim (${papanPeringkat.length} entri)`);
+    console.log(`✅ [Leaderboard] Berhasil dikirim (${papanPeringkat.length} entri)`);
   } catch (error) {
-    console.error('❌ Error saat mengambil leaderboard:', error);
+    console.error('❌ [Leaderboard] Error:', error.message);
+    console.error('❌ [Leaderboard] Stack:', error.stack);
     res.status(500).json({
       sukses: false,
       pesan: 'Terjadi kesalahan saat mengambil leaderboard',
