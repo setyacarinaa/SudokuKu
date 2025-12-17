@@ -626,7 +626,8 @@ function tampilkanOverlaySelesai(durasiDetik, skorFinal) {
   if (btnLeaderboard) {
     btnLeaderboard.addEventListener('click', async () => {
       try {
-        const res = await fetch('/api/whoami');
+        // Include credentials so server can read session cookie and determine login state
+        const res = await fetch('/api/whoami', { credentials: 'include', headers: { 'Accept': 'application/json' } });
         if (res.ok) {
           const j = await res.json();
           // Jika backend memberi tahu user terautentikasi, langsung ke leaderboard
@@ -636,7 +637,7 @@ function tampilkanOverlaySelesai(durasiDetik, skorFinal) {
           }
         }
       } catch (e) {
-        // ignore
+        // ignore network/parse errors, fall through to login redirect
       }
       // Jika tidak terautentikasi atau gagal cek, arahkan ke login dengan redirect kembali ke leaderboard setelah login
       window.location.href = '/login?next=/leaderboard';
