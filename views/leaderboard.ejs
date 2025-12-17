@@ -38,10 +38,10 @@
 
       <!-- Filter Tingkat -->
       <div class="tingkat-kesulitan" style="margin-bottom: 2rem;">
-        <button class="btn btn-primary btn-small" onclick="muatLeaderboard('semua')">Semua</button>
-        <button class="btn btn-secondary btn-small" onclick="muatLeaderboard('mudah')">Mudah</button>
-        <button class="btn btn-secondary btn-small" onclick="muatLeaderboard('sedang')">Sedang</button>
-        <button class="btn btn-secondary btn-small" onclick="muatLeaderboard('sulit')">Sulit</button>
+        <button class="btn btn-primary btn-small" onclick="muatLeaderboard('semua', event)">Semua</button>
+        <button class="btn btn-secondary btn-small" onclick="muatLeaderboard('mudah', event)">Mudah</button>
+        <button class="btn btn-secondary btn-small" onclick="muatLeaderboard('sedang', event)">Sedang</button>
+        <button class="btn btn-secondary btn-small" onclick="muatLeaderboard('sulit', event)">Sulit</button>
       </div>
 
       <!-- Loading -->
@@ -99,11 +99,11 @@
 
     // Muat leaderboard saat halaman load
     document.addEventListener('DOMContentLoaded', () => {
-      muatLeaderboard('semua');
+      muatLeaderboard('semua', null);
     });
 
     // Fungsi untuk muat leaderboard
-    async function muatLeaderboard(tingkat = 'semua') {
+    async function muatLeaderboard(tingkat = 'semua', evt = null) {
       tingkatAktif = tingkat;
 
       // Update tampilan tombol
@@ -113,9 +113,9 @@
       });
       
       // Jika ada event.target, update tombolnya
-      if (event && event.target) {
-        event.target.classList.remove('btn-secondary');
-        event.target.classList.add('btn-primary');
+      if (evt && evt.target) {
+        evt.target.classList.remove('btn-secondary');
+        evt.target.classList.add('btn-primary');
       } else {
         // Set tombol "Semua" sebagai aktif saat page load
         const btnSemua = document.querySelector('.tingkat-kesulitan .btn');
