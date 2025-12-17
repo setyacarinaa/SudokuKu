@@ -152,7 +152,7 @@ const hubungkanBasisData = async () => {
   }
 };
 
-// Middleware - koneksi sebelum setiap request
+// Middleware - koneksi sebelum setiap request (non-blocking)
 app.use(async (req, res, next) => {
   try {
     // Ensure connection sebelum proses request
@@ -163,10 +163,8 @@ app.use(async (req, res, next) => {
     next();
   } catch (error) {
     console.error('❌ Error koneksi middleware:', error.message);
-    return res.status(503).json({
-      sukses: false,
-      pesan: 'Database tidak tersedia - ' + error.message
-    });
+    // Tetap lanjutkan ke handler berikutnya - biarkan controller handle error
+    next();
   }
 });
 

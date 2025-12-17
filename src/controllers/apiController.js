@@ -129,6 +129,18 @@ const dapatkanLeaderboard = async (req, res) => {
     const batas = Math.min(10, Math.max(1, batasReq));
     const tingkat = req.query.tingkat;
 
+    // Check MongoDB connection
+    const mongoose = require('mongoose');
+    if (mongoose.connection.readyState !== 1) {
+      console.log('⚠️ [Leaderboard] MongoDB belum terhubung, mengembalikan data kosong');
+      return res.json({
+        sukses: true,
+        data: [],
+        total: 0,
+        pesan: 'Leaderboard kosong - database sedang connecting'
+      });
+    }
+
     // Build query - hanya ambil skor yang selesai
     let kueri = { apakahSelesai: true };
     if (tingkat && ['mudah', 'sedang', 'sulit'].includes(tingkat.toLowerCase())) {
@@ -172,10 +184,15 @@ const dapatkanLeaderboard = async (req, res) => {
   } catch (error) {
     console.error('❌ [Leaderboard] Error:', error.message);
     console.error('❌ [Leaderboard] Stack:', error.stack);
-    res.status(500).json({
-      sukses: false,
-      pesan: 'Terjadi kesalahan saat mengambil leaderboard',
-      error: error.message
+    console.error('❌ [Leaderboard] Error name:', error.name);
+    
+    // Return empty data instead of error for better UX
+    res.json({
+      sukses: true,
+      data: [],
+      total: 0,
+      pesan: 'Leaderboard tidak tersedia saat ini',
+      debug: process.env.NODE_ENV !== 'production' ? error.message : undefined
     });
   }
 };
