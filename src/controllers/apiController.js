@@ -166,6 +166,25 @@ const dapatkanLeaderboard = async (req, res) => {
       console.log(`⚠️ [Leaderboard] Data kosong! Total docs: ${totalCount}, Selesai: ${selesaiCount}`);
     }
 
+    // Jika database terhubung tetapi tidak ada data, coba fallback ke file lokal
+    if ((daftarSkor.length === 0) || !daftarSkor) {
+      try {
+        const fs = require('fs');
+        const path = require('path');
+        const fallbackPath = path.join(__dirname, '../../public/data/leaderboard.json');
+        if (fs.existsSync(fallbackPath)) {
+          const raw = fs.readFileSync(fallbackPath, 'utf8');
+          const fallback = JSON.parse(raw);
+          if (fallback && Array.isArray(fallback) && fallback.length > 0) {
+            console.log('🔁 [Leaderboard] Returning fallback JSON data');
+            return res.json({ sukses: true, data: fallback.slice(0, batas), total: fallback.length, pesan: 'Fallback leaderboard data' });
+          }
+        }
+      } catch (readErr) {
+        console.error('❌ [Leaderboard] Error reading fallback file:', readErr.message);
+      }
+    }
+
     // Format response
     const papanPeringkat = daftarSkor.map((entri, indeks) => ({
       peringkat: indeks + 1,

@@ -1,0 +1,82 @@
+[
+  {
+    "peringkat": 1,
+    "namaPengguna": "Guest_Alice",
+    "skor": 850,
+    "waktuPenyelesaian": 320,
+    "tingkatKesulitan": "sulit",
+    "tanggalMain": "2025-12-01T10:00:00.000Z"
+  },
+  {
+    "peringkat": 2,
+    "namaPengguna": "Guest_Budi",
+    "skor": 780,
+    "waktuPenyelesaian": 420,
+    "tingkatKesulitan": "sedang",
+    "tanggalMain": "2025-12-05T14:30:00.000Z"
+  },
+  {
+    "peringkat": 3,
+    "namaPengguna": "Guest_Citra",
+    "skor": 740,
+    "waktuPenyelesaian": 360,
+    "tingkatKesulitan": "sedang",
+    "tanggalMain": "2025-12-07T09:15:00.000Z"
+  },
+  {
+    "peringkat": 4,
+    "namaPengguna": "Guest_Dedi",
+    "skor": 700,
+    "waktuPenyelesaian": 480,
+    "tingkatKesulitan": "mudah",
+    "tanggalMain": "2025-12-03T12:00:00.000Z"
+  },
+  {
+    "peringkat": 5,
+    "namaPengguna": "Guest_Ella",
+    "skor": 680,
+    "waktuPenyelesaian": 500,
+    "tingkatKesulitan": "mudah",
+    "tanggalMain": "2025-12-04T16:45:00.000Z"
+  },
+  {
+    "peringkat": 6,
+    "namaPengguna": "Guest_Fikri",
+    "skor": 640,
+    "waktuPenyelesaian": 540,
+    "tingkatKesulitan": "sulit",
+    "tanggalMain": "2025-12-06T11:20:00.000Z"
+  },
+  {
+    "peringkat": 7,
+    "namaPengguna": "Guest_Gita",
+    "skor": 600,
+    "waktuPenyelesaian": 600,
+    "tingkatKesulitan": "sedang",
+    "tanggalMain": "2025-12-02T08:10:00.000Z"
+  },
+  {
+    "peringkat": 8,
+    "namaPengguna": "Guest_Hadi",
+    "skor": 560,
+    "waktuPenyelesaian": 660,
+    "tingkatKesulitan": "mudah",
+    "tanggalMain": "2025-12-08T19:00:00.000Z"
+  },
+  {
+    "peringkat": 9,
+    "namaPengguna": "Guest_Iman",
+    "skor": 520,
+    "waktuPenyelesaian": 720,
+    "tingkatKesulitan": "sulit",
+    "tanggalMain": "2025-12-09T07:30:00.000Z"
+  },
+  {
+    "peringkat": 10,
+    "namaPengguna": "Guest_Jeni",
+    "skor": 480,
+    "waktuPenyelesaian": 780,
+    "tingkatKesulitan": "sedang",
+    "tanggalMain": "2025-12-10T13:50:00.000Z"
+  }
+]
