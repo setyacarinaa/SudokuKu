@@ -45,6 +45,27 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '../views'));
 
+// ==================== MONGODB CONNECTION MIDDLEWARE ====================
+// Ensure we attempt to connect before routes are handled in serverless
+const mongoose = require('mongoose');
+app.use(async (req, res, next) => {
+  try {
+    if (mongoose.connection.readyState !== 1) {
+      console.log(`⏳ [Serverless] mencoba menghubungkan ke MongoDB (status saat ini: ${mongoose.connection.readyState})`);
+      await hubungkanMongoDB();
+      if (mongoose.connection.readyState === 1) {
+        console.log('✅ [Serverless] MongoDB berhasil terhubung');
+      } else {
+        console.warn('⚠️ [Serverless] MongoDB tidak dikonfigurasi atau gagal terhubung. Fitur yang membutuhkan DB akan mengembalikan 503.');
+      }
+    }
+    next();
+  } catch (error) {
+    console.error('❌ Error koneksi middleware:', error && error.message ? error.message : error);
+    next();
+  }
+});
+
 // ==================== ROUTES ====================
 
 // Halaman utama
@@ -154,28 +175,7 @@ app.use((req, res) => {
   });
 });
 
-// ==================== MONGODB CONNECTION ====================
-
-const mongoose = require('mongoose');
-
-// Middleware - gunakan util hubungkanMongoDB agar perilaku konsisten
-app.use(async (req, res, next) => {
-  try {
-    if (mongoose.connection.readyState !== 1) {
-      console.log(`⏳ [Serverless] mencoba menghubungkan ke MongoDB (status saat ini: ${mongoose.connection.readyState})`);
-      await hubungkanMongoDB();
-      if (mongoose.connection.readyState === 1) {
-        console.log('✅ [Serverless] MongoDB berhasil terhubung');
-      } else {
-        console.warn('⚠️ [Serverless] MongoDB tidak dikonfigurasi atau gagal terhubung. Fitur yang membutuhkan DB akan mengembalikan 503.');
-      }
-    }
-    next();
-  } catch (error) {
-    console.error('❌ Error koneksi middleware:', error && error.message ? error.message : error);
-    next();
-  }
-});
+// (moved earlier in file)
 
 // Export app sebagai serverless function
 module.exports = app;
