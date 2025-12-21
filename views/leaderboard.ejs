@@ -252,6 +252,30 @@
               info.className = 'debug-info';
               el.appendChild(info);
             }
+
+            // If DB disconnected, show actionable instructions for Vercel env vars
+            if (j.dbStatus && j.dbStatus.toLowerCase().includes('disconnected')) {
+              const help = document.createElement('div');
+              help.style.marginTop = '1rem';
+              help.style.padding = '1rem';
+              help.style.background = '#fff6e5';
+              help.style.border = '1px solid #ffecb5';
+              help.style.borderRadius = '8px';
+              help.innerHTML = `
+                <strong>Diagnosis:</strong> Aplikasi deploy tidak tersambung ke MongoDB Atlas.
+                <div style="margin-top:0.5rem; color:#333;">Untuk memperbaiki, tambahkan environment variables pada Project Vercel:</div>
+                <ol style="margin-top:0.5rem; color:#333;">
+                  <li><code>MONGODB_URI</code> — connection string MongoDB Atlas (contoh: <em>mongodb+srv://USER:PASSWORD@cluster0.xyz.mongodb.net/sudokuku?retryWrites=true&w=majority</em>)</li>
+                  <li><code>MONGODB_DB</code> — (opsional) <code>sudokuku</code> untuk memastikan nama database</li>
+                  <li><code>SESSION_SECRET</code> — secret untuk session Express</li>
+                </ol>
+                <div style="margin-top:0.5rem;"><a href="https://vercel.com/docs/environment-variables" target="_blank">Panduan set env vars di Vercel</a></div>
+              `;
+              if (!el.querySelector('.debug-help')) {
+                help.className = 'debug-help';
+                el.appendChild(help);
+              }
+            }
           }
         } catch (e) {
           // ignore
