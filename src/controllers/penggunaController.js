@@ -4,6 +4,7 @@
  */
 
 const Pengguna = require('../models/Pengguna');
+const Skor = require('../models/Skor');
 const mongoose = require('mongoose');
 const { hubungkanMongoDB } = require('../utils/koneksiMongo');
 const { kirimEmailSelamatDatang } = require('../services/emailService');
@@ -299,10 +300,46 @@ const dapatkanProfil = async (req, res) => {
   }
 };
 
+/**
+ * Dapatkan riwayat skor pengguna
+ * GET /api/riwayat-skor
+ */
+const dapatkanRiwayatSkor = async (req, res) => {
+  try {
+    if (!req.session.userId) {
+      return res.status(401).json({
+        sukses: false,
+        pesan: 'Anda harus login terlebih dahulu'
+      });
+    }
+
+    const dbStatus = mongoose.connection.readyState;
+    if (dbStatus !== 1) {
+      await hubungkanMongoDB();
+    }
+
+    const riwayat = await Skor.find({ idPengguna: req.session.userId })
+      .sort({ tanggalMain: -1 })
+      .limit(200)
+      .select('tingkatKesulitan waktuPenyelesaian skor tanggalMain apakahSelesai')
+      .lean();
+
+    res.json({ sukses: true, data: riwayat });
+  } catch (error) {
+    console.error('❌ Error saat mengambil riwayat skor:', error);
+    res.status(500).json({
+      sukses: false,
+      pesan: 'Terjadi kesalahan saat mengambil riwayat skor',
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   registerPengguna,
   loginPengguna,
   logoutPengguna,
   cekStatusLogin,
-  dapatkanProfil
+  dapatkanProfil,
+  dapatkanRiwayatSkor
 };

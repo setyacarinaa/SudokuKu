@@ -28,4 +28,7 @@ rute.get('/cek-login', penggunaController.cekStatusLogin);
 // Dapatkan profil pengguna
 rute.get('/profil', penggunaController.dapatkanProfil);
 
+// Dapatkan riwayat skor pengguna
+rute.get('/riwayat-skor', penggunaController.dapatkanRiwayatSkor);
+
 module.exports = rute;

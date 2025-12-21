@@ -92,6 +92,17 @@ app.get('/leaderboard', (req, res) => {
   });
 });
 
+// Halaman profil pengguna
+app.get('/profil', (req, res) => {
+  if (!req.session.userId) {
+    return res.redirect('/login');
+  }
+  res.render('profil', {
+    title: 'SudokuKu - Profil',
+    sudahLogin: true,
+    namaLengkap: req.session.namaLengkap
+  });
+});
 // Halaman hasil permainan
 app.get('/hasil', (req, res) => {
   if (!req.session.userId) {

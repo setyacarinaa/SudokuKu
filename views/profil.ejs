@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SudokuKu — Profil</title>
+  <meta name="theme-color" content="#667eea">
+  <link rel="stylesheet" href="/css/gaya.css">
+</head>
+<body>
+  <header class="header">
+    <nav class="navbar">
+      <div class="logo">🎮 SudokuKu</div>
+      <ul class="nav-menu">
+        <li><a href="/">Beranda</a></li>
+        <li><a href="/sudoku">Main</a></li>
+        <li><a href="/leaderboard">Leaderboard</a></li>
+        <li><a href="/profil" style="color: #667eea; font-weight: bold;">Profil (<%= namaLengkap %>)</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="container">
+    <div class="card" style="max-width:900px; margin:2rem auto;">
+      <div class="card-header text-center">
+        <h1 class="card-title">👤 Profil Saya</h1>
+        <p class="card-subtitle">Informasi akun dan riwayat permainan</p>
+      </div>
+
+      <div id="profil-info" style="padding:1.5rem; display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+        <div class="card" style="padding:1rem;">
+          <h3>Data Akun</h3>
+          <p><strong>Nama:</strong> <span id="nama-lengkap"><%= namaLengkap %></span></p>
+          <p><strong>Email:</strong> <span id="email">-</span></p>
+          <p><strong>Tanggal Daftar:</strong> <span id="tanggal-daftar">-</span></p>
+          <p><strong>Terakhir Login:</strong> <span id="terakhir-login">-</span></p>
+          <p><strong>Skor Terbaik:</strong> <span id="skor-terbaik">-</span></p>
+          <p><strong>Total Permainan:</strong> <span id="total-permainan">-</span></p>
+
+          <div style="margin-top:1rem;">
+            <a href="/api/logout" onclick="return confirm('Yakin ingin logout?')" class="btn btn-danger">🚪 Logout</a>
+          </div>
+        </div>
+
+        <div class="card" style="padding:1rem;">
+          <h3>Aktivitas Singkat</h3>
+          <p id="ringkasan">Memuat ringkasan...</p>
+        </div>
+      </div>
+
+      <div style="padding:1.5rem;">
+        <h3>Riwayat Skor</h3>
+        <div style="overflow:auto;">
+          <table class="leaderboard-table" style="width:100%;">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Tanggal</th>
+                <th>Tingkat</th>
+                <th>Waktu</th>
+                <th>Skor</th>
+                <th>Selesai</th>
+              </tr>
+            </thead>
+            <tbody id="riwayat-body">
+              <tr><td colspan="6">Memuat riwayat...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    function formatWaktu(detiks) {
+      const m = Math.floor(detiks / 60).toString().padStart(2, '0');
+      const s = (detiks % 60).toString().padStart(2, '0');
+      return `${m}:${s}`;
+    }
+
+    function formatTanggal(iso) {
+      const d = new Date(iso);
+      return d.toLocaleString();
+    }
+
+    async function muatProfil() {
+      try {
+        const res = await fetch('/api/profil');
+        if (!res.ok) throw new Error('Gagal memuat profil');
+        const json = await res.json();
+        if (!json.sukses) throw new Error(json.pesan || 'Tidak sukses');
+
+        const data = json.data;
+        document.getElementById('email').innerText = data.email || '-';
+        document.getElementById('tanggal-daftar').innerText = data.tanggalDaftar ? new Date(data.tanggalDaftar).toLocaleDateString() : '-';
+        document.getElementById('terakhir-login').innerText = data.terakhirLogin ? new Date(data.terakhirLogin).toLocaleString() : '-';
+        document.getElementById('skor-terbaik').innerText = data.skorTerbaik || '-';
+        document.getElementById('total-permainan').innerText = data.totalPermainan || 0;
+
+        document.getElementById('ringkasan').innerText = `Skor terbaik: ${data.skorTerbaik || '-'} · Total permainan: ${data.totalPermainan || 0}`;
+      } catch (err) {
+        console.error(err);
+        document.getElementById('ringkasan').innerText = 'Gagal memuat ringkasan profil.';
+      }
+    }
+
+    async function muatRiwayat() {
+      try {
+        const res = await fetch('/api/riwayat-skor');
+        if (!res.ok) throw new Error('Gagal memuat riwayat');
+        const json = await res.json();
+        if (!json.sukses) throw new Error(json.pesan || 'Tidak sukses');
+
+        const body = document.getElementById('riwayat-body');
+        body.innerHTML = '';
+        if (!json.data || json.data.length === 0) {
+          body.innerHTML = '<tr><td colspan="6">Belum ada riwayat permainan</td></tr>';
+          return;
+        }
+
+        json.data.forEach((r, i) => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${i + 1}</td>
+            <td>${formatTanggal(r.tanggalMain)}</td>
+            <td>${r.tingkatKesulitan}</td>
+            <td>${formatWaktu(r.waktuPenyelesaian)}</td>
+            <td>${r.skor}</td>
+            <td>${r.apakahSelesai ? '✅' : '❌'}</td>
+          `;
+          body.appendChild(tr);
+        });
+      } catch (err) {
+        console.error(err);
+        const body = document.getElementById('riwayat-body');
+        body.innerHTML = '<tr><td colspan="6">Gagal memuat riwayat</td></tr>';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      muatProfil();
+      muatRiwayat();
+    });
+  </script>
+</body>
+</html>

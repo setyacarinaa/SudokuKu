@@ -20,7 +20,7 @@
         <li><a href="/sudoku">Main</a></li>
         <li><a href="/leaderboard" style="color: #667eea; font-weight: bold;">Leaderboard</a></li>
         <% if (sudahLogin) { %>
-          <li><a href="/api/logout" onclick="return confirm('Yakin ingin logout?')">Logout (<%= namaLengkap %>)</a></li>
+          <li><a href="/profil">Profil (<%= namaLengkap %>)</a></li>
         <% } else { %>
           <li><a href="/login">Login</a></li>
         <% } %>
