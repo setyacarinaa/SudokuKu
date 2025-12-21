@@ -324,14 +324,32 @@ const dapatkanRiwayatSkor = async (req, res) => {
       .select('tingkatKesulitan waktuPenyelesaian skor tanggalMain apakahSelesai')
       .lean();
 
-    res.json({ sukses: true, data: riwayat });
+    // Pastikan selalu mengembalikan array (bukan null)
+    res.json({ sukses: true, data: riwayat || [] });
   } catch (error) {
     console.error('❌ Error saat mengambil riwayat skor:', error);
-    res.status(500).json({
+    const payload = {
       sukses: false,
       pesan: 'Terjadi kesalahan saat mengambil riwayat skor',
       error: error.message
-    });
+    };
+    if (process.env.NODE_ENV !== 'production') {
+      payload.stack = error.stack;
+    }
+    res.status(500).json(payload);
+  }
+};
+
+// Debug: cek jumlah skor pengguna (untuk verifikasi di deploy)
+const debugRiwayat = async (req, res) => {
+  try {
+    if (!req.session.userId) return res.json({ sukses: false, pesan: 'Tidak ada session' });
+    const dbStatus = mongoose.connection.readyState;
+    if (dbStatus !== 1) await hubungkanMongoDB();
+    const total = await Skor.countDocuments({ idPengguna: req.session.userId });
+    res.json({ sukses: true, total });
+  } catch (e) {
+    res.status(500).json({ sukses: false, pesan: e.message });
   }
 };
 

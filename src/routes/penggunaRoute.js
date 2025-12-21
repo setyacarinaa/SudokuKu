@@ -31,4 +31,7 @@ rute.get('/profil', penggunaController.dapatkanProfil);
 // Dapatkan riwayat skor pengguna
 rute.get('/riwayat-skor', penggunaController.dapatkanRiwayatSkor);
 
+// Debug route: jumlah riwayat skor (cek session & collection)
+rute.get('/debug-riwayat', penggunaController.debugRiwayat);
+
 module.exports = rute;
