@@ -33,7 +33,10 @@ const hubungkanMongoDB = async () => {
     }
 
     if (!uriMongo) {
-      throw new Error('Tidak menemukan connection string MongoDB. Set salah satu env vars: ' + envCandidates.join(', '));
+      console.warn('Tidak menemukan connection string MongoDB. Set salah satu env vars: ' + envCandidates.join(', '));
+      // Jangan throw agar server dan serverless tetap dapat berjalan.
+      // Kembalikan status koneksi saat ini (mungkin disconnected)
+      return mongoose.connection;
     }
     console.log('Menggunakan env var untuk MongoDB:', detectedVar);
 

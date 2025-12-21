@@ -19,6 +19,12 @@ const registerPengguna = async (req, res) => {
     // Pastikan koneksi DB aktif sebelum operasi
     if (mongoose.connection.readyState !== 1) {
       await hubungkanMongoDB();
+      if (mongoose.connection.readyState !== 1) {
+        return res.status(503).json({
+          sukses: false,
+          pesan: 'Database tidak tersedia. Pastikan variabel environment MongoDB sudah diatur.'
+        });
+      }
     }
     const { namaLengkap, email, password } = req.body;
 
@@ -128,6 +134,12 @@ const loginPengguna = async (req, res) => {
     // Pastikan koneksi DB aktif sebelum operasi
     if (mongoose.connection.readyState !== 1) {
       await hubungkanMongoDB();
+      if (mongoose.connection.readyState !== 1) {
+        return res.status(503).json({
+          sukses: false,
+          pesan: 'Database tidak tersedia. Pastikan variabel environment MongoDB sudah diatur.'
+        });
+      }
     }
     const { email, password } = req.body;
 
@@ -270,6 +282,13 @@ const dapatkanProfil = async (req, res) => {
       });
     }
 
+    if (mongoose.connection.readyState !== 1) {
+      await hubungkanMongoDB();
+      if (mongoose.connection.readyState !== 1) {
+        return res.status(503).json({ sukses: false, pesan: 'Database tidak tersedia. Pastikan variabel environment MongoDB sudah diatur.' });
+      }
+    }
+
     const pengguna = await Pengguna.findById(req.session.userId);
     if (!pengguna) {
       return res.status(404).json({
@@ -316,6 +335,9 @@ const dapatkanRiwayatSkor = async (req, res) => {
     const dbStatus = mongoose.connection.readyState;
     if (dbStatus !== 1) {
       await hubungkanMongoDB();
+      if (mongoose.connection.readyState !== 1) {
+        return res.status(503).json({ sukses: false, pesan: 'Database tidak tersedia. Pastikan variabel environment MongoDB sudah diatur.' });
+      }
     }
 
     const riwayat = await Skor.find({ idPengguna: req.session.userId })
@@ -345,7 +367,12 @@ const debugRiwayat = async (req, res) => {
   try {
     if (!req.session.userId) return res.json({ sukses: false, pesan: 'Tidak ada session' });
     const dbStatus = mongoose.connection.readyState;
-    if (dbStatus !== 1) await hubungkanMongoDB();
+    if (dbStatus !== 1) {
+      await hubungkanMongoDB();
+      if (mongoose.connection.readyState !== 1) {
+        return res.status(503).json({ sukses: false, pesan: 'Database tidak tersedia. Pastikan variabel environment MongoDB sudah diatur.' });
+      }
+    }
     const total = await Skor.countDocuments({ idPengguna: req.session.userId });
     res.json({ sukses: true, total });
   } catch (e) {
