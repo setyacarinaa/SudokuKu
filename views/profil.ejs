@@ -22,29 +22,22 @@
 
   <main class="container">
     <div class="card" style="max-width:900px; margin:2rem auto;">
-      <div class="card-header text-center">
+      <div class="card-header text-center" style="position:relative; padding-bottom:1rem;">
         <h1 class="card-title">👤 Profil Saya</h1>
         <p class="card-subtitle">Informasi akun dan riwayat permainan</p>
+        <div style="margin-top:0.75rem;">
+          <a href="/api/logout" onclick="return confirm('Yakin ingin logout?')" class="btn btn-danger">🚪 Logout</a>
+        </div>
       </div>
 
-      <div id="profil-info" style="padding:1.5rem; display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
-        <div class="card" style="padding:1rem;">
+      <div id="profil-info" style="padding:1.5rem; display:grid; grid-template-columns: 1fr; gap:1rem;">
+        <div class="card" style="padding:1.25rem;">
           <h3>Data Akun</h3>
           <p><strong>Nama:</strong> <span id="nama-lengkap"><%= namaLengkap %></span></p>
           <p><strong>Email:</strong> <span id="email">-</span></p>
           <p><strong>Tanggal Daftar:</strong> <span id="tanggal-daftar">-</span></p>
-          <p><strong>Terakhir Login:</strong> <span id="terakhir-login">-</span></p>
-          <p><strong>Skor Terbaik:</strong> <span id="skor-terbaik">-</span></p>
+          <p><strong>Skor Terbaik:</strong> <span id="skor-terbaik">-</span> <small id="keterangan-level" style="color:#6b7280; margin-left:0.5rem">-</small></p>
           <p><strong>Total Permainan:</strong> <span id="total-permainan">-</span></p>
-
-          <div style="margin-top:1rem;">
-            <a href="/api/logout" onclick="return confirm('Yakin ingin logout?')" class="btn btn-danger">🚪 Logout</a>
-          </div>
-        </div>
-
-        <div class="card" style="padding:1rem;">
-          <h3>Aktivitas Singkat</h3>
-          <p id="ringkasan">Memuat ringkasan...</p>
         </div>
       </div>
 
@@ -138,8 +131,25 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      muatProfil();
+        muatProfil();
       muatRiwayat();
+        // Tambah mapping sederhana untuk menampilkan keterangan level berdasarkan skor terbaik
+        (async function setKeteranganLevel() {
+          try {
+            const res = await fetch('/api/profil');
+            if (!res.ok) return;
+            const json = await res.json();
+            if (!json.sukses) return;
+            const skor = json.data.skorTerbaik || 0;
+            const elem = document.getElementById('keterangan-level');
+            let level = 'Mudah';
+            if (skor >= 300) level = 'Sulit';
+            else if (skor >= 200) level = 'Sedang';
+            elem.innerText = `(${level})`;
+          } catch (e) {
+            // ignore
+          }
+        })();
     });
   </script>
 </body>
