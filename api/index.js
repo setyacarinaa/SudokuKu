@@ -75,6 +75,18 @@ app.get('/leaderboard', (req, res) => {
   });
 });
 
+// Halaman profil (ditambahkan juga untuk environment serverless seperti Vercel)
+app.get('/profil', (req, res) => {
+  if (!req.session.userId) {
+    return res.redirect('/login');
+  }
+  res.render('profil', {
+    title: 'Profil',
+    sudahLogin: true,
+    namaLengkap: req.session.namaLengkap
+  });
+});
+
 // Halaman login
 app.get('/login', (req, res) => {
   if (req.session.userId) {
