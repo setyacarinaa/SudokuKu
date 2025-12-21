@@ -43,26 +43,43 @@ const hubungkanMongoDB = async () => {
     // Jika user ingin memaksa nama database yang sama untuk semua environment,
     // mereka bisa set env var `MONGODB_DB`. Kita akan mengganti/menambahkan nama DB pada URI.
     const namaDbOverride = process.env.MONGODB_DB;
-    if (namaDbOverride) {
-      try {
-        // Pisahkan query string jika ada
-        const [base, query] = uriMongo.split('?');
-        // Jika base belum memiliki nama database (endsWith host/port) atau memiliki nama 'test', ganti atau tambahkan
-        const slashIndex = base.indexOf('/', base.indexOf('://') + 3);
-        let newBase;
+    // default DB name when none specified
+    const defaultDbName = 'sudokuku';
+    try {
+      // Pisahkan query string jika ada
+      const [base, query] = uriMongo.split('?');
+      // Jika base belum memiliki nama database (endsWith host/port) atau memiliki nama 'test', ganti atau tambahkan
+      const slashIndex = base.indexOf('/', base.indexOf('://') + 3);
+      let newBase = base;
+
+      if (namaDbOverride) {
         if (slashIndex === -1) {
-          // Tidak ada slash setelah host; tambahkan
           newBase = base + '/' + namaDbOverride;
         } else {
-          // Ganti path (nama DB) dengan namaDbOverride
-          const beforePath = base.slice(0, slashIndex + 1); // termasuk '/'
+          const beforePath = base.slice(0, slashIndex + 1);
           newBase = beforePath + namaDbOverride;
         }
         uriMongo = query ? `${newBase}?${query}` : newBase;
         console.log('Menggunakan override nama database dari MONGODB_DB:', namaDbOverride);
-      } catch (e) {
-        console.warn('Gagal menerapkan MONGODB_DB override, menggunakan URI asli');
+      } else {
+        // If URI already contains a DB path, check if it's 'test' or empty
+        if (slashIndex === -1) {
+          // No DB in URI -> append default
+          newBase = base + '/' + defaultDbName;
+          uriMongo = query ? `${newBase}?${query}` : newBase;
+          console.log(`Tidak ada nama DB di URI; menggunakan default '${defaultDbName}'`);
+        } else {
+          const currentDb = base.slice(slashIndex + 1);
+          if (!currentDb || currentDb === 'test') {
+            const beforePath = base.slice(0, slashIndex + 1);
+            newBase = beforePath + defaultDbName;
+            uriMongo = query ? `${newBase}?${query}` : newBase;
+            console.log(`Nama DB di URI adalah '${currentDb || ''}'; mengganti dengan default '${defaultDbName}'`);
+          }
+        }
       }
+    } catch (e) {
+      console.warn('Gagal menerapkan pengaturan nama DB, menggunakan URI asli');
     }
     
     // Skip jika sudah terhubung
