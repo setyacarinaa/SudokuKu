@@ -73,6 +73,7 @@ app.get('/api/debug-conn', (req, res) => {
       siapTerhubung: hasUri,
       envVarDetected: detectedVar,
       menggunakanOverrideDb: hasDbOverride,
+      databaseName: mongoose.connection && mongoose.connection.name ? mongoose.connection.name : null,
       pesan: ready === 1 ? 'Connected' : (hasUri ? `Env var ${detectedVar} present but not connected` : 'No MongoDB env var set')
     });
   } catch (e) {
