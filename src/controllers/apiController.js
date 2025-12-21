@@ -166,9 +166,8 @@ const dapatkanLeaderboard = async (req, res) => {
       tanggalMain: entri.tanggalMain
     }));
 
-    // Set CORS headers explicitly untuk serverless
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Credentials', 'true');
+    // CORS dikendalikan oleh middleware global (app.use(cors(...))).
+    // Jangan timpa header CORS di sini untuk menghindari konflik (mis. '*' + credentials).
     
     res.json({
       sukses: true,
