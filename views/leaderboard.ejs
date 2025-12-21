@@ -243,16 +243,6 @@
           const j = await res.json();
           const el = document.getElementById('empty-state');
           if (j && j.sukses) {
-            const info = document.createElement('p');
-            info.style.fontSize = '0.9rem';
-            info.style.color = '#6b7280';
-            info.innerText = `Debug: DB status=${j.dbStatus}; totalDocuments=${j.totalDocuments}; selesaiDocuments=${j.selesaiDocuments}`;
-            // append once
-            if (!el.querySelector('.debug-info')) {
-              info.className = 'debug-info';
-              el.appendChild(info);
-            }
-
             // If DB disconnected, show actionable instructions for Vercel env vars
             if (j.dbStatus && j.dbStatus.toLowerCase().includes('disconnected')) {
               const help = document.createElement('div');
