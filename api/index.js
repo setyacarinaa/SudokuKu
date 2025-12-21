@@ -140,10 +140,30 @@ const hubungkanBasisData = async () => {
       return mongoose.connection;
     }
     
-    const URI_MONGODB = process.env.MONGODB_URI;
+    let URI_MONGODB = process.env.MONGODB_URI || process.env.MONGODB_ATLAS_URI;
     
     if (!URI_MONGODB) {
       throw new Error('Variabel environment MONGODB_URI tidak ditemukan');
+    }
+
+    // Jika ada override nama database, ganti atau tambahkan pada URI
+    const namaDbOverride = process.env.MONGODB_DB;
+    if (namaDbOverride) {
+      try {
+        const [base, query] = URI_MONGODB.split('?');
+        const slashIndex = base.indexOf('/', base.indexOf('://') + 3);
+        let newBase;
+        if (slashIndex === -1) {
+          newBase = base + '/' + namaDbOverride;
+        } else {
+          const beforePath = base.slice(0, slashIndex + 1);
+          newBase = beforePath + namaDbOverride;
+        }
+        URI_MONGODB = query ? `${newBase}?${query}` : newBase;
+        console.log('Menggunakan override nama database dari MONGODB_DB:', namaDbOverride);
+      } catch (e) {
+        console.warn('Gagal menerapkan MONGODB_DB override, menggunakan URI asli');
+      }
     }
     
     console.log('🔄 [Cold Start] Menghubungkan ke MongoDB Atlas...');
