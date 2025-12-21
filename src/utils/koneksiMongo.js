@@ -12,11 +12,30 @@ const mongoose = require('mongoose');
 const hubungkanMongoDB = async () => {
   try {
     // Ambil connection string dari environment variable (coba beberapa nama umum)
-    let uriMongo = process.env.MONGODB_URI || process.env.MONGODB_ATLAS_URI || process.env.MONGODB_LOCAL;
+    const envCandidates = [
+      'MONGODB_URI',
+      'MONGODB_ATLAS_URI',
+      'MONGODB_ATLAS',
+      'MONGO_URI',
+      'MONGO_URL',
+      'MONGODB_LOCAL',
+      'DATABASE_URL'
+    ];
+
+    let uriMongo = null;
+    let detectedVar = null;
+    for (const name of envCandidates) {
+      if (process.env[name]) {
+        uriMongo = process.env[name];
+        detectedVar = name;
+        break;
+      }
+    }
 
     if (!uriMongo) {
-      throw new Error('MONGODB_URI tidak ditemukan di environment variables (coba set MONGODB_URI atau MONGODB_ATLAS_URI)');
+      throw new Error('Tidak menemukan connection string MongoDB. Set salah satu env vars: ' + envCandidates.join(', '));
     }
+    console.log('Menggunakan env var untuk MongoDB:', detectedVar);
 
     // Jika user ingin memaksa nama database yang sama untuk semua environment,
     // mereka bisa set env var `MONGODB_DB`. Kita akan mengganti/menambahkan nama DB pada URI.

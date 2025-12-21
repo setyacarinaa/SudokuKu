@@ -59,14 +59,20 @@ app.get('/', (req, res) => {
 app.get('/api/debug-conn', (req, res) => {
   try {
     const ready = mongoose.connection.readyState; // 0 disconnected,1 connected
-    const hasUri = !!(process.env.MONGODB_URI || process.env.MONGODB_ATLAS_URI || process.env.MONGODB_LOCAL);
+    const envCandidates = ['MONGODB_URI','MONGODB_ATLAS_URI','MONGODB_ATLAS','MONGO_URI','MONGO_URL','DATABASE_URL','MONGODB_LOCAL'];
+    let detectedVar = null;
+    for (const n of envCandidates) {
+      if (process.env[n]) { detectedVar = n; break; }
+    }
+    const hasUri = !!detectedVar;
     const hasDbOverride = !!process.env.MONGODB_DB;
     res.json({
       sukses: true,
       readyState: ready,
       siapTerhubung: hasUri,
+      envVarDetected: detectedVar,
       menggunakanOverrideDb: hasDbOverride,
-      pesan: ready === 1 ? 'Connected' : (hasUri ? 'URI set but not connected' : 'No MONGODB_URI set')
+      pesan: ready === 1 ? 'Connected' : (hasUri ? `Env var ${detectedVar} present but not connected` : 'No MongoDB env var set')
     });
   } catch (e) {
     res.status(500).json({ sukses: false, pesan: e.message });
@@ -159,11 +165,22 @@ const hubungkanBasisData = async () => {
       return mongoose.connection;
     }
     
-    let URI_MONGODB = process.env.MONGODB_URI || process.env.MONGODB_ATLAS_URI;
-    
-    if (!URI_MONGODB) {
-      throw new Error('Variabel environment MONGODB_URI tidak ditemukan');
+    // Coba beberapa nama env var yang umum digunakan
+    const envCandidates = ['MONGODB_URI', 'MONGODB_ATLAS_URI', 'MONGODB_ATLAS', 'MONGO_URI', 'MONGO_URL', 'DATABASE_URL'];
+    let URI_MONGODB = null;
+    let detectedVar = null;
+    for (const name of envCandidates) {
+      if (process.env[name]) {
+        URI_MONGODB = process.env[name];
+        detectedVar = name;
+        break;
+      }
     }
+
+    if (!URI_MONGODB) {
+      throw new Error('Variabel environment MongoDB tidak ditemukan. Periksa salah satu: ' + envCandidates.join(', '));
+    }
+    console.log('Menggunakan env var untuk MongoDB:', detectedVar);
 
     // Jika ada override nama database, ganti atau tambahkan pada URI
     const namaDbOverride = process.env.MONGODB_DB;
