@@ -11,11 +11,36 @@ const mongoose = require('mongoose');
  */
 const hubungkanMongoDB = async () => {
   try {
-    // Ambil connection string dari environment variable
-    const uriMongo = process.env.MONGODB_URI;
-    
+    // Ambil connection string dari environment variable (coba beberapa nama umum)
+    let uriMongo = process.env.MONGODB_URI || process.env.MONGODB_ATLAS_URI || process.env.MONGODB_LOCAL;
+
     if (!uriMongo) {
-      throw new Error('MONGODB_URI tidak ditemukan di environment variables');
+      throw new Error('MONGODB_URI tidak ditemukan di environment variables (coba set MONGODB_URI atau MONGODB_ATLAS_URI)');
+    }
+
+    // Jika user ingin memaksa nama database yang sama untuk semua environment,
+    // mereka bisa set env var `MONGODB_DB`. Kita akan mengganti/menambahkan nama DB pada URI.
+    const namaDbOverride = process.env.MONGODB_DB;
+    if (namaDbOverride) {
+      try {
+        // Pisahkan query string jika ada
+        const [base, query] = uriMongo.split('?');
+        // Jika base belum memiliki nama database (endsWith host/port) atau memiliki nama 'test', ganti atau tambahkan
+        const slashIndex = base.indexOf('/', base.indexOf('://') + 3);
+        let newBase;
+        if (slashIndex === -1) {
+          // Tidak ada slash setelah host; tambahkan
+          newBase = base + '/' + namaDbOverride;
+        } else {
+          // Ganti path (nama DB) dengan namaDbOverride
+          const beforePath = base.slice(0, slashIndex + 1); // termasuk '/'
+          newBase = beforePath + namaDbOverride;
+        }
+        uriMongo = query ? `${newBase}?${query}` : newBase;
+        console.log('Menggunakan override nama database dari MONGODB_DB:', namaDbOverride);
+      } catch (e) {
+        console.warn('Gagal menerapkan MONGODB_DB override, menggunakan URI asli');
+      }
     }
     
     // Skip jika sudah terhubung
