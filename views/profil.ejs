@@ -36,7 +36,7 @@
           <p><strong>Nama:</strong> <span id="nama-lengkap"><%= namaLengkap %></span></p>
           <p><strong>Email:</strong> <span id="email">-</span></p>
           <p><strong>Tanggal Daftar:</strong> <span id="tanggal-daftar">-</span></p>
-          <p><strong>Skor Terbaik:</strong> <span id="skor-terbaik">-</span> <small id="keterangan-level" style="color:#6b7280; margin-left:0.5rem">-</small></p>
+          <p><strong>Skor Terbaik:</strong> <span id="skor-terbaik">-</span></p>
           <p><strong>Total Permainan:</strong> <span id="total-permainan">-</span></p>
         </div>
       </div>
@@ -133,19 +133,35 @@
     document.addEventListener('DOMContentLoaded', () => {
         muatProfil();
       muatRiwayat();
-        // Tambah mapping sederhana untuk menampilkan keterangan level berdasarkan skor terbaik
-        (async function setKeteranganLevel() {
+        // Tampilkan skor beserta level dalam satu field
+        function tingkatDariSkor(skor) {
+          if (!skor || skor <= 0) return null;
+          if (skor >= 300) return 'Sulit';
+          if (skor >= 200) return 'Sedang';
+          return 'Mudah';
+        }
+
+        (function setSkorDanLevel() {
           try {
-            const res = await fetch('/api/profil');
-            if (!res.ok) return;
-            const json = await res.json();
-            if (!json.sukses) return;
-            const skor = json.data.skorTerbaik || 0;
-            const elem = document.getElementById('keterangan-level');
-            let level = 'Mudah';
-            if (skor >= 300) level = 'Sulit';
-            else if (skor >= 200) level = 'Sedang';
-            elem.innerText = `(${level})`;
+            const elemSkor = document.getElementById('skor-terbaik');
+            const skorVal = Number(document.getElementById('skor-terbaik').innerText) || null;
+            // jika muatProfil sudah mengisi nilai, gunakan itu; jika belum, coba fetch cepat
+            if (skorVal && skorVal > 0) {
+              const level = tingkatDariSkor(skorVal);
+              elemSkor.innerText = `${skorVal} ${level ? `(${level})` : ''}`;
+              return;
+            }
+
+            // fetch as fallback (safe and idempotent)
+            fetch('/api/profil').then(r => r.json()).then(json => {
+              if (!json || !json.sukses) return;
+              const skor = json.data.skorTerbaik || 0;
+              const level = tingkatDariSkor(skor);
+              elemSkor.innerText = skor && skor > 0 ? `${skor} ${level ? `(${level})` : ''}` : '-';
+              // ensure total permainan also set if missing
+              const tp = document.getElementById('total-permainan');
+              if (tp && (tp.innerText === '-' || !tp.innerText)) tp.innerText = json.data.totalPermainan || 0;
+            }).catch(() => {});
           } catch (e) {
             // ignore
           }
