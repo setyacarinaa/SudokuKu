@@ -33,10 +33,34 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'sudokuku_secret_key',
   resave: false,
   saveUninitialized: false,
+  // Configure cookie for production (Vercel) and local development
   cookie: {
     maxAge: 24 * 60 * 60 * 1000 // 24 jam
   }
 }));
+
+// Trust proxy (needed on Vercel) so secure cookies work behind proxies
+if (process.env.NODE_ENV === 'production' || process.env.VERCEL) {
+  app.set('trust proxy', 1);
+  // update cookie settings to allow cross-site cookies if needed
+  // sameSite:'none' and secure:true required for some cross-origin setups
+  app.use((req, res, next) => {
+    if (req.session) {
+      req.session.cookie.sameSite = 'none';
+      req.session.cookie.secure = true;
+    }
+    next();
+  });
+} else {
+  // local/dev: allow lax sameSite and non-secure cookie
+  app.use((req, res, next) => {
+    if (req.session) {
+      req.session.cookie.sameSite = 'lax';
+      req.session.cookie.secure = false;
+    }
+    next();
+  });
+}
 
 // Static files
 app.use(express.static(path.join(__dirname, '../public')));
