@@ -360,4 +360,5 @@ module.exports = {
   cekStatusLogin,
   dapatkanProfil,
   dapatkanRiwayatSkor
+  ,debugRiwayat
 };
