@@ -55,6 +55,24 @@ app.get('/', (req, res) => {
   });
 });
 
+// Debug endpoint: cek status koneksi dan env vars penting (tidak menampilkan secrets)
+app.get('/api/debug-conn', (req, res) => {
+  try {
+    const ready = mongoose.connection.readyState; // 0 disconnected,1 connected
+    const hasUri = !!(process.env.MONGODB_URI || process.env.MONGODB_ATLAS_URI || process.env.MONGODB_LOCAL);
+    const hasDbOverride = !!process.env.MONGODB_DB;
+    res.json({
+      sukses: true,
+      readyState: ready,
+      siapTerhubung: hasUri,
+      menggunakanOverrideDb: hasDbOverride,
+      pesan: ready === 1 ? 'Connected' : (hasUri ? 'URI set but not connected' : 'No MONGODB_URI set')
+    });
+  } catch (e) {
+    res.status(500).json({ sukses: false, pesan: e.message });
+  }
+});
+
 // Halaman game Sudoku
 app.get('/sudoku', (req, res) => {
   if (!req.session.userId) {
