@@ -235,6 +235,28 @@
       document.getElementById('leaderboard-container').style.display = 'none';
       document.getElementById('empty-state').style.display = 'block';
       document.getElementById('error-state').style.display = 'none';
+      // Fetch debug info to help diagnose empty leaderboard
+      (async () => {
+        try {
+          const res = await fetch('/api/test-leaderboard', { credentials: 'include' });
+          if (!res.ok) return;
+          const j = await res.json();
+          const el = document.getElementById('empty-state');
+          if (j && j.sukses) {
+            const info = document.createElement('p');
+            info.style.fontSize = '0.9rem';
+            info.style.color = '#6b7280';
+            info.innerText = `Debug: DB status=${j.dbStatus}; totalDocuments=${j.totalDocuments}; selesaiDocuments=${j.selesaiDocuments}`;
+            // append once
+            if (!el.querySelector('.debug-info')) {
+              info.className = 'debug-info';
+              el.appendChild(info);
+            }
+          }
+        } catch (e) {
+          // ignore
+        }
+      })();
     }
   </script>
   <!-- Footer -->
