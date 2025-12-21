@@ -13,6 +13,7 @@ const cors = require('cors');
 const ruteApi = require('../src/routes/apiRoute');
 const rutePengguna = require('../src/routes/penggunaRoute');
 const ruteChatbot = require('../src/routes/chatbot');
+const { hubungkanMongoDB } = require('../src/utils/koneksiMongo');
 
 // Inisialisasi Express
 const app = express();
@@ -156,86 +157,21 @@ app.use((req, res) => {
 
 const mongoose = require('mongoose');
 
-// Direct connection tanpa caching untuk cold start
-const hubungkanBasisData = async () => {
-  try {
-    // Check jika sudah connected
-    if (mongoose.connection.readyState === 1) {
-      console.log('♻️ Menggunakan ulang koneksi MongoDB yang sudah ada');
-      return mongoose.connection;
-    }
-    
-    // Coba beberapa nama env var yang umum digunakan
-    const envCandidates = ['MONGODB_URI', 'MONGODB_ATLAS_URI', 'MONGODB_ATLAS', 'MONGO_URI', 'MONGO_URL', 'DATABASE_URL'];
-    let URI_MONGODB = null;
-    let detectedVar = null;
-    for (const name of envCandidates) {
-      if (process.env[name]) {
-        URI_MONGODB = process.env[name];
-        detectedVar = name;
-        break;
-      }
-    }
-
-    if (!URI_MONGODB) {
-      throw new Error('Variabel environment MongoDB tidak ditemukan. Periksa salah satu: ' + envCandidates.join(', '));
-    }
-    console.log('Menggunakan env var untuk MongoDB:', detectedVar);
-
-    // Jika ada override nama database, ganti atau tambahkan pada URI
-    const namaDbOverride = process.env.MONGODB_DB;
-    if (namaDbOverride) {
-      try {
-        const [base, query] = URI_MONGODB.split('?');
-        const slashIndex = base.indexOf('/', base.indexOf('://') + 3);
-        let newBase;
-        if (slashIndex === -1) {
-          newBase = base + '/' + namaDbOverride;
-        } else {
-          const beforePath = base.slice(0, slashIndex + 1);
-          newBase = beforePath + namaDbOverride;
-        }
-        URI_MONGODB = query ? `${newBase}?${query}` : newBase;
-        console.log('Menggunakan override nama database dari MONGODB_DB:', namaDbOverride);
-      } catch (e) {
-        console.warn('Gagal menerapkan MONGODB_DB override, menggunakan URI asli');
-      }
-    }
-    
-    console.log('🔄 [Cold Start] Menghubungkan ke MongoDB Atlas...');
-    
-    // Koneksi langsung tanpa promise caching
-    await mongoose.connect(URI_MONGODB, {
-      serverSelectionTimeoutMS: 30000,
-      socketTimeoutMS: 60000,
-      connectTimeoutMS: 30000,
-      maxPoolSize: 5,
-      minPoolSize: 1,
-      family: 4, // Force IPv4
-    });
-    
-    console.log('✅ [Cold Start] MongoDB terhubung!');
-    console.log(`   Basis data: ${mongoose.connection.name}`);
-    
-    return mongoose.connection;
-  } catch (error) {
-    console.error('❌ [Cold Start] Gagal terhubung:', error.message);
-    throw error;
-  }
-};
-
-// Middleware - koneksi sebelum setiap request (non-blocking)
+// Middleware - gunakan util hubungkanMongoDB agar perilaku konsisten
 app.use(async (req, res, next) => {
   try {
-    // Ensure connection sebelum proses request
     if (mongoose.connection.readyState !== 1) {
-      console.log(`⏳ Menghubungkan... (status saat ini: ${mongoose.connection.readyState})`);
-      await hubungkanBasisData();
+      console.log(`⏳ [Serverless] mencoba menghubungkan ke MongoDB (status saat ini: ${mongoose.connection.readyState})`);
+      await hubungkanMongoDB();
+      if (mongoose.connection.readyState === 1) {
+        console.log('✅ [Serverless] MongoDB berhasil terhubung');
+      } else {
+        console.warn('⚠️ [Serverless] MongoDB tidak dikonfigurasi atau gagal terhubung. Fitur yang membutuhkan DB akan mengembalikan 503.');
+      }
     }
     next();
   } catch (error) {
-    console.error('❌ Error koneksi middleware:', error.message);
-    // Tetap lanjutkan ke handler berikutnya - biarkan controller handle error
+    console.error('❌ Error koneksi middleware:', error && error.message ? error.message : error);
     next();
   }
 });
