@@ -20,7 +20,8 @@ const app = express();
 // ==================== MIDDLEWARE ====================
 
 // CORS
-app.use(cors());
+// Allow credentials so session cookie can be sent from browser to API on deploy
+app.use(cors({ origin: true, credentials: true }));
 
 // Body parser
 app.use(express.json());

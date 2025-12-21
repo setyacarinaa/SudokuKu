@@ -78,7 +78,7 @@
 
     async function muatProfil() {
       try {
-        const res = await fetch('/api/profil');
+        const res = await fetch('/api/profil', { credentials: 'include' });
         if (!res.ok) throw new Error('Gagal memuat profil');
         const json = await res.json();
         if (!json.sukses) throw new Error(json.pesan || 'Tidak sukses');
@@ -99,7 +99,7 @@
 
     async function muatRiwayat() {
       try {
-        const res = await fetch('/api/riwayat-skor');
+        const res = await fetch('/api/riwayat-skor', { credentials: 'include' });
         const body = document.getElementById('riwayat-body');
         body.innerHTML = '';
         let json;
@@ -163,7 +163,7 @@
             }
 
             // fetch as fallback (safe and idempotent)
-            fetch('/api/profil').then(r => r.json()).then(json => {
+            fetch('/api/profil', { credentials: 'include' }).then(r => r.json()).then(json => {
               if (!json || !json.sukses) return;
               const skor = json.data.skorTerbaik || 0;
               const level = tingkatDariSkor(skor);
