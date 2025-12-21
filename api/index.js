@@ -27,40 +27,30 @@ app.use(cors({ origin: true, credentials: true }));
 // Body parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+// Trust proxy (needed on Vercel) so secure cookies work behind proxies
+if (process.env.NODE_ENV === 'production' || process.env.VERCEL) {
+  app.set('trust proxy', 1);
+}
 
-// Session middleware
+// Session middleware - set cookie options depending on environment so initial Set-Cookie is correct
+const isProd = process.env.NODE_ENV === 'production' || !!process.env.VERCEL;
+const cookieOptions = {
+  maxAge: 24 * 60 * 60 * 1000
+};
+if (isProd) {
+  cookieOptions.sameSite = 'none';
+  cookieOptions.secure = true;
+} else {
+  cookieOptions.sameSite = 'lax';
+  cookieOptions.secure = false;
+}
+
 app.use(session({
   secret: process.env.SESSION_SECRET || 'sudokuku_secret_key',
   resave: false,
   saveUninitialized: false,
-  // Configure cookie for production (Vercel) and local development
-  cookie: {
-    maxAge: 24 * 60 * 60 * 1000 // 24 jam
-  }
+  cookie: cookieOptions
 }));
-
-// Trust proxy (needed on Vercel) so secure cookies work behind proxies
-if (process.env.NODE_ENV === 'production' || process.env.VERCEL) {
-  app.set('trust proxy', 1);
-  // update cookie settings to allow cross-site cookies if needed
-  // sameSite:'none' and secure:true required for some cross-origin setups
-  app.use((req, res, next) => {
-    if (req.session) {
-      req.session.cookie.sameSite = 'none';
-      req.session.cookie.secure = true;
-    }
-    next();
-  });
-} else {
-  // local/dev: allow lax sameSite and non-secure cookie
-  app.use((req, res, next) => {
-    if (req.session) {
-      req.session.cookie.sameSite = 'lax';
-      req.session.cookie.secure = false;
-    }
-    next();
-  });
-}
 
 // Static files
 app.use(express.static(path.join(__dirname, '../public')));
