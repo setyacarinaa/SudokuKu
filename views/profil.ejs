@@ -102,34 +102,52 @@
 
     async function muatRiwayat() {
       try {
-        const res = await fetch('/api/riwayat-skor', { credentials: 'include' });
         const body = document.getElementById('riwayat-body');
-        body.innerHTML = '';
-        // parse JSON only if content-type indicates JSON
-        let json = null;
-        const ct = res.headers.get('content-type') || '';
-        if (ct.includes('application/json')) {
-          json = await res.json().catch(() => null);
+        if (!body) return;
+        body.innerHTML = '<tr><td colspan="6">Memuat riwayat...</td></tr>';
+
+        const fetchRiwayat = async () => {
+          const res = await fetch('/api/riwayat-skor', { credentials: 'include', headers: { 'Accept': 'application/json' } });
+          const ct = res.headers.get('content-type') || '';
+          let json = null;
+          if (ct.includes('application/json')) json = await res.json().catch(() => null);
+          if (!res.ok) {
+            const pesan = (json && (json.pesan || json.error)) || res.statusText || `Status ${res.status}`;
+            return { ok: false, pesan, status: res.status, json };
+          }
+          if (!json || !json.sukses) {
+            const pesan = (json && (json.pesan || json.error)) || 'Gagal memuat riwayat';
+            return { ok: false, pesan, status: res.status, json };
+          }
+          return { ok: true, data: json.data };
+        };
+
+        // attempt once, retry once after refreshing profile if unauthorized/runs-into-login requirement
+        let attempt = 0;
+        let result = await fetchRiwayat();
+        if (!result.ok && (result.status === 401 || /login/i.test(result.pesan || ''))) {
+          // if server says login required but page shows a logged-in name, try refreshing session endpoint and retry once
+          const nameEl = document.getElementById('nama-lengkap');
+          if (nameEl && nameEl.innerText && nameEl.innerText.trim()) {
+            try { await fetch('/api/profil', { credentials: 'include', headers: { 'Accept': 'application/json' } }); } catch (e) { /* ignore */ }
+            attempt++;
+            result = await fetchRiwayat();
+          }
         }
 
-        if (!res.ok) {
-          const pesan = (json && (json.pesan || json.error)) || res.statusText || 'Gagal memuat riwayat';
-          body.innerHTML = `<tr><td colspan="6">Gagal memuat riwayat: ${pesan}</td></tr>`;
+        if (!result.ok) {
+          body.innerHTML = `<tr><td colspan="6">Gagal memuat riwayat: ${result.pesan}</td></tr>`;
           return;
         }
 
-        if (!json || !json.sukses) {
-          const pesan = (json && (json.pesan || json.error)) || 'Gagal memuat riwayat';
-          body.innerHTML = `<tr><td colspan="6">Gagal memuat riwayat: ${pesan}</td></tr>`;
-          return;
-        }
-
-        if (!json.data || json.data.length === 0) {
+        const data = result.data;
+        if (!data || data.length === 0) {
           body.innerHTML = '<tr><td colspan="6">Belum ada riwayat permainan</td></tr>';
           return;
         }
 
-        json.data.forEach((r, i) => {
+        body.innerHTML = '';
+        data.forEach((r, i) => {
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td>${i + 1}</td>
@@ -144,7 +162,7 @@
       } catch (err) {
         console.error(err);
         const body = document.getElementById('riwayat-body');
-        body.innerHTML = `<tr><td colspan="6">Gagal memuat riwayat: ${err.message}</td></tr>`;
+        if (body) body.innerHTML = `<tr><td colspan="6">Gagal memuat riwayat: ${err.message}</td></tr>`;
       }
     }
 
