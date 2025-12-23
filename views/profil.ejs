@@ -38,7 +38,7 @@
           <p><strong>Tanggal Daftar:</strong> <span id="tanggal-daftar">-</span></p>
           <p><strong>Skor Terbaik:</strong> <span id="skor-terbaik">-</span></p>
           <p><strong>Total Permainan:</strong> <span id="total-permainan">-</span></p>
-          <p id="ringkasan" style="margin-top:0.5rem; color:#444;">Skor terbaik: - · Total permainan: -</p>
+          
         </div>
       </div>
 
@@ -85,22 +85,20 @@
       setIf('terakhir-login', '-');
       setIf('skor-terbaik', '-');
       setIf('total-permainan', '-');
-      const ringEl = document.getElementById('ringkasan');
-      if (ringEl) ringEl.innerText = 'Memuat ringkasan...';
 
       try {
         const res = await fetch('/api/profil', { credentials: 'include', headers: { 'Accept': 'application/json' } });
         if (!res.ok) {
           const t = await res.text().catch(() => '');
           const reason = t || res.statusText || `Status ${res.status}`;
-          if (ringEl) ringEl.innerText = 'Gagal memuat ringkasan: ' + reason;
-          return false;
+          console.warn('Gagal memuat profil:', reason);
+          return;
         }
         const json = await res.json().catch(() => null);
         if (!json || !json.sukses) {
           const pesan = (json && (json.pesan || json.error)) || 'Tidak sukses';
-          if (ringEl) ringEl.innerText = 'Gagal memuat ringkasan: ' + pesan;
-          return false;
+          console.warn('Gagal memuat profil:', pesan);
+          return;
         }
 
         const data = json.data || {};
@@ -109,11 +107,11 @@
         setIf('terakhir-login', data.terakhirLogin ? new Date(data.terakhirLogin).toLocaleString() : '-');
         setIf('skor-terbaik', data.skorTerbaik || '-');
         setIf('total-permainan', data.totalPermainan || 0);
-        if (ringEl) ringEl.innerText = `Skor terbaik: ${data.skorTerbaik || '-'} · Total permainan: ${data.totalPermainan || 0}`;
+        return;
       } catch (err) {
         console.error(err);
-        if (ringEl) ringEl.innerText = 'Gagal memuat ringkasan profil.';
-        return false;
+        console.warn('Gagal memuat profil:', err.message || err);
+        return;
       }
     }
 
