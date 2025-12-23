@@ -110,7 +110,6 @@
         setIf('skor-terbaik', data.skorTerbaik || '-');
         setIf('total-permainan', data.totalPermainan || 0);
         if (ringEl) ringEl.innerText = `Skor terbaik: ${data.skorTerbaik || '-'} · Total permainan: ${data.totalPermainan || 0}`;
-        return true;
       } catch (err) {
         console.error(err);
         if (ringEl) ringEl.innerText = 'Gagal memuat ringkasan profil.';
