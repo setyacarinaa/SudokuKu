@@ -38,6 +38,7 @@
           <p><strong>Tanggal Daftar:</strong> <span id="tanggal-daftar">-</span></p>
           <p><strong>Skor Terbaik:</strong> <span id="skor-terbaik">-</span></p>
           <p><strong>Total Permainan:</strong> <span id="total-permainan">-</span></p>
+          <p id="ringkasan" style="margin-top:0.5rem; color:#444;">Skor terbaik: - · Total permainan: -</p>
         </div>
       </div>
 
@@ -77,26 +78,43 @@
     }
 
     async function muatProfil() {
-      try {
-        const res = await fetch('/api/profil', { credentials: 'include' });
-        if (!res.ok) throw new Error('Gagal memuat profil');
-        const json = await res.json();
-        if (!json.sukses) throw new Error(json.pesan || 'Tidak sukses');
+      // initialize placeholders first
+      const setIf = (id, value) => { const el = document.getElementById(id); if (el) el.innerText = value; };
+      setIf('email', '-');
+      setIf('tanggal-daftar', '-');
+      setIf('terakhir-login', '-');
+      setIf('skor-terbaik', '-');
+      setIf('total-permainan', '-');
+      const ringEl = document.getElementById('ringkasan');
+      if (ringEl) ringEl.innerText = 'Memuat ringkasan...';
 
-        const data = json.data;
-        const setIf = (id, value) => { const el = document.getElementById(id); if (el) el.innerText = value; };
+      try {
+        const res = await fetch('/api/profil', { credentials: 'include', headers: { 'Accept': 'application/json' } });
+        if (!res.ok) {
+          const t = await res.text().catch(() => '');
+          const reason = t || res.statusText || `Status ${res.status}`;
+          if (ringEl) ringEl.innerText = 'Gagal memuat ringkasan: ' + reason;
+          return false;
+        }
+        const json = await res.json().catch(() => null);
+        if (!json || !json.sukses) {
+          const pesan = (json && (json.pesan || json.error)) || 'Tidak sukses';
+          if (ringEl) ringEl.innerText = 'Gagal memuat ringkasan: ' + pesan;
+          return false;
+        }
+
+        const data = json.data || {};
         setIf('email', data.email || '-');
         setIf('tanggal-daftar', data.tanggalDaftar ? new Date(data.tanggalDaftar).toLocaleDateString() : '-');
         setIf('terakhir-login', data.terakhirLogin ? new Date(data.terakhirLogin).toLocaleString() : '-');
         setIf('skor-terbaik', data.skorTerbaik || '-');
         setIf('total-permainan', data.totalPermainan || 0);
-
-        const ringEl = document.getElementById('ringkasan');
         if (ringEl) ringEl.innerText = `Skor terbaik: ${data.skorTerbaik || '-'} · Total permainan: ${data.totalPermainan || 0}`;
+        return true;
       } catch (err) {
         console.error(err);
-        const ringEl = document.getElementById('ringkasan');
         if (ringEl) ringEl.innerText = 'Gagal memuat ringkasan profil.';
+        return false;
       }
     }
 
@@ -167,8 +185,11 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        muatProfil();
-      muatRiwayat();
+        (async function initProfile() {
+          const ok = await muatProfil();
+          // load riwayat after profil attempt to avoid race/unauthorized issues
+          await muatRiwayat();
+        })();
         // Tampilkan skor beserta level dalam satu field
         function tingkatDariSkor(skor) {
           if (!skor || skor <= 0) return null;
