@@ -84,16 +84,19 @@
         if (!json.sukses) throw new Error(json.pesan || 'Tidak sukses');
 
         const data = json.data;
-        document.getElementById('email').innerText = data.email || '-';
-        document.getElementById('tanggal-daftar').innerText = data.tanggalDaftar ? new Date(data.tanggalDaftar).toLocaleDateString() : '-';
-        document.getElementById('terakhir-login').innerText = data.terakhirLogin ? new Date(data.terakhirLogin).toLocaleString() : '-';
-        document.getElementById('skor-terbaik').innerText = data.skorTerbaik || '-';
-        document.getElementById('total-permainan').innerText = data.totalPermainan || 0;
+        const setIf = (id, value) => { const el = document.getElementById(id); if (el) el.innerText = value; };
+        setIf('email', data.email || '-');
+        setIf('tanggal-daftar', data.tanggalDaftar ? new Date(data.tanggalDaftar).toLocaleDateString() : '-');
+        setIf('terakhir-login', data.terakhirLogin ? new Date(data.terakhirLogin).toLocaleString() : '-');
+        setIf('skor-terbaik', data.skorTerbaik || '-');
+        setIf('total-permainan', data.totalPermainan || 0);
 
-        document.getElementById('ringkasan').innerText = `Skor terbaik: ${data.skorTerbaik || '-'} · Total permainan: ${data.totalPermainan || 0}`;
+        const ringEl = document.getElementById('ringkasan');
+        if (ringEl) ringEl.innerText = `Skor terbaik: ${data.skorTerbaik || '-'} · Total permainan: ${data.totalPermainan || 0}`;
       } catch (err) {
         console.error(err);
-        document.getElementById('ringkasan').innerText = 'Gagal memuat ringkasan profil.';
+        const ringEl = document.getElementById('ringkasan');
+        if (ringEl) ringEl.innerText = 'Gagal memuat ringkasan profil.';
       }
     }
 
@@ -102,16 +105,21 @@
         const res = await fetch('/api/riwayat-skor', { credentials: 'include' });
         const body = document.getElementById('riwayat-body');
         body.innerHTML = '';
-        let json;
-        try {
-          json = await res.json();
-        } catch (e) {
-          body.innerHTML = '<tr><td colspan="6">Gagal memuat riwayat (response bukan JSON)</td></tr>';
+        // parse JSON only if content-type indicates JSON
+        let json = null;
+        const ct = res.headers.get('content-type') || '';
+        if (ct.includes('application/json')) {
+          json = await res.json().catch(() => null);
+        }
+
+        if (!res.ok) {
+          const pesan = (json && (json.pesan || json.error)) || res.statusText || 'Gagal memuat riwayat';
+          body.innerHTML = `<tr><td colspan="6">Gagal memuat riwayat: ${pesan}</td></tr>`;
           return;
         }
 
-        if (!res.ok || !json.sukses) {
-          const pesan = json.pesan || json.error || 'Gagal memuat riwayat';
+        if (!json || !json.sukses) {
+          const pesan = (json && (json.pesan || json.error)) || 'Gagal memuat riwayat';
           body.innerHTML = `<tr><td colspan="6">Gagal memuat riwayat: ${pesan}</td></tr>`;
           return;
         }
@@ -154,7 +162,8 @@
         (function setSkorDanLevel() {
           try {
             const elemSkor = document.getElementById('skor-terbaik');
-            const skorVal = Number(document.getElementById('skor-terbaik').innerText) || null;
+            const raw = elemSkor ? elemSkor.innerText : '';
+            const skorVal = raw ? Number(raw.toString().replace(/[^0-9.-]+/g, '')) || null : null;
             // jika muatProfil sudah mengisi nilai, gunakan itu; jika belum, coba fetch cepat
             if (skorVal && skorVal > 0) {
               const level = tingkatDariSkor(skorVal);
@@ -167,7 +176,7 @@
               if (!json || !json.sukses) return;
               const skor = json.data.skorTerbaik || 0;
               const level = tingkatDariSkor(skor);
-              elemSkor.innerText = skor && skor > 0 ? `${skor} ${level ? `(${level})` : ''}` : '-';
+              if (elemSkor) elemSkor.innerText = skor && skor > 0 ? `${skor} ${level ? `(${level})` : ''}` : '-';
               // ensure total permainan also set if missing
               const tp = document.getElementById('total-permainan');
               if (tp && (tp.innerText === '-' || !tp.innerText)) tp.innerText = json.data.totalPermainan || 0;
