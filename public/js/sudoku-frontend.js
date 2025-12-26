@@ -176,6 +176,12 @@ function tampilkanPapan() {
         input.value = nilai;
         input.classList.add('tetap');
         input.readOnly = true;
+        // Press animation for fixed cells as well
+        input.addEventListener('mousedown', (e) => { input.classList.add('sel-pressed'); });
+        input.addEventListener('mouseup', (e) => { input.classList.remove('sel-pressed'); });
+        input.addEventListener('mouseleave', (e) => { input.classList.remove('sel-pressed'); });
+        input.addEventListener('touchstart', (e) => { input.classList.add('sel-pressed'); });
+        input.addEventListener('touchend', (e) => { input.classList.remove('sel-pressed'); });
       } else {
         input.value = '';
         // Make cell readonly so mobile keyboard won't open; selection handled via click/touch

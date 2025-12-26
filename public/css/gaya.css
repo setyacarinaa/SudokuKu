@@ -216,62 +216,58 @@ body {
 /* ==================== SUDOKU BOARD ==================== */
 .papan-sudoku {
   display: grid;
-  grid-template-columns: repeat(9, 48px);
-  grid-template-rows: repeat(9, 48px);
+  grid-template-columns: repeat(9, 45px);
+  grid-template-rows: repeat(9, 45px);
   gap: 0;
+  border: 3px solid var(--text-dark);
   margin: 1.5rem auto;
   width: fit-content;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.45);
-  background: #0f0d18; /* deep background for board */
-  border-radius: 8px;
-  padding: 6px; /* inner padding so outer border shows */
+  box-shadow: var(--shadow-lg);
+  background: white;
 }
 
 .sel-sudoku {
-  width: 48px;
-  height: 48px;
-  appearance: none;
-  -webkit-appearance: none;
-  border: 1px solid rgba(255,255,255,0.06);
-  background: transparent;
-  color: #e6e6ff;
+  width: 45px;
+  height: 45px;
+  border: 1px solid var(--border-color);
   text-align: center;
-  font-size: 1.25rem;
-  font-weight: 700;
-  transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
-  outline: none;
-  caret-color: transparent;
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: var(--text-dark);
+  transition: all 0.2s;
 }
 
 .sel-sudoku:focus {
-  transform: translateY(-2px);
+  outline: none;
+  background: #e0e7ff;
+  border-color: var(--primary-color);
 }
 
 .sel-sudoku.tetap {
-  color: #9fb3ff; /* desaturated bluish for given numbers */
-  font-weight: 800;
+  background: #f3f4f6;
+  color: var(--text-dark);
+  font-weight: 900;
 }
 
 .sel-sudoku.diisi {
-  color: #b388ff; /* user inputs in soft purple */
+  color: var(--primary-color);
 }
 
 .sel-sudoku.salah {
-  background: rgba(255, 60, 60, 0.08);
-  color: #ff9b9b;
+  background: #fee2e2;
+  color: var(--error-color);
 }
 
-/* Press animation class */
+/* Press animation class (keeps small visual feedback) */
 .sel-sudoku.sel-pressed {
   transform: scale(0.96);
-  box-shadow: 0 8px 30px rgba(100,60,200,0.22) inset;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08) inset;
 }
 
-/* Selected cell (single) highlight */
+/* Selected cell when tapped */
 .sel-sudoku.sel-terpilih {
-  background: linear-gradient(135deg, rgba(110,76,255,0.16), rgba(123,95,255,0.08));
-  box-shadow: 0 8px 20px rgba(110,76,255,0.12);
-  border: 1px solid rgba(150,120,255,0.35);
+  outline: 3px solid rgba(102,126,234,0.18);
+  box-shadow: 0 4px 18px rgba(102,126,234,0.12) inset;
 }
 
 /* Border tebal untuk subgrid 3x3 */
