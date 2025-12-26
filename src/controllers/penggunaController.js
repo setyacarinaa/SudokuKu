@@ -185,13 +185,30 @@ const loginPengguna = async (req, res) => {
       pengguna.save().catch(() => {});
     }
 
+    // Hitung skor terbaik terbaru dari koleksi Skor
+    let skorTerbaikCount = pengguna.skorTerbaik || 0;
+    try {
+      const top = await Skor.findOne({ idPengguna: pengguna._id }).sort({ skor: -1 }).select('skor').lean();
+      if (top && typeof top.skor === 'number') skorTerbaikCount = top.skor;
+    } catch (errBest) {
+      skorTerbaikCount = pengguna.skorTerbaik || 0;
+    }
+
+    // Sinkronkan skorTerbaik pada dokumen pengguna jika berbeda (non-blocking)
+    try {
+      if (typeof pengguna.skorTerbaik !== 'number' || pengguna.skorTerbaik !== skorTerbaikCount) {
+        pengguna.skorTerbaik = skorTerbaikCount;
+        pengguna.save().catch(() => {});
+      }
+    } catch (e) {}
+
     res.json({
       sukses: true,
       data: {
         id: pengguna._id,
         namaLengkap: pengguna.namaLengkap,
         email: pengguna.email,
-        skorTerbaik: pengguna.skorTerbaik,
+        skorTerbaik: skorTerbaikCount,
         totalPermainan: totalPermainanCount
       },
       pesan: 'Login berhasil!'
@@ -333,13 +350,33 @@ const dapatkanProfil = async (req, res) => {
       // ignore save errors
     }
 
+    // Hitung skor terbaik terbaru dari koleksi Skor agar akurat terhadap riwayat
+    let skorTerbaikCount = pengguna.skorTerbaik || 0;
+    try {
+      const top = await Skor.findOne({ idPengguna: pengguna._id }).sort({ skor: -1 }).select('skor').lean();
+      if (top && typeof top.skor === 'number') skorTerbaikCount = top.skor;
+    } catch (errBest) {
+      console.warn('⚠️ Gagal menghitung skor terbaik dari koleksi Skor:', errBest && errBest.message);
+      skorTerbaikCount = pengguna.skorTerbaik || 0;
+    }
+
+    // Sinkronkan dokumen pengguna jika berbeda (upaya terbaik, non-blocking)
+    try {
+      if (typeof pengguna.skorTerbaik !== 'number' || pengguna.skorTerbaik !== skorTerbaikCount) {
+        pengguna.skorTerbaik = skorTerbaikCount;
+        pengguna.save().catch(err => console.warn('⚠️ Gagal memperbarui skorTerbaik pada dokumen pengguna:', err && err.message));
+      }
+    } catch (e) {
+      // ignore
+    }
+
     res.json({
       sukses: true,
       data: {
         id: pengguna._id,
         namaLengkap: pengguna.namaLengkap,
         email: pengguna.email,
-        skorTerbaik: pengguna.skorTerbaik,
+        skorTerbaik: skorTerbaikCount,
         totalPermainan: totalPermainanCount,
         tanggalDaftar: pengguna.tanggalDaftar,
         terakhirLogin: pengguna.terakhirLogin
