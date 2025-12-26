@@ -273,12 +273,12 @@ body {
 /* Border tebal untuk subgrid 3x3 */
 .sel-sudoku:nth-child(9n+3),
 .sel-sudoku:nth-child(9n+6) {
-  border-right: 2px solid rgba(255,255,255,0.08);
+  border-right: 2px solid var(--text-dark);
 }
 
 .sel-sudoku:nth-child(n+19):nth-child(-n+27),
 .sel-sudoku:nth-child(n+46):nth-child(-n+54) {
-  border-bottom: 2px solid rgba(255,255,255,0.08);
+  border-bottom: 2px solid var(--text-dark);
 }
 
 /* ==================== GAME CONTROLS ==================== */
