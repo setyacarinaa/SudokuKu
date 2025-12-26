@@ -500,10 +500,11 @@ body {
 /* ==================== CHATBOT ==================== */
 .chatbot-container {
   position: fixed;
-  bottom: 18px;
+  bottom: 4px;
   right: 18px;
-  width: 380px;
-  height: 600px;
+  /* Lebarkan dan tinggi untuk memberi ruang pada bagian 'pertanyaan cepat' */
+  width: 460px;
+  height: 720px;
   background: var(--bg-white);
   border-radius: 14px;
   box-shadow: 0 20px 45px rgba(0, 0, 0, 0.18);
@@ -584,7 +585,8 @@ body {
 .chatbot-messages {
   flex: 1 1 auto;
   min-height: 120px;
-  max-height: calc(600px - 45px - 140px - 80px);
+  /* Sesuaikan maksimum tinggi pesan dengan tinggi kontainer yang lebih besar */
+  max-height: calc(720px - 45px - 160px - 60px);
     padding: 1rem;
     /* Sisakan sedikit ruang agar pesan tidak menempel 100% ke input */
     padding-bottom: 8px; /* rapat ke input */
@@ -625,11 +627,12 @@ body {
 
 .chatbot-input {
   display: flex;
-  gap: 0.4rem;
-  padding: 0.45rem 0.8rem;
-  border-top: 1px solid #e0e3e8;
+  gap: 0.6rem;
+  padding: 0.6rem 1rem; /* Lebih banyak ruang untuk area input */
+  /* Buat latar input transparan agar tidak muncul strip putih */
+  border-top: none;
   flex-shrink: 0;
-  background: white;
+  background: transparent;
   height: auto;
   width: 100%;
   box-sizing: border-box;
@@ -655,16 +658,22 @@ body {
 
 .chatbot-input input {
   flex: 1;
-  padding: 0.4rem 0.6rem;
+  padding: 0.8rem 1rem; /* Lebih besar area ketik */
+  min-height: 44px;
+  border-radius: 8px;
   border: 1px solid #d1d5db;
   animation: scaleUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
   transition: transform 0.28s ease, opacity 0.28s ease;
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-family: inherit;
 }
 
 .chatbot-input button {
   flex-shrink: 0;
+  min-width: 64px;
+  min-height: 40px;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.95rem;
 }
 
 .overlay-selesai.hiding {
@@ -955,8 +964,8 @@ body {
 
   .chatbot-container {
     width: 92%;
-    height: 70vh;
-    max-height: 550px;
+    height: 76vh;
+    max-height: 760px;
     bottom: 80px;
     right: 4%;
     left: 4%;
