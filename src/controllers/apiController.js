@@ -75,8 +75,10 @@ const rekamSkor = async (req, res) => {
 
     // Update total permainan dan skor terbaik pengguna
     pengguna.totalPermainan += 1;
+    // simpan nilai skor sebelumnya untuk response
+    let skorSebelumnya = pengguna.skorTerbaik || 0;
     if (skor > pengguna.skorTerbaik) {
-      const skorSebelumnya = pengguna.skorTerbaik;
+      // skorSebelumnya sudah menyimpan nilai lama
       pengguna.skorTerbaik = skor;
       await pengguna.save();
 

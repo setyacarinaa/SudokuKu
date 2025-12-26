@@ -15,6 +15,7 @@ let nomorKeypadTerpilih = null; // Menyimpan nomor keypad yang sedang dipilih (h
 let errorCount = 0; // Tracking kesalahan (max 3)
 let solusiSekarang = null; // Menyimpan solusi untuk validasi
 let solusiDitampilkan = false; // Jika true, pemain tidak boleh submit/rekam skor
+let puzzleFilledButNotSubmitted = false; // Jika true: semua sel terisi tetapi belum submit
 const MAX_ERRORS = 3; // Batas maksimal kesalahan
 // transient highlight removed; persistent toggle highlighting used instead
 
@@ -245,7 +246,7 @@ function inputAngkaViaKeypad(angka) {
   // Cek apakah puzzle selesai
   if (cekPuzzleSelesai()) {
     setTimeout(() => {
-      selesaiPermainan();
+      markPuzzleFilledButNotSubmitted();
     }, 500);
   }
 
@@ -387,7 +388,7 @@ function tanganiInput(event, baris, kolom) {
   // Cek apakah puzzle selesai
   if (cekPuzzleSelesai()) {
     setTimeout(() => {
-      selesaiPermainan();
+      markPuzzleFilledButNotSubmitted();
     }, 500);
   }
 }
@@ -646,43 +647,43 @@ function tampilkanOverlaySelesai(durasiDetik, skorFinal) {
         </div>
         
         <div class="overlay-actions">
-          <a href="/sudoku" class="btn btn-primary btn-lg overlay-btn">🎮 Main Lagi</a>
-          <a href="/" class="btn btn-secondary btn-lg overlay-btn">🏠 Kembali ke Beranda</a>
-          <button id="btn-overlay-leaderboard" class="btn btn-tertiary btn-lg overlay-btn">🏅 Lihat Leaderboard</button>
+          <button type="button" id="btn-overlay-main" class="btn btn-primary btn-lg overlay-btn">🎮 Main Lagi</button>
+          <button type="button" id="btn-overlay-home" class="btn btn-secondary btn-lg overlay-btn">🏠 Kembali ke Beranda</button>
         </div>
       </div>
     `;
-    
+
     document.body.appendChild(overlay);
   }
-  
+
   // Show overlay dengan animasi
   overlay.style.display = 'flex';
   overlay.offsetHeight; // Trigger reflow
   overlay.classList.add('show');
 
-  // Pasang listener untuk tombol Leaderboard yang akan cek status login terlebih dahulu
-  const btnLeaderboard = document.getElementById('btn-overlay-leaderboard');
-  if (btnLeaderboard) {
-    btnLeaderboard.addEventListener('click', async () => {
-      try {
-        // Include credentials so server can read session cookie and determine login state
-        const res = await fetch('/api/whoami', { credentials: 'include', headers: { 'Accept': 'application/json' } });
-        if (res.ok) {
-          const j = await res.json();
-          // Jika backend memberi tahu user terautentikasi, langsung ke leaderboard
-          if (j && (j.sukses || j.user)) {
-            window.location.href = '/leaderboard';
-            return;
-          }
-        }
-      } catch (e) {
-        // ignore network/parse errors, fall through to login redirect
-      }
-      // Jika tidak terautentikasi atau gagal cek, arahkan ke login dengan redirect kembali ke leaderboard setelah login
-      window.location.href = '/login?next=/leaderboard';
-    });
+  // Tombol Main Lagi: muat papan baru tanpa meninggalkan halaman
+  const btnMain = document.getElementById('btn-overlay-main');
+  if (btnMain) {
+    btnMain.onclick = (e) => {
+      e.preventDefault(); e.stopPropagation();
+      if (!confirm('Muat papan baru sekarang?')) return;
+      overlay.classList.remove('show');
+      overlay.classList.add('hiding');
+      setTimeout(() => {
+        overlay.classList.remove('hiding');
+        overlay.style.display = 'none';
+        try { muatPapanBaru(tingkatTerpilih); } catch (err) { window.location.href = '/sudoku'; }
+      }, 350);
+    };
   }
+
+  // Tombol Kembali ke Beranda
+  const btnHome = document.getElementById('btn-overlay-home');
+  if (btnHome) {
+    btnHome.onclick = (e) => { e.preventDefault(); e.stopPropagation(); window.location.href = '/'; };
+  }
+
+  // Removed "Lihat Leaderboard" button from overlay per UX decision.
   
   // Auto-redirect dihapus; pemain memilih aksi sendiri
 }
@@ -740,43 +741,28 @@ function cekPuzzleSelesai() {
 // ==================== SELESAI PERMAINAN ====================
 
 async function selesaiPermainan() {
-  // Hentikan timer
-  hentikanTimer();
-  
-  const waktuSelesai = hitungWaktu();
-  
-  // Simpan skor
+  // Delegate to centralized gameOver flow so we show the overlay
+  // and let the player choose actions (no immediate "play again" prompt).
   try {
-    const response = await fetch('/api/rekam-skor', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        waktuPenyelesaian: waktuSelesai,
-        tingkatKesulitan: tingkatTerpilih
-      })
-    });
-    
-    const data = await response.json();
-    
-    if (data.sukses) {
-      skorPemain = data.data.skor;
-      tampilkanPesan(
-        `🎉 Selamat! Puzzle selesai dalam ${formatWaktu(waktuSelesai)}! Skor: ${skorPemain}`,
-        'success'
-      );
-      
-      // Tanya apakah mau main lagi
-      setTimeout(() => {
-        if (confirm('Main lagi dengan puzzle baru?')) {
-          muatPapanBaru(tingkatTerpilih);
-        }
-      }, 2000);
-    }
-  } catch (error) {
-    console.error('❌ Error menyimpan skor:', error);
-    tampilkanPesan('Puzzle selesai! Tapi gagal menyimpan skor.', 'error');
+    gameOver(true);
+  } catch (e) {
+    // Fallback: if something goes wrong, still attempt to show overlay
+    try { tampilkanOverlaySelesai(hitungWaktu(), hitungSkor(Math.floor((new Date() - waktuMulai) / 1000), tingkatTerpilih)); } catch (err) {}
+  }
+}
+
+// Ketika semua sel terisi otomatis: jangan langsung rekam atau tunjukkan overlay.
+// Beritahu pemain untuk menekan tombol Submit jika ingin memverifikasi/rekam skor.
+function markPuzzleFilledButNotSubmitted() {
+  puzzleFilledButNotSubmitted = true;
+  tampilkanPesan('Semua sel terisi. Tekan "Submit Jawaban Final" untuk memverifikasi dan menyimpan skor.', 'info');
+
+  // Sorot tombol submit agar jelas bagi pemain
+  const btnSubmit = document.getElementById('btn-submit-jawaban');
+  if (btnSubmit) {
+    btnSubmit.classList.add('btn-primary');
+    btnSubmit.classList.remove('btn-secondary');
+    try { btnSubmit.focus(); } catch (e) {}
   }
 }
 
@@ -953,48 +939,29 @@ function updateKeypadCounters() {
     }
   }
 
-  // Update DOM for keypad badges
+  // Update keypad visual state (no numeric badges shown)
   document.querySelectorAll('.btn-keypad').forEach((btn) => {
     const txt = btn.textContent.trim();
     const digit = Number(txt[0]);
     if (!Number.isInteger(digit) || digit < 1 || digit > 9) return;
 
-    const remaining = Math.max(0, targetCounts[digit] - correctCounts[digit]);
-
-    // find or create badge
-    let badge = btn.querySelector('.keypad-badge');
-    if (!badge && remaining > 0) {
-      badge = document.createElement('span');
-      badge.className = 'keypad-badge';
-      btn.appendChild(badge);
+    // If all occurrences of this digit are correctly placed -> remove/hide button
+    if (targetCounts[digit] > 0 && correctCounts[digit] >= targetCounts[digit]) {
+      btn.classList.add('keypad-complete');
+      btn.classList.remove('keypad-error');
+      try { btn.disabled = true; } catch (e) {}
+      return;
+    } else {
+      btn.classList.remove('keypad-complete');
+      try { btn.disabled = false; } catch (e) {}
     }
 
-    if (badge) {
-      if (remaining > 0) {
-        badge.textContent = String(remaining);
-        badge.style.display = 'inline-block';
-      } else {
-        badge.style.display = 'none';
+    // If player placed as many instances as solution but some are wrong -> animate error briefly
+    if (targetCounts[digit] > 0 && placedCounts[digit] >= targetCounts[digit] && correctCounts[digit] < targetCounts[digit]) {
+      if (!btn.classList.contains('keypad-error')) {
+        btn.classList.add('keypad-error');
+        setTimeout(() => { btn.classList.remove('keypad-error'); }, 700);
       }
-    }
-
-    // If player used up all occurrences but some are wrongly placed -> animate error
-    if (placedCounts[digit] >= targetCounts[digit] && correctCounts[digit] < targetCounts[digit] && targetCounts[digit] > 0) {
-      btn.classList.add('keypad-error');
-
-      // Prepare error message listing up to 5 wrong positions for that digit
-      const wrongs = wrongPositionsByNumber[digit] || [];
-      let msg = `⚠️ Angka ${digit} sudah digunakan semua, tetapi beberapa posisinya salah.`;
-      if (wrongs.length > 0) {
-        msg += '\nPosisi salah:\n';
-        wrongs.slice(0, 5).forEach(w => { msg += `• Baris ${w.baris}, Kolom ${w.kolom} (seharusnya ${w.nilaiBenar})\n`; });
-        if (wrongs.length > 5) msg += `• ...dan ${wrongs.length - 5} lainnya`;
-      }
-
-      tampilkanPesan(msg, 'error');
-
-      // Remove error class after animation duration
-      setTimeout(() => { btn.classList.remove('keypad-error'); }, 700);
     } else {
       btn.classList.remove('keypad-error');
     }

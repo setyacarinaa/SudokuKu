@@ -60,6 +60,11 @@
               <tr><td colspan="6">Memuat riwayat...</td></tr>
             </tbody>
           </table>
+          <div id="riwayat-pagination" style="margin-top:0.75rem; display:flex; gap:0.5rem; align-items:center; justify-content:flex-end;">
+            <button id="riwayat-prev" class="btn btn-secondary" disabled>‹ Prev</button>
+            <span id="riwayat-page-info" style="font-weight:600; color:var(--text-light)"></span>
+            <button id="riwayat-next" class="btn btn-secondary" disabled>Next ›</button>
+          </div>
         </div>
       </div>
     </div>
@@ -158,22 +163,59 @@
         const data = result.data;
         if (!data || data.length === 0) {
           body.innerHTML = '<tr><td colspan="6">Belum ada riwayat permainan</td></tr>';
+          // disable pagination
+          const infoEl = document.getElementById('riwayat-page-info'); if (infoEl) infoEl.innerText = '';
+          document.getElementById('riwayat-prev').disabled = true;
+          document.getElementById('riwayat-next').disabled = true;
           return;
         }
 
-        body.innerHTML = '';
-        data.forEach((r, i) => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${i + 1}</td>
-            <td>${formatTanggal(r.tanggalMain)}</td>
-            <td>${r.tingkatKesulitan}</td>
-            <td>${formatWaktu(r.waktuPenyelesaian)}</td>
-            <td>${r.skor}</td>
-            <td>${r.apakahSelesai ? '✅' : '❌'}</td>
-          `;
-          body.appendChild(tr);
-        });
+        // Client-side pagination: 10 rows per page
+        const rowsPerPage = 10;
+        let riwayatData = data.slice();
+        let currentPage = 0; // zero-based
+
+        function renderPage(page) {
+          currentPage = page;
+          const start = page * rowsPerPage;
+          const end = Math.min(start + rowsPerPage, riwayatData.length);
+          body.innerHTML = '';
+          for (let idx = start; idx < end; idx++) {
+            const r = riwayatData[idx];
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${idx + 1}</td>
+              <td>${formatTanggal(r.tanggalMain)}</td>
+              <td>${r.tingkatKesulitan}</td>
+              <td>${formatWaktu(r.waktuPenyelesaian)}</td>
+              <td>${r.skor}</td>
+              <td>${r.apakahSelesai ? '✅' : '❌'}</td>
+            `;
+            body.appendChild(tr);
+          }
+
+          // update pagination controls
+          const totalPages = Math.ceil(riwayatData.length / rowsPerPage);
+          const infoEl = document.getElementById('riwayat-page-info');
+          if (infoEl) infoEl.innerText = `Halaman ${page + 1} / ${totalPages}`;
+          const prevBtn = document.getElementById('riwayat-prev');
+          const nextBtn = document.getElementById('riwayat-next');
+          if (prevBtn) prevBtn.disabled = page <= 0;
+          if (nextBtn) nextBtn.disabled = page >= totalPages - 1;
+        }
+
+        // wire up controls
+        const prevBtn = document.getElementById('riwayat-prev');
+        const nextBtn = document.getElementById('riwayat-next');
+        if (prevBtn) {
+          prevBtn.onclick = (e) => { e.preventDefault(); if (currentPage > 0) renderPage(currentPage - 1); };
+        }
+        if (nextBtn) {
+          nextBtn.onclick = (e) => { e.preventDefault(); const totalPages = Math.ceil(riwayatData.length / rowsPerPage); if (currentPage < totalPages - 1) renderPage(currentPage + 1); };
+        }
+
+        // initial render
+        renderPage(0);
       } catch (err) {
         console.error(err);
         const body = document.getElementById('riwayat-body');
