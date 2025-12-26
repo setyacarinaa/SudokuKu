@@ -409,8 +409,30 @@ function tanganiInput(event, baris, kolom) {
 }
 
 // ==================== KEYBOARD NAVIGATION ====================
+function isTouchDevice() {
+  return (('ontouchstart' in window) || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0));
+}
 
 function tanganiKeyboard(event, baris, kolom) {
+  const touch = isTouchDevice();
+
+  // Handle numeric input on desktop only (1-9)
+  if (!touch && /^[1-9]$/.test(event.key)) {
+    const target = document.querySelector(`[data-baris="${baris}"][data-kolom="${kolom}"]`);
+    if (target) {
+      // ensure this cell is selected for consistent behavior
+      try { pilihSel(null, target, baris, kolom); } catch (e) {}
+
+      if (target.classList.contains('tetap')) {
+        pilihNomorKeypad(Number(event.key));
+      } else {
+        inputAngkaViaKeypad(Number(event.key));
+      }
+      event.preventDefault();
+      return;
+    }
+  }
+
   let targetBaris = baris;
   let targetKolom = kolom;
   
@@ -433,9 +455,15 @@ function tanganiKeyboard(event, baris, kolom) {
       break;
     case 'Backspace':
     case 'Delete':
-      papanSudoku[baris][kolom] = 0;
-      event.target.value = '';
-      event.target.classList.remove('diisi', 'salah');
+      // Allow deletion via keyboard on desktop only
+      if (!touch) {
+        papanSudoku[baris][kolom] = 0;
+        const el = document.querySelector(`[data-baris="${baris}"][data-kolom="${kolom}"]`);
+        if (el) {
+          el.value = '';
+          el.classList.remove('diisi', 'salah');
+        }
+      }
       break;
     default:
       return;
