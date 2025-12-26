@@ -130,6 +130,7 @@ const prosesPesanChatbot = (pesan, dataTekaTeki, options = {}) => {
   // Deteksi pertanyaan meta seperti "selain ngasih hint bisa apa".
   const reMetaSelain = /\b(selain|kecuali|apa selain|apa lagi|lainnya|selain ngasih)\b/;
   const menyebutHint = /\b(hint|petunjuk|bantuan)\b/;
+  const menyebutSolusi = /\b(solusi|jawaban|lihat solusi|tampilkan solusi|beri solusi)\b/;
 
   // Jika pesan berasal dari tombol cepat, anggap ini permintaan langsung
   // dan jangan jalankan deteksi meta yang mencoba menafsirkan konteks.
@@ -160,6 +161,45 @@ Coba ketik misalnya: "cek jawaban", "cara main", atau "strategi tingkat sulit"`
       tipe: 'hint',
       data: hint,
       pesan: hint.pesan
+    };
+  }
+
+  // Command: Solusi (hanya ketika memang meminta solusi eksplisit)
+  // Hindari men-trigger saat pengguna menanyakan kemampuan selain memberi solusi.
+  const memintaSolusiEksplisit = (
+    pesanHurufKecil === 'solusi' ||
+    pesanHurufKecil.startsWith('lihat solusi') ||
+    pesanHurufKecil.startsWith('tampilkan solusi') ||
+    pesanHurufKecil.includes('tampilkan solusi') ||
+    pesanHurufKecil.includes('lihat jawaban') ||
+    pesanHurufKecil.includes('beri solusi')
+  );
+
+  if (menyebutSolusi.test(pesanHurufKecil) && !fromQuick && reMetaSelain.test(pesanHurufKecil)) {
+    return {
+      tipe: 'instruksi',
+      pesan: `Saya bisa membantu beberapa hal selain memberi solusi lengkap:
+• Menjelaskan cara main dan strategi bermain
+• Memeriksa/validasi jawaban saat ini
+• Memberikan hint (maksimal 3 kali per permainan)
+• Menjelaskan teknik atau strategi tingkat sulit
+
+Coba ketik misalnya: "cek jawaban", "hint", atau "strategi tingkat sulit"`
+    };
+  }
+
+  if (memintaSolusiEksplisit) {
+    if (!dataTekaTeki || !dataTekaTeki.solusi) {
+      return {
+        tipe: 'error',
+        pesan: '❌ Tidak ada puzzle aktif!'
+      };
+    }
+
+    return {
+      tipe: 'solusi',
+      data: { solusi: dataTekaTeki.solusi },
+      pesan: '📋 Berikut adalah solusi lengkap puzzle ini:'
     };
   }
 
