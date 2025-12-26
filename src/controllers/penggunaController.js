@@ -179,7 +179,7 @@ const loginPengguna = async (req, res) => {
       totalPermainanCount = pengguna.totalPermainan || 0;
     }
 
-    // Best-effort sinkronisasi
+    // Sinkronisasi (upaya terbaik) untuk menjaga konsistensi
     if (typeof pengguna.totalPermainan !== 'number' || pengguna.totalPermainan !== totalPermainanCount) {
       pengguna.totalPermainan = totalPermainanCount;
       pengguna.save().catch(() => {});
@@ -212,30 +212,26 @@ const loginPengguna = async (req, res) => {
  */
 const logoutPengguna = async (req, res) => {
   try {
-    // Hapus session
+    // Jika tidak ada session, kembalikan sukses sederhana
+    if (!req.session) {
+      return res.json({ sukses: true, pesan: 'Logout berhasil' });
+    }
+
+    // Hapus session dan kirim respons
     req.session.destroy((err) => {
       if (err) {
-        console.error('Error saat logout:', err);
-        return res.status(500).json({
-          sukses: false,
-          pesan: 'Terjadi kesalahan saat logout'
-        });
+        console.error('Gagal menghancurkan session saat logout:', err);
+        return res.status(500).json({ sukses: false, pesan: 'Gagal logout' });
       }
 
-      // Hapus cookie sesi dan alihkan ke beranda
-      res.clearCookie('connect.sid');
-      return res.redirect('/');
+      // Beri tahu client bahwa logout berhasil
+      return res.json({ sukses: true, pesan: 'Logout berhasil' });
     });
   } catch (error) {
     console.error('❌ Error saat logout:', error);
-    res.status(500).json({
-      sukses: false,
-      pesan: 'Terjadi kesalahan saat logout',
-      error: error.message
-    });
+    res.status(500).send('Terjadi kesalahan server');
   }
 };
-
 /**
  * Cek status login
  * GET /api/cek-login
@@ -322,11 +318,11 @@ const dapatkanProfil = async (req, res) => {
       totalPermainanCount = await Skor.countDocuments({ idPengguna: pengguna._id });
     } catch (errCount) {
       console.warn('⚠️ Gagal menghitung total permainan dari koleksi Skor:', errCount && errCount.message);
-      // fallback ke nilai yang tersimpan di dokumen pengguna
+      // kembali ke nilai yang tersimpan di dokumen pengguna jika perhitungan gagal
       totalPermainanCount = pengguna.totalPermainan || 0;
     }
 
-    // Jika ada ketidaksesuaian, sinkronkan nilai pada dokumen pengguna (best-effort)
+    // Jika ada ketidaksesuaian, sinkronkan nilai pada dokumen pengguna (upaya terbaik)
     try {
       if (typeof pengguna.totalPermainan !== 'number' || pengguna.totalPermainan !== totalPermainanCount) {
         pengguna.totalPermainan = totalPermainanCount;

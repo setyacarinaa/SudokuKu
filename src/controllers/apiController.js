@@ -150,7 +150,7 @@ const dapatkanLeaderboard = async (req, res) => {
       console.log(`⚠️ [Leaderboard] Data kosong! Total docs: ${totalCount}, Selesai: ${selesaiCount}`);
     }
 
-    // Do not use guest fallback data; leaderboard must come from registered users in DB only
+    // Jangan gunakan data cadangan untuk tamu; leaderboard harus berasal dari pengguna terdaftar di database saja
 
     // Format response
     const papanPeringkat = daftarSkor.map((entri, indeks) => ({

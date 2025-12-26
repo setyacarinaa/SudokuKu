@@ -23,7 +23,7 @@ export async function getGPTResponse(userMessage) {
     ],
   });
 
-  // SDK may expose plain text or structured output. Try common locations.
+  // SDK mungkin mengembalikan teks polos atau keluaran terstruktur. Coba lokasi-lokasi umum.
   try {
     if (response.output_text && typeof response.output_text === 'string') {
       return response.output_text;
@@ -43,9 +43,9 @@ export async function getGPTResponse(userMessage) {
       if (parts.length > 0) return parts.join('\n');
     }
   } catch (e) {
-    // parsing fallback
+    // Cadangan parsing respons
   }
 
-  // Fallback: stringify response object
+  // Cadangan: ubah objek respons menjadi string
   try { return JSON.stringify(response); } catch (e) { return String(response); }
 }

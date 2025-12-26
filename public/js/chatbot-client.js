@@ -3,7 +3,7 @@
  * Frontend untuk Socket.IO chatbot
  */
 
-// Inisialisasi Socket.IO dengan path fallback
+// Inisialisasi Socket.IO dengan path cadangan
 let soket = null;
 let sudahCobaAlternate = false;
 const socketPaths = ['/api/socket.io', '/socket.io'];
@@ -165,7 +165,7 @@ function kirimPesanKeChatbot(pesan, papan = null, options = {}) {
   }
 
   if (!soket) {
-    // Fallback ke HTTP API - backend akan ambil dari session
+  // Sebagai cadangan, gunakan HTTP API - backend akan mengambil data dari session
     fetch('/api/chatbot', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -338,7 +338,7 @@ function tanganiValidasi(data) {
         if (typeof window.tambahKesalahan === 'function') {
           window.tambahKesalahan(hasil.kesalahan || []);
         } else {
-          // Fallback: increment via exposing error handling if available
+          // Cadangan: tingkatkan counter melalui penanganan kesalahan jika tersedia
           if (typeof window.highlightSelSalah === 'function' && Array.isArray(hasil.kesalahan)) {
             const selArr = hasil.kesalahan.map(k => ({ baris: (k.baris || 1) - 1, kolom: (k.kolom || 1) - 1 }));
             window.highlightSelSalah(selArr);
@@ -353,7 +353,7 @@ function tanganiValidasi(data) {
             window.updateErrorCounter();
           }
           if (typeof window.gameOver === 'function') {
-            // If error limit reached, gameOver should be triggered by updateErrorCounter helper
+            // Jika batas kesalahan tercapai, fungsi gameOver akan dipicu oleh helper updateErrorCounter
           }
         }
       } catch (e) {

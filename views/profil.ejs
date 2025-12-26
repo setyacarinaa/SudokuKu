@@ -249,7 +249,7 @@
               return;
             }
 
-            // fetch as fallback (safe and idempotent)
+            // fetch sebagai cadangan (aman dan idempoten)
             fetch('/api/profil', { credentials: 'include' }).then(r => r.json()).then(json => {
               if (!json || !json.sukses) return;
               const skor = json.data.skorTerbaik || 0;

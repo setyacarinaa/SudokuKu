@@ -17,7 +17,7 @@ let solusiSekarang = null; // Menyimpan solusi untuk validasi
 let solusiDitampilkan = false; // Jika true, pemain tidak boleh submit/rekam skor
 let puzzleFilledButNotSubmitted = false; // Jika true: semua sel terisi tetapi belum submit
 const MAX_ERRORS = 3; // Batas maksimal kesalahan
-// transient highlight removed; persistent toggle highlighting used instead
+// Highlight sementara dihapus; menggunakan toggle persistens sebagai gantinya
 
 // ==================== INISIALISASI ====================
 
@@ -74,7 +74,7 @@ function pasangPendengarEvent() {
         return;
       }
 
-      // Fallback: if button labeled C or clear
+      // Cadangan: jika tombol berlabel C atau clear
       if (/^c$|clear/i.test(txt)) {
         hapusAngkaViaKeypad();
         return;
@@ -658,7 +658,7 @@ function tampilkanOverlaySelesai(durasiDetik, skorFinal) {
 
   // Show overlay dengan animasi
   overlay.style.display = 'flex';
-  overlay.offsetHeight; // Trigger reflow
+  overlay.offsetHeight; // Memicu reflow (paksa perhitungan ulang layout)
   overlay.classList.add('show');
 
   // Tombol Main Lagi: muat papan baru tanpa meninggalkan halaman
@@ -746,7 +746,7 @@ async function selesaiPermainan() {
   try {
     gameOver(true);
   } catch (e) {
-    // Fallback: if something goes wrong, still attempt to show overlay
+    // Cadangan: jika terjadi kesalahan, tetap coba tampilkan overlay
     try { tampilkanOverlaySelesai(hitungWaktu(), hitungSkor(Math.floor((new Date() - waktuMulai) / 1000), tingkatTerpilih)); } catch (err) {}
   }
 }
@@ -1007,7 +1007,7 @@ window.tambahKesalahan = (kesalahanList) => {
       highlightSelSalah(selArr);
     }
 
-    // Jika batas kesalahan tercapai, trigger game over
+    // Jika batas kesalahan tercapai, picu game over
     if (errorCount >= MAX_ERRORS) {
       if (typeof gameOver === 'function') gameOver(false);
     }
