@@ -126,15 +126,32 @@ const validasiJawaban = (papanPemain, solusi) => {
 const prosesPesanChatbot = (pesan, dataTekaTeki) => {
   const pesanHurufKecil = pesan.toLowerCase().trim();
 
-  // Command: Hint
-  if (pesanHurufKecil.includes('hint') || pesanHurufKecil.includes('petunjuk') || pesanHurufKecil.includes('bantuan')) {
+  // Deteksi pertanyaan meta seperti "selain ngasih hint bisa apa".
+  const reMetaSelain = /\b(selain|kecuali|apa selain|apa lagi|lainnya|selain ngasih)\b/;
+  const menyebutHint = /\b(hint|petunjuk|bantuan)\b/;
+
+  if (reMetaSelain.test(pesanHurufKecil) && menyebutHint.test(pesanHurufKecil)) {
+    return {
+      tipe: 'instruksi',
+      pesan: `Saya bisa membantu beberapa hal selain memberi hint:
+• Menjelaskan cara main dan strategi bermain
+• Memeriksa/validasi jawaban saat ini
+• Menampilkan solusi lengkap ketika diminta
+• Memberikan strategi tingkat sulit atau teknik spesifik
+
+Coba ketik misalnya: "cek jawaban", "cara main", atau "strategi tingkat sulit"` 
+    };
+  }
+
+  // Command: Hint (lebih selektif — hanya ketika memang meminta hint sendiri)
+  if ((pesanHurufKecil === 'hint' || pesanHurufKecil === 'minta hint' || pesanHurufKecil.startsWith('minta hint') || menyebutHint.test(pesanHurufKecil)) && !reMetaSelain.test(pesanHurufKecil)) {
     if (!dataTekaTeki || !dataTekaTeki.papan || !dataTekaTeki.solusi) {
       return {
         tipe: 'error',
         pesan: '❌ Tidak ada puzzle aktif. Silakan mulai game baru!'
       };
     }
-    
+
     const hint = berikanHint(dataTekaTeki.papan, dataTekaTeki.solusi);
     return {
       tipe: 'hint',
