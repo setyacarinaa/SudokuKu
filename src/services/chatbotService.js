@@ -220,21 +220,9 @@ Coba ketik misalnya: "cek jawaban", "hint", atau "strategi tingkat sulit"`
     };
   }
 
-  // Command: Solusi
-  if (pesanHurufKecil.includes('solusi') || pesanHurufKecil.includes('jawaban')) {
-    if (!dataTekaTeki || !dataTekaTeki.solusi) {
-      return {
-        tipe: 'error',
-        pesan: '❌ Tidak ada puzzle aktif!'
-      };
-    }
-
-    return {
-      tipe: 'solusi',
-      data: { solusi: dataTekaTeki.solusi },
-      pesan: '📋 Berikut adalah solusi lengkap puzzle ini:'
-    };
-  }
+  // NOTE: removed broad catch-all for 'solusi'/'jawaban' to avoid false positives.
+  // Solutions are only returned when a user explicitly requests them (see
+  // `memintaSolusiEksplisit` above).
 
   // Command: Cara Main
   if (pesanHurufKecil.includes('cara') || pesanHurufKecil.includes('aturan') || pesanHurufKecil.includes('main')) {
