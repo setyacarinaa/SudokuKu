@@ -238,6 +238,9 @@ function inputAngkaViaKeypad(angka) {
   papanSudoku[baris][kolom] = angka;
   selTerpilih.classList.add('diisi');
   selTerpilih.classList.remove('salah');
+  
+  // Update keypad counters after placing a number
+  try { updateKeypadCounters(); } catch (e) {}
 
   // Cek apakah puzzle selesai
   if (cekPuzzleSelesai()) {
@@ -275,6 +278,9 @@ function hapusAngkaViaKeypad() {
   selTerpilih.value = '';
   papanSudoku[baris][kolom] = 0;
   selTerpilih.classList.remove('diisi', 'salah');
+  
+  // Update keypad counters after deletion
+  try { updateKeypadCounters(); } catch (e) {}
 }
 
 /**
@@ -374,6 +380,9 @@ function tanganiInput(event, baris, kolom) {
   papanSudoku[baris][kolom] = parseInt(nilai);
   input.classList.add('diisi');
   input.classList.remove('salah');
+  
+  // Update keypad counters on any input
+  try { updateKeypadCounters(); } catch (e) {}
   
   // Cek apakah puzzle selesai
   if (cekPuzzleSelesai()) {
@@ -803,6 +812,9 @@ function resetPapan() {
   // Kembalikan ke papan asli
   papanSudoku = JSON.parse(JSON.stringify(papanAsli));
   tampilkanPapan();
+    
+  // Update keypad counters based on new puzzle
+  try { updateKeypadCounters(); } catch (e) {}
   
   // Reset timer
   mulaiTimer();
@@ -899,7 +911,96 @@ window.dapatkanPapanSekarang = () => papanSudoku;
 window.updatePapan = (papanBaru) => {
   papanSudoku = papanBaru;
   tampilkanPapan();
+  try { updateKeypadCounters(); } catch (e) {}
 };
+
+/**
+ * Update keypad badges showing how many of each digit remain to be placed correctly.
+ * - Uses `solusiSekarang` for target counts and `papanSudoku` for player placements.
+ * - If remaining <= 0, hide badge.
+ * - If player has placed as many instances as solution but some positions are wrong,
+ *   animate keypad button red and show a non-penalty positional error message.
+ */
+function updateKeypadCounters() {
+  if (!solusiSekarang || !Array.isArray(solusiSekarang)) return;
+
+  // Count occurrences in solution
+  const targetCounts = Array(10).fill(0);
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      const v = Number(solusiSekarang[r][c]);
+      if (v >= 1 && v <= 9) targetCounts[v]++;
+    }
+  }
+
+  // Count player's correct placements and total placements
+  const correctCounts = Array(10).fill(0);
+  const placedCounts = Array(10).fill(0);
+  const wrongPositionsByNumber = Array.from({ length: 10 }, () => []);
+
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      const p = Number(papanSudoku[r][c]);
+      const s = Number(solusiSekarang[r][c]);
+      if (p >= 1 && p <= 9) {
+        placedCounts[p]++;
+        if (p === s) correctCounts[p]++;
+        else {
+          // record wrong position for that placed number
+          wrongPositionsByNumber[p].push({ baris: r + 1, kolom: c + 1, nilaiPemain: p, nilaiBenar: s });
+        }
+      }
+    }
+  }
+
+  // Update DOM for keypad badges
+  document.querySelectorAll('.btn-keypad').forEach((btn) => {
+    const txt = btn.textContent.trim();
+    const digit = Number(txt[0]);
+    if (!Number.isInteger(digit) || digit < 1 || digit > 9) return;
+
+    const remaining = Math.max(0, targetCounts[digit] - correctCounts[digit]);
+
+    // find or create badge
+    let badge = btn.querySelector('.keypad-badge');
+    if (!badge && remaining > 0) {
+      badge = document.createElement('span');
+      badge.className = 'keypad-badge';
+      btn.appendChild(badge);
+    }
+
+    if (badge) {
+      if (remaining > 0) {
+        badge.textContent = String(remaining);
+        badge.style.display = 'inline-block';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    // If player used up all occurrences but some are wrongly placed -> animate error
+    if (placedCounts[digit] >= targetCounts[digit] && correctCounts[digit] < targetCounts[digit] && targetCounts[digit] > 0) {
+      btn.classList.add('keypad-error');
+
+      // Prepare error message listing up to 5 wrong positions for that digit
+      const wrongs = wrongPositionsByNumber[digit] || [];
+      let msg = `⚠️ Angka ${digit} sudah digunakan semua, tetapi beberapa posisinya salah.`;
+      if (wrongs.length > 0) {
+        msg += '\nPosisi salah:\n';
+        wrongs.slice(0, 5).forEach(w => { msg += `• Baris ${w.baris}, Kolom ${w.kolom} (seharusnya ${w.nilaiBenar})\n`; });
+        if (wrongs.length > 5) msg += `• ...dan ${wrongs.length - 5} lainnya`;
+      }
+
+      tampilkanPesan(msg, 'error');
+
+      // Remove error class after animation duration
+      setTimeout(() => { btn.classList.remove('keypad-error'); }, 700);
+    } else {
+      btn.classList.remove('keypad-error');
+    }
+  });
+}
+
 
 // Expose solusi saat ini untuk chatbot (berguna pada environment serverless tanpa session)
 window.dapatkanSolusiSekarang = () => solusiSekarang;

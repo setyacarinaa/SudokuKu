@@ -384,6 +384,39 @@ body {
   transform: translateY(-2px);
 }
 
+/* Keypad badge showing remaining count */
+.btn-keypad .keypad-badge {
+  display: inline-block;
+  min-width: 18px;
+  height: 18px;
+  line-height: 18px;
+  border-radius: 9px;
+  background: #f3e8ff; /* light purple */
+  color: #5a2a8a;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0 6px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+/* Shake animation for keypad when all used but some wrong */
+@keyframes keypad-shake {
+  0% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+  100% { transform: translateX(0); }
+}
+
+.btn-keypad.keypad-error {
+  background: #fee2e2 !important;
+  border-color: var(--error-color) !important;
+  color: var(--error-color) !important;
+  animation: keypad-shake 600ms ease;
+}
+
 /* Selected cell when tapped */
 .sel-sudoku.sel-terpilih {
   outline: 3px solid rgba(102,126,234,0.18);
