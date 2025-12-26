@@ -888,13 +888,35 @@ window.dapatkanSolusiSekarang = () => solusiSekarang;
 // Helper: tambahkan 1 kesalahan (dipanggil oleh chatbot ketika melakukan 'cek jawaban')
 window.tambahKesalahan = (kesalahanList) => {
   try {
-    // increment error counter internal
+    // Tambah 1 kesalahan terlepas dari berapa banyak sel yang salah (sama seperti fitur Cek Jawaban)
     errorCount = (typeof errorCount === 'number') ? errorCount + 1 : 1;
     updateErrorCounter();
 
-    // highlight kesalahan (convert to zero-based)
+    // highlight kesalahan (convert to zero-based) — dukung input 1-based atau 0-based
     if (Array.isArray(kesalahanList) && kesalahanList.length > 0) {
-      const selArr = kesalahanList.map(k => ({ baris: (k.baris || 1) - 1, kolom: (k.kolom || 1) - 1 }));
+      const selArr = kesalahanList.map(k => {
+        // coba baca berbagai bentuk (baris/kolom sebagai number atau string)
+        let b = Number(k.baris);
+        let c = Number(k.kolom);
+
+        if (!Number.isFinite(b)) b = Number(k.row);
+        if (!Number.isFinite(c)) c = Number(k.col);
+
+        if (!Number.isFinite(b)) b = 0;
+        if (!Number.isFinite(c)) c = 0;
+
+        // Jika nilai tampak 1-based (1..9), ubah ke 0-based
+        if (b >= 1 && b <= 9) b = b - 1;
+        // Jika sudah 0-based (0..8), biarkan
+        if (c >= 1 && c <= 9) c = c - 1;
+
+        // Clamp pada rentang 0..8
+        b = Math.max(0, Math.min(8, b));
+        c = Math.max(0, Math.min(8, c));
+
+        return { baris: b, kolom: c };
+      });
+
       highlightSelSalah(selArr);
     }
 

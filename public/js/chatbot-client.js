@@ -331,6 +331,34 @@ function tanganiValidasi(data) {
       }
       
       tambahPesanBot(pesanError);
+
+      // Jika ada kesalahan, sinkronkan dengan mekanik permainan: hitung 1 kesalahan
+      // dan highlight sel yang salah. Gunakan helper global jika tersedia.
+      try {
+        if (typeof window.tambahKesalahan === 'function') {
+          window.tambahKesalahan(hasil.kesalahan || []);
+        } else {
+          // Fallback: increment via exposing error handling if available
+          if (typeof window.highlightSelSalah === 'function' && Array.isArray(hasil.kesalahan)) {
+            const selArr = hasil.kesalahan.map(k => ({ baris: (k.baris || 1) - 1, kolom: (k.kolom || 1) - 1 }));
+            window.highlightSelSalah(selArr);
+          }
+          if (typeof window.updateErrorCounter === 'function') {
+            try {
+              // Try to increment a global errorCount if exposed
+              if (typeof window.errorCount === 'number') {
+                window.errorCount += 1;
+              }
+            } catch (e) { }
+            window.updateErrorCounter();
+          }
+          if (typeof window.gameOver === 'function') {
+            // If error limit reached, gameOver should be triggered by updateErrorCounter helper
+          }
+        }
+      } catch (e) {
+        console.warn('Gagal menyinkronkan kesalahan ke game:', e);
+      }
     }
   }
 }
