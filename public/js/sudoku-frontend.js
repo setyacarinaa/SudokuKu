@@ -14,6 +14,7 @@ let selTerpilih = null; // Menyimpan sel yang sedang dipilih untuk keypad input
 let nomorKeypadTerpilih = null; // Menyimpan nomor keypad yang sedang dipilih (highlight)
 let errorCount = 0; // Tracking kesalahan (max 3)
 let solusiSekarang = null; // Menyimpan solusi untuk validasi
+let solusiDitampilkan = false; // Jika true, pemain tidak boleh submit/rekam skor
 const MAX_ERRORS = 3; // Batas maksimal kesalahan
 // transient highlight removed; persistent toggle highlighting used instead
 
@@ -462,6 +463,11 @@ function highlightSelSalah(selSalah) {
 // ==================== SUBMIT JAWABAN FINAL ====================
 
 function submitJawabanFinal() {
+  // Prevent submitting if solution was shown
+  if (window.solusiDitampilkan || solusiDitampilkan) {
+    tampilkanPesan('❌ Tidak bisa submit setelah melihat solusi. Pertandingan tidak akan dihitung.', 'error');
+    return;
+  }
   if (!solusiSekarang) {
     tampilkanPesan('Solusi tidak tersedia', 'error');
     return;
@@ -748,6 +754,10 @@ async function selesaikanPuzzle() {
   }
   
   try {
+    // Tandai bahwa solusi akan ditampilkan (frontend guard)
+    solusiDitampilkan = true;
+    window.solusiDitampilkan = true;
+
     // Minta solusi dari chatbot
     if (window.kirimPesanKeChatbot) {
       window.kirimPesanKeChatbot('solusi');

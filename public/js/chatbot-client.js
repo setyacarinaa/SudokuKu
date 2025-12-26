@@ -99,7 +99,7 @@ function siapkanChatbot() {
   const btnHint = document.getElementById('btn-hint-chat');
   if (btnHint) {
     btnHint.addEventListener('click', () => {
-      kirimPesanKeChatbot('hint');
+      kirimPesanKeChatbot('hint', null, { quick: true });
     });
   }
   
@@ -149,7 +149,7 @@ function kirimPesanPengguna() {
   input.value = '';
 }
 
-function kirimPesanKeChatbot(pesan, papan = null) {
+function kirimPesanKeChatbot(pesan, papan = null, options = {}) {
   // Jangan kirim papan dari frontend - gunakan session backend yang lebih reliable
   // Backend akan ambil dari req.session.tekaTekiAktif
   // Namun untuk validasi langkah kita dapat mengirim papan saat ini agar server
@@ -169,7 +169,7 @@ function kirimPesanKeChatbot(pesan, papan = null) {
     fetch('/api/chatbot', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pesan, dataPuzzle: papanSekarang ? { papan: papanSekarang, solusi: solusiSekarang } : undefined })
+      body: JSON.stringify({ pesan, quick: !!options.quick, dataPuzzle: papanSekarang ? { papan: papanSekarang, solusi: solusiSekarang } : undefined })
     })
     .then(r => r.json())
     .then(data => tanganiResponsChatbot(data))
@@ -184,7 +184,8 @@ function kirimPesanKeChatbot(pesan, papan = null) {
   soket.emit('pesan_chatbot', {
     pesan: pesan,
     papan: papanSekarang,
-    solusi: solusiSekarang
+    solusi: solusiSekarang,
+    quick: !!options.quick
   });
   
   console.log('📤 Pesan dikirim:', pesan);
@@ -343,6 +344,9 @@ function tanganiSolusi(data) {
     tambahPesanBot(data.pesan);
     tambahPesanBot('⚠️ Menampilkan solusi akan menghentikan permainan dan skor tidak akan disimpan.');
     
+    // Tandai bahwa solusi telah ditampilkan sehingga tidak boleh disubmit
+    try { window.solusiDitampilkan = true; } catch(e) { /* ignore */ }
+
     // Update papan dengan solusi
     if (typeof window.updatePapan === 'function') {
       setTimeout(() => {

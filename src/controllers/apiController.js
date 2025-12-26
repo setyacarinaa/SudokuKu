@@ -32,6 +32,14 @@ const rekamSkor = async (req, res) => {
       });
     }
 
+    // Jika pemain melihat solusi sebelum submit, tolak penyimpanan skor
+    if (req.session && req.session.solutionShown) {
+      return res.status(403).json({
+        sukses: false,
+        pesan: 'Skor tidak dapat disimpan karena solusi telah ditampilkan selama permainan.'
+      });
+    }
+
     // Validasi tingkat kesulitan
     const tingkatValid = ['mudah', 'sedang', 'sulit'];
     if (!tingkatValid.includes(tingkatKesulitan.toLowerCase())) {

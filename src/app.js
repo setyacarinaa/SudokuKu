@@ -89,11 +89,38 @@ io.on('connection', (socket) => {
       }
 
       // First try local handlers (logika lokal)
-      let hasil = chatbotService.prosesPesanChatbot(pesan || '', dataUntukChatbot);
+      const opsiDariClient = { fromQuick: !!(payload && payload.quick) };
+
+      // Hint usage limit: hanya hitung ketika benar-benar permintaan hint
+      const pesanLower = (pesan || '').toLowerCase();
+      const isMetaSelain = /\b(selain|kecuali|apa selain|apa lagi|lainnya|selain ngasih)\b/.test(pesanLower);
+      const menyebutHint = /\b(hint|petunjuk|bantuan)\b/.test(pesanLower);
+      const isHint = (menyebutHint && (!isMetaSelain || opsiDariClient.fromQuick));
+
+      if (isHint) {
+        sessionData.hintsUsed = sessionData.hintsUsed || 0;
+        if (sessionData.hintsUsed >= 3) {
+          socket.emit('respons_chatbot', { tipe: 'error', pesan: '⚠️ Batas penggunaan hint (3x) telah tercapai.' });
+          return;
+        }
+        sessionData.hintsUsed += 1;
+        // Simpan session (jika tersedia)
+        try { socket.request.session.save(() => {}); } catch (e) { /* ignore */ }
+      }
+
+      let hasil = chatbotService.prosesPesanChatbot(pesan || '', dataUntukChatbot, opsiDariClient);
       if (hasil && typeof hasil.then === 'function') hasil = await hasil;
 
       // If the local chatbot doesn't recognize the command, delegate to OpenAI
       if (hasil && hasil.tipe && hasil.tipe !== 'unknown') {
+        // Jika ini adalah solusi, tandai di session agar tidak boleh submit
+        if (hasil.tipe === 'solusi') {
+          try {
+            sessionData.solutionShown = true;
+            socket.request.session.save(() => {});
+          } catch (e) { /* ignore */ }
+        }
+
         socket.emit('respons_chatbot', hasil);
         return;
       }

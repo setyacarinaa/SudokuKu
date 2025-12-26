@@ -123,14 +123,17 @@ const validasiJawaban = (papanPemain, solusi) => {
  * @param {Object} dataPuzzle - Data puzzle aktif {papan, solusi}
  * @returns {Object} Respons chatbot
  */
-const prosesPesanChatbot = (pesan, dataTekaTeki) => {
-  const pesanHurufKecil = pesan.toLowerCase().trim();
+const prosesPesanChatbot = (pesan, dataTekaTeki, options = {}) => {
+  const pesanHurufKecil = (pesan || '').toLowerCase().trim();
+  const fromQuick = !!(options && options.fromQuick);
 
   // Deteksi pertanyaan meta seperti "selain ngasih hint bisa apa".
   const reMetaSelain = /\b(selain|kecuali|apa selain|apa lagi|lainnya|selain ngasih)\b/;
   const menyebutHint = /\b(hint|petunjuk|bantuan)\b/;
 
-  if (reMetaSelain.test(pesanHurufKecil) && menyebutHint.test(pesanHurufKecil)) {
+  // Jika pesan berasal dari tombol cepat, anggap ini permintaan langsung
+  // dan jangan jalankan deteksi meta yang mencoba menafsirkan konteks.
+  if (!fromQuick && reMetaSelain.test(pesanHurufKecil) && menyebutHint.test(pesanHurufKecil)) {
     return {
       tipe: 'instruksi',
       pesan: `Saya bisa membantu beberapa hal selain memberi hint:
@@ -139,12 +142,12 @@ const prosesPesanChatbot = (pesan, dataTekaTeki) => {
 • Menampilkan solusi lengkap ketika diminta
 • Memberikan strategi tingkat sulit atau teknik spesifik
 
-Coba ketik misalnya: "cek jawaban", "cara main", atau "strategi tingkat sulit"` 
+Coba ketik misalnya: "cek jawaban", "cara main", atau "strategi tingkat sulit"`
     };
   }
 
   // Command: Hint (lebih selektif — hanya ketika memang meminta hint sendiri)
-  if ((pesanHurufKecil === 'hint' || pesanHurufKecil === 'minta hint' || pesanHurufKecil.startsWith('minta hint') || menyebutHint.test(pesanHurufKecil)) && !reMetaSelain.test(pesanHurufKecil)) {
+  if ((pesanHurufKecil === 'hint' || pesanHurufKecil === 'minta hint' || pesanHurufKecil.startsWith('minta hint') || menyebutHint.test(pesanHurufKecil)) && !(!fromQuick && reMetaSelain.test(pesanHurufKecil))) {
     if (!dataTekaTeki || !dataTekaTeki.papan || !dataTekaTeki.solusi) {
       return {
         tipe: 'error',

@@ -12,7 +12,24 @@ rute.post('/', async (req, res) => {
   const dataUntukChatbot = dariBody || dariSession;
 
   try {
-    const hasil = await Promise.resolve(prosesPesanChatbot(pesan || '', dataUntukChatbot));
+    const opsi = { fromQuick: !!(req.body && req.body.quick) };
+
+    // Hint usage limit (HTTP fallback)
+    const pesanLower = (pesan || '').toLowerCase();
+    const isMetaSelain = /\b(selain|kecuali|apa selain|apa lagi|lainnya|selain ngasih)\b/.test(pesanLower);
+    const menyebutHint = /\b(hint|petunjuk|bantuan)\b/.test(pesanLower);
+    const isHint = (menyebutHint && (!isMetaSelain || opsi.fromQuick));
+
+    if (isHint) {
+      req.session.hintsUsed = req.session.hintsUsed || 0;
+      if (req.session.hintsUsed >= 3) {
+        return res.json({ tipe: 'error', pesan: '⚠️ Batas penggunaan hint (3x) telah tercapai.' });
+      }
+      req.session.hintsUsed += 1;
+      try { req.session.save(() => {}); } catch (e) { /* ignore */ }
+    }
+
+    const hasil = await Promise.resolve(prosesPesanChatbot(pesan || '', dataUntukChatbot, opsi));
 
     // Jika local tidak mengenal perintah, dan OpenAI tersedia, gunakan OpenAI sebagai fallback
     if (hasil && hasil.tipe === 'unknown' && process.env.OPENAI_API_KEY) {
@@ -24,6 +41,12 @@ rute.post('/', async (req, res) => {
         console.error('OpenAI fallback error:', e);
         return res.json({ tipe: 'error', pesan: '❌ AI eksternal gagal merespons.' });
       }
+    }
+
+    // Jika local mengembalikan solusi, tandai session agar tidak bisa submit skor
+    if (hasil && hasil.tipe === 'solusi') {
+      req.session.solutionShown = true;
+      try { req.session.save(() => {}); } catch (e) { /* ignore */ }
     }
 
     return res.json(hasil);
