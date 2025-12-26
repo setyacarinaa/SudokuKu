@@ -9,25 +9,31 @@ require('dotenv').config();
 
 const express = require('express');
 const http = require('http');
-// Catatan: Socket.IO dinonaktifkan untuk kompatibilitas serverless
 const session = require('express-session');
 const path = require('path');
 const cors = require('cors');
 
-// Import utilities
-const { hubungkanMongoDB } = require('./utils/koneksiMongo');
+// Socket.IO helper
+const { Server } = require('socket.io');
+const chatbotService = require('./services/chatbotService');
 
-// Import routes
+// Import utilities and routes
+const { hubungkanMongoDB } = require('./utils/koneksiMongo');
 const ruteApi = require('./routes/apiRoute');
 const rutePengguna = require('./routes/penggunaRoute');
-
-// Router Chatbot via HTTP
 const ruteChatbot = require('./routes/chatbot');
 
-// Inisialisasi Express
+// Inisialisasi Express + HTTP server
 const app = express();
 const serverHttp = http.createServer(app);
-// Socket.IO dihapus; gunakan HTTP endpoints
+
+// Attach Socket.IO for realtime chatbot
+const io = new Server(serverHttp, {
+  path: process.env.SOCKET_PATH || '/socket.io',
+  cors: { origin: '*' }
+});
+
+// We'll attach the session middleware to sockets after it's declared
 
 // Port dari environment atau default
 const PORT = process.env.PORT || 3000;
@@ -52,6 +58,71 @@ const middlewareSesi = session({
 });
 
 app.use(middlewareSesi);
+
+// Attach session middleware to Socket.IO requests
+io.use((socket, next) => {
+  middlewareSesi(socket.request, socket.request.res || {}, next);
+});
+
+// Socket.IO connection handler for realtime chatbot
+io.on('connection', (socket) => {
+  console.log('🔌 Socket.IO: client connected', socket.id);
+
+  socket.emit('respons_chatbot', { tipe: 'status', pesan: '✅ Chatbot terhubung (realtime)' });
+
+  socket.on('pesan_chatbot', async (payload) => {
+    try {
+      const pesan = (payload && payload.pesan) ? String(payload.pesan) : '';
+      const sessionData = socket.request.session || {};
+      const sessionTeka = sessionData.tekaTekiAktif || null;
+
+      // If client provided a board (to validate current player entries), prefer it
+      // but pair it with the session's solution so server can validate.
+      let dataUntukChatbot = sessionTeka;
+      if (payload && payload.papan) {
+        dataUntukChatbot = {
+          papan: payload.papan,
+          solusi: sessionTeka ? sessionTeka.solusi : null
+        };
+      }
+
+      // First try local handlers (logika lokal)
+      let hasil = chatbotService.prosesPesanChatbot(pesan || '', dataUntukChatbot);
+      if (hasil && typeof hasil.then === 'function') hasil = await hasil;
+
+      // If the local chatbot doesn't recognize the command, delegate to OpenAI
+      if (hasil && hasil.tipe && hasil.tipe !== 'unknown') {
+        socket.emit('respons_chatbot', hasil);
+        return;
+      }
+
+      // If unknown, and OPENAI_API_KEY is configured, call OpenAI Responses API
+      if (process.env.OPENAI_API_KEY) {
+        try {
+          // Dynamically import ES module helper
+          const { getGPTResponse } = await import('./utils/openai.mjs');
+          const aiText = await getGPTResponse(pesan || '');
+          socket.emit('respons_chatbot', { tipe: 'ai', pesan: aiText });
+          return;
+        } catch (e) {
+          console.error('OpenAI call failed:', e);
+          socket.emit('respons_chatbot', { tipe: 'error', pesan: '❌ AI eksternal gagal merespons.' });
+          return;
+        }
+      }
+
+      // No external AI configured — return the unknown response
+      socket.emit('respons_chatbot', hasil);
+    } catch (err) {
+      console.error('Chatbot socket error:', err);
+      socket.emit('respons_chatbot', { tipe: 'error', pesan: `❌ Kesalahan chatbot: ${err.message}` });
+    }
+  });
+
+  socket.on('disconnect', (reason) => {
+    console.log('🔌 Socket.IO: client disconnected', socket.id, reason);
+  });
+});
 
 // Static files
 app.use(express.static(path.join(__dirname, '../public')));
@@ -192,6 +263,7 @@ const startServer = async () => {
       console.log(`✅ Server berjalan di: http://localhost:${PORT}`);
       console.log(`✅ MongoDB: Connected`);
       console.log(`✅ Chatbot: HTTP endpoints ready`);
+      console.log(`✅ Chatbot: Socket.IO ready at path ${io.path()}`);
       console.log('='.repeat(50));
       console.log('');
     });

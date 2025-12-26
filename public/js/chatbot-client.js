@@ -152,13 +152,19 @@ function kirimPesanPengguna() {
 function kirimPesanKeChatbot(pesan, papan = null) {
   // Jangan kirim papan dari frontend - gunakan session backend yang lebih reliable
   // Backend akan ambil dari req.session.tekaTekiAktif
-  
+  // Namun untuk validasi langkah kita dapat mengirim papan saat ini agar server
+  // dapat memvalidasi berdasarkan isian pemain yang sedang aktif.
+  let papanSekarang = papan;
+  if (!papanSekarang && typeof window.dapatkanPapanSekarang === 'function') {
+    try { papanSekarang = window.dapatkanPapanSekarang(); } catch(e) { papanSekarang = null; }
+  }
+
   if (!soket) {
     // Fallback ke HTTP API - backend akan ambil dari session
     fetch('/api/chatbot', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pesan })
+      body: JSON.stringify({ pesan, dataPuzzle: papanSekarang ? { papan: papanSekarang } : undefined })
     })
     .then(r => r.json())
     .then(data => tanganiResponsChatbot(data))
@@ -172,7 +178,7 @@ function kirimPesanKeChatbot(pesan, papan = null) {
   // Emit event ke server
   soket.emit('pesan_chatbot', {
     pesan: pesan,
-    papan: papan
+    papan: papanSekarang
   });
   
   console.log('📤 Pesan dikirim:', pesan);

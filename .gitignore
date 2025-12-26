@@ -1,3 +1,10 @@
+node_modules/
+.env
+env.js
+/.vercel
+dist/
+npm-debug.log
+yarn-error.log
 # Node.js
 node_modules/
 npm-debug.log*

@@ -249,6 +249,7 @@ Tips: Mulai dari sel dengan fewest candidates untuk progress lebih cepat!`
 
     let benar = 0, salah = 0, kosong = 0;
     let kesalahanDetail = [];
+    let kesalahanObj = [];
 
     for (let baris = 0; baris < 9; baris++) {
       for (let kolom = 0; kolom < 9; kolom++) {
@@ -263,6 +264,9 @@ Tips: Mulai dari sel dengan fewest candidates untuk progress lebih cepat!`
           salah++;
           if (kesalahanDetail.length < 3) {
             kesalahanDetail.push(`Baris ${baris+1}, Kolom ${kolom+1}: ${nilaiPemain} ❌ (seharusnya ${nilaiBenar})`);
+          }
+          if (kesalahanObj.length < 3) {
+            kesalahanObj.push({ baris: baris+1, kolom: kolom+1, nilaiPemain, nilaiBenar });
           }
         }
       }
@@ -288,6 +292,11 @@ Tips: Mulai dari sel dengan fewest candidates untuk progress lebih cepat!`
 
     return {
       tipe: 'validasi',
+      data: {
+        valid: (salah === 0),
+        selesai: (kosong === 0 && salah === 0),
+        kesalahan: kesalahanObj
+      },
       pesan: pesan
     };
   }
