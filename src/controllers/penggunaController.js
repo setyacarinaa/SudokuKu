@@ -171,6 +171,20 @@ const loginPengguna = async (req, res) => {
 
     console.log(`✅ Login berhasil: ${email}`);
 
+    // Hitung total permainan terkini dari koleksi Skor
+    let totalPermainanCount = 0;
+    try {
+      totalPermainanCount = await Skor.countDocuments({ idPengguna: pengguna._id });
+    } catch (errCount) {
+      totalPermainanCount = pengguna.totalPermainan || 0;
+    }
+
+    // Best-effort sinkronisasi
+    if (typeof pengguna.totalPermainan !== 'number' || pengguna.totalPermainan !== totalPermainanCount) {
+      pengguna.totalPermainan = totalPermainanCount;
+      pengguna.save().catch(() => {});
+    }
+
     res.json({
       sukses: true,
       data: {
@@ -178,7 +192,7 @@ const loginPengguna = async (req, res) => {
         namaLengkap: pengguna.namaLengkap,
         email: pengguna.email,
         skorTerbaik: pengguna.skorTerbaik,
-        totalPermainan: pengguna.totalPermainan
+        totalPermainan: totalPermainanCount
       },
       pesan: 'Login berhasil!'
     });
@@ -242,6 +256,18 @@ const cekStatusLogin = async (req, res) => {
       });
     }
 
+    // Compute latest totalPermainan
+    let totalPermainanCount = pengguna.totalPermainan || 0;
+    try {
+      totalPermainanCount = await Skor.countDocuments({ idPengguna: pengguna._id });
+      if (pengguna.totalPermainan !== totalPermainanCount) {
+        pengguna.totalPermainan = totalPermainanCount;
+        pengguna.save().catch(() => {});
+      }
+    } catch (errCount) {
+      // ignore and use stored value
+    }
+
     res.json({
       sudahLogin: true,
       data: {
@@ -249,7 +275,7 @@ const cekStatusLogin = async (req, res) => {
         namaLengkap: pengguna.namaLengkap,
         email: pengguna.email,
         skorTerbaik: pengguna.skorTerbaik,
-        totalPermainan: pengguna.totalPermainan
+        totalPermainan: totalPermainanCount
       }
     });
   } catch (error) {
@@ -290,6 +316,27 @@ const dapatkanProfil = async (req, res) => {
       });
     }
 
+    // Hitung total permainan berdasarkan entri skor di koleksi Skor agar selalu konsisten
+    let totalPermainanCount = 0;
+    try {
+      totalPermainanCount = await Skor.countDocuments({ idPengguna: pengguna._id });
+    } catch (errCount) {
+      console.warn('⚠️ Gagal menghitung total permainan dari koleksi Skor:', errCount && errCount.message);
+      // fallback ke nilai yang tersimpan di dokumen pengguna
+      totalPermainanCount = pengguna.totalPermainan || 0;
+    }
+
+    // Jika ada ketidaksesuaian, sinkronkan nilai pada dokumen pengguna (best-effort)
+    try {
+      if (typeof pengguna.totalPermainan !== 'number' || pengguna.totalPermainan !== totalPermainanCount) {
+        pengguna.totalPermainan = totalPermainanCount;
+        // simpan perubahan secara asinkron, tapi jangan blokir respons ke client jika gagal
+        pengguna.save().catch(err => console.warn('⚠️ Gagal memperbarui totalPermainan pada dokumen pengguna:', err && err.message));
+      }
+    } catch (e) {
+      // ignore save errors
+    }
+
     res.json({
       sukses: true,
       data: {
@@ -297,7 +344,7 @@ const dapatkanProfil = async (req, res) => {
         namaLengkap: pengguna.namaLengkap,
         email: pengguna.email,
         skorTerbaik: pengguna.skorTerbaik,
-        totalPermainan: pengguna.totalPermainan,
+        totalPermainan: totalPermainanCount,
         tanggalDaftar: pengguna.tanggalDaftar,
         terakhirLogin: pengguna.terakhirLogin
       }
