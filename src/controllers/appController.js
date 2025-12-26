@@ -23,7 +23,7 @@ const mailGenerator = new Mailgen({
   theme: 'default',
   product: {
     name: 'SudokuKu',
-    link: 'http://localhost:3000'
+    link: 'http://localhost:4000'
   }
 });
 
