@@ -176,6 +176,13 @@ function tampilkanPapan() {
         input.value = nilai;
         input.classList.add('tetap');
         input.readOnly = true;
+        // Click/tap handler for fixed cells: select and highlight same numbers
+        input.addEventListener('click', (e) => {
+          pilihSel(e, input, baris, kolom);
+          // highlight all cells with same number
+          try { pilihNomorKeypad(Number(input.value), true); } catch (e) { }
+        });
+        input.addEventListener('touchstart', (e) => { e.preventDefault(); pilihSel(e, input, baris, kolom); try { pilihNomorKeypad(Number(input.value), true); } catch (e) {} });
         // Press animation for fixed cells as well
         input.addEventListener('mousedown', (e) => { input.classList.add('sel-pressed'); });
         input.addEventListener('mouseup', (e) => { input.classList.remove('sel-pressed'); });
