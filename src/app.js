@@ -1,7 +1,6 @@
-/**
- * app.js
- * Entry point aplikasi SudokuKu
- * Server Express dengan Socket.IO untuk real-time chatbot
+/**n * app.js
+ * Titik masuk aplikasi SudokuKu
+ * Server Express dengan Socket.IO untuk chatbot realtime
  */
 
 // Load environment variables
@@ -33,7 +32,7 @@ const io = new Server(serverHttp, {
   cors: { origin: '*' }
 });
 
-// We'll attach the session middleware to sockets after it's declared
+// Middleware sesi akan dipasang ke Socket.IO setelah dideklarasikan
 
 // Port dari environment atau default
 const PORT = process.env.PORT || 3000;
@@ -76,13 +75,16 @@ io.on('connection', (socket) => {
       const sessionData = socket.request.session || {};
       const sessionTeka = sessionData.tekaTekiAktif || null;
 
-      // If client provided a board (to validate current player entries), prefer it
-      // but pair it with the session's solution so server can validate.
+      // If client provided a board (to validate current player entries), prefer it.
+      // Use solution from payload when available (useful for serverless deployments
+      // where session data may not be present), otherwise fall back to session solution.
       let dataUntukChatbot = sessionTeka;
       if (payload && payload.papan) {
         dataUntukChatbot = {
           papan: payload.papan,
-          solusi: sessionTeka ? sessionTeka.solusi : null
+          solusi: (payload.solusi !== undefined && payload.solusi !== null)
+            ? payload.solusi
+            : (sessionTeka ? sessionTeka.solusi : null)
         };
       }
 

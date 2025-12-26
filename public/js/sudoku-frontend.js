@@ -865,3 +865,6 @@ window.updatePapan = (papanBaru) => {
   papanSudoku = papanBaru;
   tampilkanPapan();
 };
+
+// Expose solusi saat ini untuk chatbot (berguna pada environment serverless tanpa session)
+window.dapatkanSolusiSekarang = () => solusiSekarang;

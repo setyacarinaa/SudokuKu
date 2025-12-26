@@ -5,8 +5,8 @@ const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 /**
  * getGPTResponse
- * Calls OpenAI Responses API using model gpt-5-nano and returns plain text.
- * Throws if OPENAI_API_KEY is not set or request fails.
+ * Memanggil OpenAI Responses API menggunakan model gpt-5-nano dan mengembalikan teks.
+ * Melempar error jika `OPENAI_API_KEY` tidak dikonfigurasi atau permintaan gagal.
  */
 export async function getGPTResponse(userMessage) {
   if (!process.env.OPENAI_API_KEY) {

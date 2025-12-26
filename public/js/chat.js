@@ -1,5 +1,5 @@
 // public/js/chat.js
-// Minimal Socket.IO client to send user messages and receive AI responses
+// Client Socket.IO minimal untuk mengirim pesan pengguna dan menerima respons AI
 
 document.addEventListener('DOMContentLoaded', () => {
   if (typeof io === 'undefined') return console.warn('Socket.IO client library not loaded');

@@ -3,7 +3,7 @@
  * Frontend untuk Socket.IO chatbot
  */
 
-// Inisialisasi Socket.IO dengan fallback path
+// Inisialisasi Socket.IO dengan path fallback
 let soket = null;
 let sudahCobaAlternate = false;
 const socketPaths = ['/api/socket.io', '/socket.io'];
@@ -158,13 +158,18 @@ function kirimPesanKeChatbot(pesan, papan = null) {
   if (!papanSekarang && typeof window.dapatkanPapanSekarang === 'function') {
     try { papanSekarang = window.dapatkanPapanSekarang(); } catch(e) { papanSekarang = null; }
   }
+  // Coba dapatkan solusi dari frontend jika tersedia (berguna di environment tanpa session)
+  let solusiSekarang = null;
+  if (typeof window.dapatkanSolusiSekarang === 'function') {
+    try { solusiSekarang = window.dapatkanSolusiSekarang(); } catch(e) { solusiSekarang = null; }
+  }
 
   if (!soket) {
     // Fallback ke HTTP API - backend akan ambil dari session
     fetch('/api/chatbot', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pesan, dataPuzzle: papanSekarang ? { papan: papanSekarang } : undefined })
+      body: JSON.stringify({ pesan, dataPuzzle: papanSekarang ? { papan: papanSekarang, solusi: solusiSekarang } : undefined })
     })
     .then(r => r.json())
     .then(data => tanganiResponsChatbot(data))
@@ -178,7 +183,8 @@ function kirimPesanKeChatbot(pesan, papan = null) {
   // Emit event ke server
   soket.emit('pesan_chatbot', {
     pesan: pesan,
-    papan: papanSekarang
+    papan: papanSekarang,
+    solusi: solusiSekarang
   });
   
   console.log('📤 Pesan dikirim:', pesan);
