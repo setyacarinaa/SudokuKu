@@ -59,6 +59,23 @@ rute.get('/test-leaderboard', async (req, res) => {
 // Dapatkan statistik pengguna
 rute.get('/statistik', apiController.dapatkanStatistik);
 
+// Reset penggunaan hint dan flag solusi pada session (dipanggil saat muat papan baru)
+rute.post('/reset-hints', (req, res) => {
+  try {
+    if (req.session) {
+      req.session.hintsUsed = 0;
+      req.session.solutionShown = false;
+      req.session.save(() => {
+        return res.json({ sukses: true, pesan: 'Hint dan flag solusi direset' });
+      });
+    } else {
+      return res.json({ sukses: false, pesan: 'Session tidak tersedia' });
+    }
+  } catch (error) {
+    return res.status(500).json({ sukses: false, pesan: 'Gagal mereset session', error: error.message });
+  }
+});
+
 // ==================== AUTH / REGISTRATION ====================
 // Register user (kirim welcome email hanya setelah berhasil registrasi)
 rute.post('/auth/register', appController.registerUser);

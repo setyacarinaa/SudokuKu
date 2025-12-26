@@ -124,6 +124,12 @@ async function muatPapanBaru(tingkat) {
     papanSudoku = data.data.papan;
     papanAsli = JSON.parse(JSON.stringify(data.data.papan)); // Deep copy
     solusiSekarang = data.data.solusi; // Capture solusi dari API
+    // Reset flag solusi ditampilkan dan sinkronkan ke server (reset hint counter)
+    solusiDitampilkan = false;
+    try { window.solusiDitampilkan = false; } catch (e) { }
+    try {
+      fetch('/api/reset-hints', { method: 'POST', credentials: 'include' }).catch(() => {});
+    } catch (e) {}
     
     // Reset error counter
     errorCount = 0;
@@ -878,3 +884,25 @@ window.updatePapan = (papanBaru) => {
 
 // Expose solusi saat ini untuk chatbot (berguna pada environment serverless tanpa session)
 window.dapatkanSolusiSekarang = () => solusiSekarang;
+
+// Helper: tambahkan 1 kesalahan (dipanggil oleh chatbot ketika melakukan 'cek jawaban')
+window.tambahKesalahan = (kesalahanList) => {
+  try {
+    // increment error counter internal
+    errorCount = (typeof errorCount === 'number') ? errorCount + 1 : 1;
+    updateErrorCounter();
+
+    // highlight kesalahan (convert to zero-based)
+    if (Array.isArray(kesalahanList) && kesalahanList.length > 0) {
+      const selArr = kesalahanList.map(k => ({ baris: (k.baris || 1) - 1, kolom: (k.kolom || 1) - 1 }));
+      highlightSelSalah(selArr);
+    }
+
+    // Jika batas kesalahan tercapai, trigger game over
+    if (errorCount >= MAX_ERRORS) {
+      if (typeof gameOver === 'function') gameOver(false);
+    }
+  } catch (e) {
+    console.warn('tambahKesalahan gagal:', e);
+  }
+};
