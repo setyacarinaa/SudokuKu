@@ -7,7 +7,6 @@ const Pengguna = require('../models/Pengguna');
 const Skor = require('../models/Skor');
 const mongoose = require('mongoose');
 const { hubungkanMongoDB } = require('../utils/koneksiMongo');
-const { kirimEmailSelamatDatang } = require('../services/emailService');
 
 /**
  * Registrasi pengguna baru
@@ -73,13 +72,7 @@ const registerPengguna = async (req, res) => {
 
     console.log(`✅ Pengguna baru berhasil didaftarkan: ${email}`);
 
-    // Kirim email selamat datang (async, tidak menunggu)
-    try {
-      await kirimEmailSelamatDatang(email, namaLengkap);
-    } catch (emailError) {
-      console.error('Error mengirim email selamat datang:', emailError);
-      // Lanjutkan meskipun email gagal
-    }
+    // Email sending removed per user request; continue without sending email.
 
     // Simpan user ID di session (auto login setelah register)
     req.session.userId = penggunaBaru._id;

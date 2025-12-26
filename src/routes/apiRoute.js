@@ -9,7 +9,8 @@ const rute = express.Router();
 // Import controllers
 const sudokuController = require('../controllers/sudokuController');
 const apiController = require('../controllers/apiController');
-const emailController = require('../controllers/emailController');
+// emailController removed; email testing routes handled via appController or removed
+const appController = require('../controllers/appController');
 
 // ==================== SUDOKU ROUTES ====================
 
@@ -58,12 +59,8 @@ rute.get('/test-leaderboard', async (req, res) => {
 // Dapatkan statistik pengguna
 rute.get('/statistik', apiController.dapatkanStatistik);
 
-// ==================== EMAIL TESTING ROUTES ====================
-
-// Test koneksi email
-rute.get('/test-email', emailController.testEmail);
-
-// Kirim email test
-rute.post('/kirim-email-test', emailController.kirimEmailTest);
+// ==================== AUTH / REGISTRATION ====================
+// Register user (kirim welcome email hanya setelah berhasil registrasi)
+rute.post('/auth/register', appController.registerUser);
 
 module.exports = rute;

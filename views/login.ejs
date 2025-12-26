@@ -195,7 +195,7 @@
       btnRegister.innerHTML = '<span class="loading"></span> Mendaftar...';
 
       try {
-        const response = await fetch('/api/register', {
+        const response = await fetch('/api/auth/register', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -206,10 +206,9 @@
         const data = await response.json();
 
         if (data.sukses) {
-          tampilkanAlert('Registrasi berhasil! Email selamat datang telah dikirim. Mengalihkan...', 'success');
-          setTimeout(() => {
-            window.location.href = '/sudoku';
-          }, 2000);
+          tampilkanAlert('Registrasi berhasil! Mengalihkan ke halaman utama...', 'success');
+          // Redirect immediately to main page
+          window.location.href = '/sudoku';
         } else {
           tampilkanAlert(data.pesan || 'Registrasi gagal', 'error');
           btnRegister.disabled = false;

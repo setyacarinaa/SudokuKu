@@ -5,7 +5,7 @@
 
 const Skor = require('../models/Skor');
 const Pengguna = require('../models/Pengguna');
-const { kirimEmailSkorTerbaik } = require('../services/emailService');
+// email sending disabled
 
 /**
  * Rekam skor permainan
@@ -72,21 +72,7 @@ const rekamSkor = async (req, res) => {
       pengguna.skorTerbaik = skor;
       await pengguna.save();
 
-      // Kirim email jika ada rekor baru dan bukan skor pertama
-      if (skorSebelumnya > 0) {
-        try {
-          await kirimEmailSkorTerbaik(
-            pengguna.email,
-            pengguna.namaLengkap,
-            skor,
-            waktuPenyelesaian,
-            tingkatKesulitan
-          );
-        } catch (emailError) {
-          console.error('Error mengirim email skor terbaik:', emailError);
-          // Lanjutkan meskipun email gagal
-        }
-      }
+      // Email notification for new high score removed per user request.
     } else {
       await pengguna.save();
     }
