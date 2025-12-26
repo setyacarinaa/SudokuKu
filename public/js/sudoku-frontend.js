@@ -184,6 +184,12 @@ function tampilkanPapan() {
         // Event listener untuk input via keypad and selection
         input.addEventListener('click', (e) => pilihSel(e, input, baris, kolom));
         input.addEventListener('touchstart', (e) => { e.preventDefault(); pilihSel(e, input, baris, kolom); });
+        // Press animation: add class while pressing/touching
+        input.addEventListener('mousedown', (e) => { input.classList.add('sel-pressed'); });
+        input.addEventListener('mouseup', (e) => { input.classList.remove('sel-pressed'); });
+        input.addEventListener('mouseleave', (e) => { input.classList.remove('sel-pressed'); });
+        input.addEventListener('touchstart', (e) => { input.classList.add('sel-pressed'); });
+        input.addEventListener('touchend', (e) => { input.classList.remove('sel-pressed'); });
         // Prevent keyboard from showing if focus occurs
         input.addEventListener('focus', (e) => { e.preventDefault(); input.blur(); });
       }

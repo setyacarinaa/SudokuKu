@@ -216,57 +216,73 @@ body {
 /* ==================== SUDOKU BOARD ==================== */
 .papan-sudoku {
   display: grid;
-  grid-template-columns: repeat(9, 45px);
-  grid-template-rows: repeat(9, 45px);
+  grid-template-columns: repeat(9, 48px);
+  grid-template-rows: repeat(9, 48px);
   gap: 0;
-  border: 3px solid var(--text-dark);
   margin: 1.5rem auto;
   width: fit-content;
-  box-shadow: var(--shadow-lg);
-  background: white;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.45);
+  background: #0f0d18; /* deep background for board */
+  border-radius: 8px;
+  padding: 6px; /* inner padding so outer border shows */
 }
 
 .sel-sudoku {
-  width: 45px;
-  height: 45px;
-  border: 1px solid var(--border-color);
+  width: 48px;
+  height: 48px;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: transparent;
+  color: #e6e6ff;
   text-align: center;
-  font-size: 1.3rem;
-  font-weight: bold;
-  color: var(--text-dark);
-  transition: all 0.2s;
+  font-size: 1.25rem;
+  font-weight: 700;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
+  outline: none;
+  caret-color: transparent;
 }
 
 .sel-sudoku:focus {
-  outline: none;
-  background: #e0e7ff;
-  border-color: var(--primary-color);
+  transform: translateY(-2px);
 }
 
 .sel-sudoku.tetap {
-  background: #f3f4f6;
-  color: var(--text-dark);
-  font-weight: 900;
+  color: #9fb3ff; /* desaturated bluish for given numbers */
+  font-weight: 800;
 }
 
 .sel-sudoku.diisi {
-  color: var(--primary-color);
+  color: #b388ff; /* user inputs in soft purple */
 }
 
 .sel-sudoku.salah {
-  background: #fee2e2;
-  color: var(--error-color);
+  background: rgba(255, 60, 60, 0.08);
+  color: #ff9b9b;
+}
+
+/* Press animation class */
+.sel-sudoku.sel-pressed {
+  transform: scale(0.96);
+  box-shadow: 0 8px 30px rgba(100,60,200,0.22) inset;
+}
+
+/* Selected cell (single) highlight */
+.sel-sudoku.sel-terpilih {
+  background: linear-gradient(135deg, rgba(110,76,255,0.16), rgba(123,95,255,0.08));
+  box-shadow: 0 8px 20px rgba(110,76,255,0.12);
+  border: 1px solid rgba(150,120,255,0.35);
 }
 
 /* Border tebal untuk subgrid 3x3 */
 .sel-sudoku:nth-child(9n+3),
 .sel-sudoku:nth-child(9n+6) {
-  border-right: 2px solid var(--text-dark);
+  border-right: 2px solid rgba(255,255,255,0.08);
 }
 
 .sel-sudoku:nth-child(n+19):nth-child(-n+27),
 .sel-sudoku:nth-child(n+46):nth-child(-n+54) {
-  border-bottom: 2px solid var(--text-dark);
+  border-bottom: 2px solid rgba(255,255,255,0.08);
 }
 
 /* ==================== GAME CONTROLS ==================== */
