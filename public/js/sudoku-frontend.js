@@ -177,6 +177,9 @@ function tampilkanPapan() {
         input.value = nilai;
         input.classList.add('tetap');
         input.readOnly = true;
+        // Make focusable for keyboard navigation
+        input.tabIndex = 0;
+        input.addEventListener('keydown', (e) => tanganiKeyboard(e, baris, kolom));
         // Click/tap handler for fixed cells: select and highlight same numbers
         input.addEventListener('click', (e) => {
           pilihSel(e, input, baris, kolom);
@@ -190,10 +193,13 @@ function tampilkanPapan() {
         input.addEventListener('mouseleave', (e) => { input.classList.remove('sel-pressed'); });
         input.addEventListener('touchstart', (e) => { input.classList.add('sel-pressed'); });
         input.addEventListener('touchend', (e) => { input.classList.remove('sel-pressed'); });
+        // keyboard navigation already attached above
       } else {
         input.value = '';
         // Make cell readonly so mobile keyboard won't open; selection handled via click/touch
         input.readOnly = true;
+        // Allow focusing via keyboard (desktop) but avoid opening mobile keyboard on touch devices
+        input.tabIndex = 0;
 
         // Event listener untuk input via keypad and selection
         input.addEventListener('click', (e) => pilihSel(e, input, baris, kolom));
@@ -204,8 +210,17 @@ function tampilkanPapan() {
         input.addEventListener('mouseleave', (e) => { input.classList.remove('sel-pressed'); });
         input.addEventListener('touchstart', (e) => { input.classList.add('sel-pressed'); });
         input.addEventListener('touchend', (e) => { input.classList.remove('sel-pressed'); });
-        // Prevent keyboard from showing if focus occurs
-        input.addEventListener('focus', (e) => { e.preventDefault(); input.blur(); });
+        // Prevent keyboard from showing if focus occurs on touch devices only
+        input.addEventListener('focus', (e) => {
+          const isTouch = (('ontouchstart' in window) || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0));
+          if (isTouch) {
+            e.preventDefault();
+            input.blur();
+          }
+        });
+
+        // Keyboard navigation for editable cells
+        input.addEventListener('keydown', (e) => tanganiKeyboard(e, baris, kolom));
       }
 
       kontainer.appendChild(input);
@@ -426,10 +441,12 @@ function tanganiKeyboard(event, baris, kolom) {
       return;
   }
   
-  // Fokus ke sel target
+  // Fokus dan pilih sel target (biarkan fokus pada sel tetap/readOnly juga)
   const targetSel = document.querySelector(`[data-baris="${targetBaris}"][data-kolom="${targetKolom}"]`);
-  if (targetSel && !targetSel.readOnly) {
-    targetSel.focus();
+  if (targetSel) {
+    try { targetSel.focus(); } catch (e) {}
+    // Update selection state so keypad/highlight sinkron
+    try { pilihSel(null, targetSel, targetBaris, targetKolom); } catch (e) {}
   }
 }
 
