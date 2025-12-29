@@ -142,6 +142,7 @@
       try {
         const response = await fetch('/api/login', {
           method: 'POST',
+          credentials: 'include',
           headers: {
             'Content-Type': 'application/json'
           },
@@ -195,8 +196,9 @@
       btnRegister.innerHTML = '<span class="loading"></span> Mendaftar...';
 
       try {
-        const response = await fetch('/api/auth/register', {
+        const response = await fetch('/api/register', {
           method: 'POST',
+          credentials: 'include',
           headers: {
             'Content-Type': 'application/json'
           },
